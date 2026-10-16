@@ -1,0 +1,12 @@
+metric,value
+n_clients,200000.0
+share_risk_low,0.7002
+share_risk_medium,0.2496
+share_risk_high,0.0502
+share_review_overdue,0.0404
+share_review_due_within_90d,0.1037
+share_risk_profile_done,0.6014
+share_appetite_cautious,0.2108
+share_appetite_balanced,0.3004
+share_appetite_adventurous,0.0902
+share_vulnerable,0.03

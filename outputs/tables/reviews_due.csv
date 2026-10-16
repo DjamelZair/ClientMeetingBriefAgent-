@@ -1,0 +1,4 @@
+risk_class,n,n_due,n_overdue
+high,10014,3524,1415
+low,139683,10718,4126
+medium,49796,6436,2521

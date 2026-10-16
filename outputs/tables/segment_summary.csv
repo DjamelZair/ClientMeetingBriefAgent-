@@ -1,0 +1,7 @@
+cluster,name,size,share,description
+0,Younger students,72206,0.36103,"Mostly students (99%), younger (average age 24), newer clients (about 3 years with the bank)"
+1,Active everyday clients,31225,0.156125,"Mostly active (99% active), everyday individual segment (99%), often hold a current account (92%)"
+2,Premium multi product clients,7453,0.037265,"Premium segment (100%), many products (3.9 on average), often hold an online account (51%)"
+3,Growing payroll account holders,14546,0.07273,"Often hold a payroll account (84%), recently adding products (about 1.9 on average in the last six months), many products (4.4 on average)"
+4,Everyday inactive clients,56718,0.28359,"Everyday individual segment (98%), mostly inactive (6% active), rarely hold a current account (28%)"
+5,Older everyday account holders,17852,0.08926,"Often hold an everyday account (100%), long standing clients (about 14 years with the bank), older (average age 55)"

@@ -1,0 +1,7 @@
+flag,n_clients,share
+flag_new_products,15427,0.077135
+flag_dropped_products,14396,0.07198
+flag_activity_drop,2422,0.01211
+flag_moved,1229,0.006145
+flag_new_client,9965,0.049825
+flag_segment_change,4757,0.023785

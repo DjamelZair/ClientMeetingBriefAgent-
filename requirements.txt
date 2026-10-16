@@ -1,0 +1,14 @@
+# the exact versions i ran it with (python 3.10.13), so the numbers on the page reproduce
+pandas==2.3.3
+numpy==2.2.6
+scikit-learn==1.6.1
+lightgbm==4.6.0
+shap==0.48.0
+pyarrow==19.0.1
+matplotlib==3.10.0
+joblib==1.4.2
+pytest==9.0.2
+# only for rebuilding the walkthrough notebook
+nbformat==5.10.4
+nbconvert==7.16.6
+ipykernel==6.29.5

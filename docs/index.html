@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Client meeting brief agent</title>
+<meta name="description" content="A worked prototype by Djamel Zair: an agent that prepares a meeting brief for a client advisor. The agent prepares, the advisor decides.">
+<meta name="author" content="Djamel Zair">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 fill=%22%232C3696%22/><circle cx=%2216%22 cy=%2216%22 r=%227%22 fill=%22%23F76300%22/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,600;6..72,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script>(function(){try{var t=localStorage.getItem('brief-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:#F5F7FC}
+:root[data-theme="dark"] body{background:#0E2450}
+:root,:root[data-theme="light"]{
+  --paper:#F5F7FC; --raised:#FFFFFF; --sunk:#EAEFF9; --wash:#ECF1FB;
+  --ink:#141A34; --ink-soft:#464E6E; --slate:#6C7492;
+  --blue:#2C3696; --blue-deep:#1B2160; --blue-soft:#7982D0; --blue-wash:#DEE3F5;
+  --flag:#F76300; --flag-bright:#F76300; --amber:#C77A12; --amber-wash:#FDF1E3;
+  --btn-label:#FFFFFF; --card-hi:#F76300;
+  --rule:rgba(19,26,52,.12); --rule-strong:rgba(19,26,52,.26);
+  --shadow:0 1px 2px rgba(19,26,52,.06),0 20px 50px -28px rgba(19,26,52,.32);
+  --display:"Newsreader",Georgia,serif; --body:"DM Sans",system-ui,-apple-system,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+:root[data-theme="dark"]{
+  --paper:#0E2450; --raised:#1B2A5E; --sunk:#122350; --wash:#16255A;
+  --ink:#F2F4FA; --ink-soft:#B9C0DE; --slate:#8A93C4;
+  --blue:#2C3696; --blue-deep:#0A1C40; --blue-soft:#7982D0; --blue-wash:#22346E;
+  --flag:#FF7C34; --flag-bright:#FF8A46; --amber:#F7A600; --amber-wash:#231A0E;
+  --btn-label:#F2F4FA; --card-hi:#7A3100;
+  --rule:rgba(242,244,250,.16); --rule-strong:rgba(242,244,250,.32);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 18px 50px -24px rgba(0,0,0,.7);
+}
+.pg{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:1.0625rem;line-height:1.58;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh;display:flex;flex-direction:column}
+.wrap{width:100%;max-width:62rem;margin-inline:auto;padding-inline:clamp(1rem,4vw,3rem)}
+.brandbar{background:var(--blue);color:var(--btn-label);padding-block:.75rem}
+.brandbar .wrap{display:flex;flex-wrap:wrap;gap:.4rem 1.4rem;align-items:center;justify-content:space-between;
+  font-family:var(--mono);font-size:.7rem;letter-spacing:.13em;text-transform:uppercase}
+.brandbar .bl{display:flex;flex-wrap:wrap;gap:.5rem 1.1rem;align-items:center}
+.brandbar .bl a{color:var(--btn-label);text-decoration:none;border-bottom:1px solid rgba(255,255,255,.45);padding-bottom:1px}
+.brandbar .bl a:hover{border-bottom-color:#fff}
+.themebtn{background:transparent;border:1px solid var(--btn-label);color:var(--btn-label);border-radius:999px;padding:3px 11px;
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;margin-left:6px}
+.themebtn:hover{background:rgba(255,255,255,.14)}
+.hero{background:#0E2450;padding-block:clamp(3rem,8vw,6rem)}
+.hero-lock{text-align:right;font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#F76300;margin-bottom:2rem}
+.eyebrow{font-family:var(--mono);font-size:.8rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#F76300;display:flex;align-items:center;gap:.6rem}
+.eyebrow::after{content:"";flex:1;height:2px;background:#F76300;opacity:.6;min-width:1.5rem}
+h1{font-family:var(--display);font-weight:700;color:#fff;font-size:clamp(2.6rem,7vw,5rem);line-height:.92;letter-spacing:-.02em;max-width:15ch;margin-top:.6rem;text-wrap:balance}
+h1 .o{color:#F76300}
+.lede{color:#E7ECFA;font-size:clamp(1.05rem,2vw,1.3rem);line-height:1.45;max-width:44ch;margin-top:1.3rem}
+.lede b{color:#fff}
+main{flex:1;padding-block:clamp(2.5rem,6vw,4.5rem)}
+.grid2{display:grid;gap:1.1rem;grid-template-columns:1fr}
+@media (min-width:46rem){.grid2{grid-template-columns:1fr 1fr}}
+.card{display:block;padding:1.4rem;background:var(--raised);border:1px solid var(--rule);border-top:4px solid var(--c,var(--blue));
+  box-shadow:var(--shadow);color:var(--ink);text-decoration:none;transition:transform .15s ease}
+.card:hover{transform:translateY(-2px)}
+.card:focus-visible{outline:3px solid var(--flag-bright);outline-offset:3px}
+.card h2{font-family:var(--display);font-weight:900;font-size:clamp(1.5rem,2.6vw,1.9rem);line-height:1.1;letter-spacing:-.015em;color:var(--blue)}
+:root[data-theme="dark"] .card h2{color:var(--ink)}
+.card p{font-size:.97rem;line-height:1.55;margin-top:.55rem;color:var(--ink-soft)}
+.card .go{display:inline-block;margin-top:1rem;font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--flag)}
+.card .k{margin-top:0;font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--slate)}
+.data{margin-top:1.8rem;padding:1rem 1.1rem;background:var(--sunk);border-left:4px solid var(--blue);font-size:.92rem;line-height:1.55;max-width:44rem}
+:root[data-theme="dark"] .data{border-left-color:var(--blue-soft)}
+.fine{font-family:var(--mono);font-size:.78rem;line-height:1.6;color:var(--slate);padding-block:1.6rem;border-top:1px solid var(--rule)}
+.pg a.plain{color:var(--blue)}
+:root[data-theme="dark"] .pg a.plain{color:#AEB5EC}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.001ms!important}}
+</style>
+</head>
+<body>
+<div class="pg">
+<div class="brandbar"><div class="wrap">
+  <span><b>Djamel Zair</b> &middot; client meeting brief</span>
+  <span class="bl"><a href="index.html">Home</a><a href="notebook.html">Notebook</a><a href="https://github.com/DjamelZair/ClientMeetingBriefAgent">Code</a><button class="themebtn" id="themeToggle" type="button" title="Switch colour theme">☾ Dark</button></span>
+</div></div>
+
+<section class="hero"><div class="wrap">
+  <p class="hero-lock">Junior Data Scientist | CLUE | Application</p>
+  <p class="eyebrow">A worked prototype, built end to end</p>
+  <h1>What should the advisor know before the client <span class="o">walks in?</span></h1>
+  <p class="lede">An agent that reads one client's record and prepares a five part brief for the meeting: who they are, what might help,
+    what not to offer, what is due anyway and how to open. <b>The agent prepares, the advisor decides.</b></p>
+</div></section>
+
+<main><div class="wrap">
+  <div class="grid2">
+    <a class="card" href="analysis.html" style="--c:var(--flag)">
+      <p class="k">Interactive read out</p>
+      <h2>The analysis</h2>
+      <p>Pick a client and read their brief, move the threshold and watch the guardrail, and see how far each score can be trusted.
+        Every number is read from the pipeline output.</p>
+      <span class="go">Open the analysis &rsaquo;</span>
+    </a>
+    <a class="card" href="notebook.html" style="--c:var(--blue)">
+      <p class="k">Code and reasoning</p>
+      <h2>The notebook</h2>
+      <p>The same steps with the code beside them: sampling, features, segmentation, propensity models, suitability rules and the agent,
+        including what I tried and dropped.</p>
+      <span class="go">Read the notebook &rsaquo;</span>
+    </a>
+  </div>
+  <p class="data"><strong>The data.</strong> Real client profiles and product holdings from the public, anonymised Santander Product
+    Recommendation set on Kaggle (a Spanish bank), plus a small synthetic layer for KYC review dates, risk profiles and vulnerability,
+    labelled as such wherever it appears. Nothing refers to any Rabobank data, system, product or process.
+    <a class="plain" href="https://github.com/DjamelZair/ClientMeetingBriefAgent">Code on GitHub</a>.</p>
+</div></main>
+
+<footer class="wrap"><p class="fine">Djamel Zair, 2026. Independent worked prototype prepared for a job application; not affiliated with or endorsed by Rabobank.</p></footer>
+</div>
+<script>
+(function(){var r=document.documentElement;var b=document.getElementById('themeToggle');
+  function lbl(){b.textContent=(r.getAttribute('data-theme')==='dark')?'☀ Light':'☾ Dark';}
+  if(b){lbl();b.addEventListener('click',function(){var d=r.getAttribute('data-theme')==='dark';
+    r.setAttribute('data-theme',d?'light':'dark');try{localStorage.setItem('brief-theme',d?'light':'dark');}catch(e){}lbl();});}})();
+</script>
+</body>
+</html>

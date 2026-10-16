@@ -1,0 +1,12 @@
+# the kaggle data, the panel and snapshots built from it, and the fitted models never leave this machine.
+# only code and aggregated outputs get pushed; the readme says how to get the data yourself
+data/
+
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+.env
+
+# my working notes, not part of the published project
+notes/

@@ -1,0 +1,18 @@
+product,label,train_eligible,train_positives,train_base_rate,val_eligible,val_positives,val_base_rate,test_eligible,test_positives,test_base_rate,modelled
+current_account,Current account,580837,8903,0.015328,77166,847,0.010976,77894,785,0.010078,True
+online_account,Online account,1393909,2839,0.002037,182552,483,0.002646,183143,583,0.003183,True
+credit_card,Credit card,1446571,7197,0.004975,190722,848,0.004446,191556,955,0.004985,True
+direct_debit,Direct debit,1331648,17380,0.013051,174451,2184,0.012519,175166,2193,0.01252,True
+salary_deposit,Salary paid in,1432331,8185,0.005714,187929,818,0.004353,189060,1182,0.006252,True
+pension_deposit,Pension paid in,1425536,9000,0.006313,187098,936,0.005003,188101,1184,0.006294,True
+payroll_account,Payroll account,1396763,4282,0.003066,183087,513,0.002802,183679,501,0.002728,True
+tax_account,Tax payment account,1434795,653,0.000455,188545,184,0.000976,189288,53,0.00028,False
+term_deposit,Term deposit,1448448,1520,0.001049,190986,23,0.00012,192079,7,3.6e-05,False
+investment_fund,Investment fund,1481744,250,0.000169,194836,22,0.000113,195774,13,6.6e-05,False
+investment_account,Investment account,1472703,661,0.000449,193494,23,0.000119,194438,34,0.000175,False
+pension_plan,Pension plan,1494776,83,5.6e-05,196437,5,2.5e-05,197368,7,3.5e-05,False
+plus_account,Plus account,1494842,863,0.000577,196196,115,0.000586,197143,113,0.000573,True
+particular_account,Everyday account,1332369,426,0.00032,176422,51,0.000289,177421,52,0.000293,False
+particular_plus_account,Everyday plus account,1448844,243,0.000168,190832,32,0.000168,191801,36,0.000188,False
+mortgage,Mortgage,1499945,7,5e-06,197092,2,1e-05,198024,1,5e-06,False
+personal_loan,Personal loan,1504238,15,1e-05,197612,0,0.0,198545,1,5e-06,False
