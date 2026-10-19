@@ -6,16 +6,14 @@ Meeting on 1 June 2016. Prepared to support the conversation. Scores are estimat
 
 **Active everyday clients** (cluster 1): Mostly active (99% active), everyday individual segment (99%), often hold a current account (92%).
 
-Aged 32, with the bank for 19 months, income not recorded, individual segment, holds 1 product: Direct debit.
+Aged 35, with the bank for 4 years, recorded income about 92,000, individual segment, holds 1 product: Bills paid by direct debit.
 
 Recent changes:
-- Closed 3 products in the last three months.
+- Closed 1 product in the last three months.
 
 ## 2. What might help
 
-- **Payroll account**, scores above 50%. In the test month, 72% of the 242 clients scoring between 50% and 100% took it up. The score leans on: closed 3 products in the last three months; already pays bills by direct debit; an active client.
-- **Salary paid in**, scores 29%. In the test month, 26% of the 368 clients scoring between 20% and 30% took it up. The score leans on: closed 3 products in the last three months; already pays bills by direct debit; an active client.
-- **Pension paid in**, scores 24%. In the test month, 23% of the 390 clients scoring between 20% and 30% took it up. The score leans on: closed 3 products in the last three months; already pays bills by direct debit; an active client.
+- **Current account**, scores above 50%. In the test month, 45% of the 377 clients scoring between 50% and 100% took it up. The score leans on: already pays bills by direct debit; closed 1 product in the last six months; aged 35.
 
 ## 3. What not to offer
 
@@ -23,26 +21,30 @@ No high scoring product was held back by the suitability check.
 
 ## 4. Due anyway
 
-No periodic review is due within 90 days; the next one is on 23 February 2019.
+No periodic review is due within 90 days; the next one is on 19 June 2017.
 
 *Review dates come from a synthetic layer made for this prototype, not real records.*
 
 ## 5. Questions to open with
 
-1. You closed a product with us recently. Was there a reason we should know about?
-2. What are your thoughts on where your salary is paid at the moment?
+1. Some of your products with us were closed recently. How are those needs covered now?
+   *Recent change. Why: Closed 1 product in the last three months.*
+   - If "Moved to another bank": Nothing new is raised. Ask what made them move and record it for the advisor.
+   - If "No longer needed": No change to the brief.
+   - If "Something went wrong": Nothing new is raised. Log the complaint and agree a follow up.
+2. How do you handle your everyday payments at the moment?
+   *Top suggestion. Why: In the test month, 45% of the 377 clients scoring between 50% and 100% took up current account.*
+   - If "Open to talking about it": Discuss Current account if the client wants to.
+   - If "Already arranged elsewhere": Nothing new is raised. Current account is arranged at another bank. Record where it is arranged and do not raise Current account again in this meeting. Record it as declined: the brief will not raise Current account again for 182 days.
+   - If "Not a priority now": Nothing new is raised. Current account is not a priority for the client now. Record it as declined: the brief will not raise Current account again for 182 days.
 
 ## How this brief was prepared
 
-1. `get_profile`: aged 32, 1 product held
+1. `get_profile`: aged 35, 1 product held
 2. `get_segment`: cluster 1, Active everyday clients
 3. `get_recent_changes`: 1 change flag
-4. `get_propensities`: 7 products scored, highest Payroll account (above 50%)
-5. `check_suitability`: Payroll account: allowed
-6. `check_linked`: Payroll account: not linked
-7. `check_suitability`: Salary paid in: allowed
-8. `check_linked`: Salary paid in: not linked
-9. `check_suitability`: Pension paid in: allowed
-10. `check_linked`: Pension paid in: not linked
-11. `check_review_due`: not due, next review 2019-02-23 (997 days)
-12. `draft_questions`: 2 questions drafted
+4. `get_propensities`: 7 products scored, highest Current account (above 50%)
+5. `check_suitability`: Current account: allowed
+6. `check_care`: care check: no signs in the data
+7. `check_review_due`: not due, next review 2017-06-19 (383 days)
+8. `draft_questions`: 2 questions drafted, each with a reason and answer branches

@@ -1,0 +1,166 @@
+{
+ "method": "optuna tpe",
+ "seed": 42,
+ "n_trials": 30,
+ "objective": "validation pr auc",
+ "validation_month": "2016-04",
+ "train_rows_per_trial": 400000,
+ "searched": [
+  "learning_rate",
+  "num_leaves",
+  "min_child_samples",
+  "subsample",
+  "colsample_bytree",
+  "reg_lambda"
+ ],
+ "fixed": {
+  "n_estimators": 2000,
+  "subsample_freq": 1
+ },
+ "products": {
+  "current_account": {
+   "product": "current_account",
+   "n_trials": 30,
+   "train_rows_per_trial": 400000,
+   "val_pr_auc_default": 0.3334575695213794,
+   "val_pr_auc_best": 0.3511415539236362,
+   "best_trial": 14,
+   "chosen": "tuned",
+   "params": {
+    "learning_rate": 0.019868083130684888,
+    "num_leaves": 49,
+    "min_child_samples": 21,
+    "subsample": 0.5177084374252304,
+    "colsample_bytree": 0.7085337539039134,
+    "reg_lambda": 0.07073618445607252
+   },
+   "seconds": 514.6
+  },
+  "online_account": {
+   "product": "online_account",
+   "n_trials": 30,
+   "train_rows_per_trial": 400000,
+   "val_pr_auc_default": 0.22326021839613733,
+   "val_pr_auc_best": 0.2501396884659221,
+   "best_trial": 19,
+   "chosen": "tuned",
+   "params": {
+    "learning_rate": 0.016342636802668883,
+    "num_leaves": 15,
+    "min_child_samples": 20,
+    "subsample": 0.6363189960262658,
+    "colsample_bytree": 0.5530342415283377,
+    "reg_lambda": 21.584741866753795
+   },
+   "seconds": 732.1
+  },
+  "credit_card": {
+   "product": "credit_card",
+   "n_trials": 30,
+   "train_rows_per_trial": 400000,
+   "val_pr_auc_default": 0.13801702444147718,
+   "val_pr_auc_best": 0.1431740403475228,
+   "best_trial": 18,
+   "chosen": "tuned",
+   "params": {
+    "learning_rate": 0.010334685497693358,
+    "num_leaves": 53,
+    "min_child_samples": 405,
+    "subsample": 0.8517712943414307,
+    "colsample_bytree": 0.4033816720980062,
+    "reg_lambda": 0.07679223315415462
+   },
+   "seconds": 815.7
+  },
+  "direct_debit": {
+   "product": "direct_debit",
+   "n_trials": 30,
+   "train_rows_per_trial": 400000,
+   "val_pr_auc_default": 0.29049076783035505,
+   "val_pr_auc_best": 0.29791980981425725,
+   "best_trial": 23,
+   "chosen": "tuned",
+   "params": {
+    "learning_rate": 0.015412320579320068,
+    "num_leaves": 38,
+    "min_child_samples": 204,
+    "subsample": 0.9353309284804611,
+    "colsample_bytree": 0.732364461469754,
+    "reg_lambda": 0.0018707079557129759
+   },
+   "seconds": 512.4
+  },
+  "salary_deposit": {
+   "product": "salary_deposit",
+   "n_trials": 30,
+   "train_rows_per_trial": 400000,
+   "val_pr_auc_default": 0.2007694358978271,
+   "val_pr_auc_best": 0.2163010395161482,
+   "best_trial": 24,
+   "chosen": "tuned",
+   "params": {
+    "learning_rate": 0.03646363272169282,
+    "num_leaves": 35,
+    "min_child_samples": 86,
+    "subsample": 0.7092971860054545,
+    "colsample_bytree": 0.5414552701186726,
+    "reg_lambda": 0.11626823434359745
+   },
+   "seconds": 562.1
+  },
+  "pension_deposit": {
+   "product": "pension_deposit",
+   "n_trials": 30,
+   "train_rows_per_trial": 400000,
+   "val_pr_auc_default": 0.24091948231663132,
+   "val_pr_auc_best": 0.26958795140212327,
+   "best_trial": 11,
+   "chosen": "tuned",
+   "params": {
+    "learning_rate": 0.010463583425015474,
+    "num_leaves": 87,
+    "min_child_samples": 103,
+    "subsample": 0.6783916776050266,
+    "colsample_bytree": 0.6532200510997217,
+    "reg_lambda": 0.01763967830470575
+   },
+   "seconds": 504.7
+  },
+  "payroll_account": {
+   "product": "payroll_account",
+   "n_trials": 30,
+   "train_rows_per_trial": 400000,
+   "val_pr_auc_default": 0.3863570175942907,
+   "val_pr_auc_best": 0.41075354841272926,
+   "best_trial": 13,
+   "chosen": "tuned",
+   "params": {
+    "learning_rate": 0.11750339105581901,
+    "num_leaves": 234,
+    "min_child_samples": 755,
+    "subsample": 0.6728468726241332,
+    "colsample_bytree": 0.4364674009011356,
+    "reg_lambda": 0.41394614707581706
+   },
+   "seconds": 318.6
+  },
+  "plus_account": {
+   "product": "plus_account",
+   "n_trials": 30,
+   "train_rows_per_trial": 400000,
+   "val_pr_auc_default": 0.11565597133296275,
+   "val_pr_auc_best": 0.13977927110947647,
+   "best_trial": 21,
+   "chosen": "tuned",
+   "params": {
+    "learning_rate": 0.015531948719158101,
+    "num_leaves": 40,
+    "min_child_samples": 309,
+    "subsample": 0.7457258121050925,
+    "colsample_bytree": 0.6269599969134454,
+    "reg_lambda": 24.301685994298957
+   },
+   "seconds": 346.3
+  }
+ }
+}

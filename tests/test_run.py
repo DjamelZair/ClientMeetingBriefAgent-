@@ -10,7 +10,7 @@ from client_brief_agent.agent import run, tools
 from test_tools import make_ctx
 
 TOOL_NAMES = {"get_profile", "get_segment", "get_recent_changes", "get_propensities",
-              "check_suitability", "check_linked", "check_review_due", "draft_questions"}
+              "check_suitability", "check_linked", "check_care", "check_review_due", "draft_questions"}
 
 
 @pytest.fixture(scope="module")
@@ -27,7 +27,7 @@ def test_brief_shape(briefs):
     b = briefs[101]
     assert set(b) == {"client_id", "meeting_date", "threshold", "next_step", "who", "might_help",
                       "in_progress", "not_to_offer", "waiting_for_review", "due_anyway", "questions",
-                      "note", "tool_log"}
+                      "question_cards", "holdings", "ranked", "care", "follow_up", "note", "tool_log"}
     assert b["who"]["cluster_name"] == "Settled everyday savers"
     assert 2 <= len(b["questions"]) <= config.MAX_QUESTIONS
     json.dumps(b)
@@ -168,3 +168,38 @@ def test_zero_tenure_reads_as_new():
     assert tenure_phrase(1) == "with the bank for 1 month"
     assert tenure_phrase(30) == "with the bank for 2 years"
     assert tenure_phrase(float("nan")) is None
+
+
+def test_holdings_cover_every_product_once(briefs):
+    for b in briefs.values():
+        codes = [p["product"] for c in b["holdings"] for p in c["products"] if p["product"]]
+        assert sorted(codes) == sorted(config.PRODUCT_COLUMNS.values())
+        held = set(b["who"]["profile"]["held"])
+        states = {p["product"]: p["state"] for c in b["holdings"] for p in c["products"] if p["product"]}
+        assert {p for p, s in states.items() if s == "held"} == held
+        assert {m["product"] for m in b["might_help"]} == {p for p, s in states.items() if s == "suggested"}
+        insurance = next(c for c in b["holdings"] if c["category"] == "Insurance")
+        assert insurance["products"][0]["state"] == "not_in_data"
+
+
+def test_question_cards_match_the_question_texts(briefs):
+    for b in briefs.values():
+        assert b["questions"] == [c["text"] for c in b["question_cards"]]
+        for c in b["question_cards"]:
+            assert c["why"] and all(a["outcome_line"] for a in c["answers"])
+
+
+def test_money_flows_are_marked_and_same_signals_shown_once(briefs):
+    for b in briefs.values():
+        shown = [m["product"] for m in b["might_help"]]
+        for m in b["might_help"]:
+            assert m["kind"] == ("flow" if m["product"] in config.MONEY_FLOWS else "product")
+        for p, partner in config.SAME_SIGNAL.items():
+            assert not (p in shown and partner in shown)
+
+
+def test_mismatch_is_said_plainly():
+    assert run._mismatch({"n_products": 1}, 3.9) == ("Grouped with clients who hold 3.9 products on average, "
+                                                    "but holds 1 product now.")
+    assert run._mismatch({"n_products": 3}, 3.9) is None
+    assert run._mismatch({"n_products": 1}, None) is None

@@ -1,0 +1,272 @@
+<!doctype html><html lang="en-GB" data-scheme="S1"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Client Meeting Brief</title>
+<meta name="description" content="One agent prepares a client meeting brief for an advisor: the client profile on the left, the agent's five tool steps across the centre, and each part of the brief under the step that produced it.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+/* l2, agent centre stage: the profile on the left, then the agent's five steps as one horizontal pipeline.
+   every part of the brief hangs in the column under the step that made it, so the questions end up on the right. */
+.app { display: flex; align-items: center; gap: var(--sp-4); padding: 0 var(--sp-4); height: 50px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.brand { display: flex; align-items: center; gap: var(--sp-3); min-width: 0; margin-right: auto; }
+.brand .mk { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: var(--on-accent); }
+.brand b { font-weight: 700; font-size: var(--t-m); letter-spacing: -0.01em; white-space: nowrap; }
+.brand span { font-size: var(--t-s); color: var(--ink-3); white-space: nowrap; }
+@media (max-width: 1380px) { .brand span { display: none; } }
+.app .links { display: flex; gap: var(--sp-4); font-size: var(--t-s); font-weight: 500; white-space: nowrap; }
+.app .links a { color: var(--ink-2); }
+.app .links a:hover { color: var(--accent-text); }
+.v-picker select { width: 300px; }
+
+/* the five columns are shared by the pipeline and the cards under it, so every card sits under its own step */
+.l2 { --cols: minmax(0, .8fr) minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, .72fr) minmax(0, 1.36fr); --cg: var(--sp-3);
+  display: grid; grid-template-columns: 284px minmax(0, 1fr); gap: var(--sp-4); padding: var(--sp-3) var(--sp-4) 0; }
+
+/* profile */
+.prof { display: flex; flex-direction: column; gap: 10px; padding: var(--sp-3) var(--sp-4); min-width: 0; }
+.prof #timeline, .prof .wal { border-top: 1px solid var(--line); padding-top: var(--sp-2); }
+/* key facts as small two up tiles: label above, value below, so five facts take two or three short rows */
+.prof .v-chips { gap: 6px; }
+.prof .v-chip { flex: 1 1 auto; display: grid; gap: 0; padding: 2px var(--sp-2) 3px; line-height: 1.2; }
+.prof .v-chip .k { font-size: var(--t-xs); }
+.prof .v-wallet { gap: 4px; }
+.prof .v-wrow.stack { grid-template-columns: 16px 1fr auto; padding-top: 2px; padding-bottom: 2px; }
+.prof .v-wrow.stack .v-g { grid-row: auto; align-self: center; margin-top: 0; }
+.prof .v-wrow.stack .sw { grid-column: auto; }
+.prof .v-name { font-size: var(--t-l); }
+.prof .v-avatar { width: 40px; height: 40px; font-size: var(--t-s); }
+.prof .v-id { gap: 10px; align-items: flex-start; }
+.prof .v-group { line-height: 1.35; }
+.prof .v-tl-key { gap: 0 var(--sp-3); }
+.prof .v-wcat { gap: 1px; }
+.prof .v-wcat-h { line-height: 1.3; padding-bottom: 1px; }
+.prof .v-wrow { padding-top: 1px; padding-bottom: 1px; }
+.prof-h { font: 600 var(--t-s)/1.2 var(--f-ui); color: var(--ink-2); display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); }
+.wal { display: grid; gap: var(--sp-2); min-height: 0; }
+.prof-h h2 { font: inherit; }
+#wq .v-link { font-size: var(--t-xs); }
+.v-wcat-quiet[hidden] { display: none; }
+
+/* stage: headline, pipeline, hanging cards */
+.stage { display: flex; flex-direction: column; gap: 10px; min-width: 0; min-height: 0; }
+.stage-h { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--sp-5); padding: 2px var(--sp-1) 0; }
+.stage-h #headline { min-width: 0; }
+.stage-h .v-head { font-size: var(--t-xl); }
+.stage-h .v-head-sub { font-size: var(--t-s); margin-top: 2px; }
+.hbar { flex: none; padding-bottom: 3px; }
+.hbar .v-bar { font-size: var(--t-xs); }
+/* the agent's own controls sit at the end of the pipeline, where the last node has no connector */
+.ag { position: absolute; top: 9px; right: var(--sp-4); z-index: 2; display: flex; align-items: center; gap: var(--sp-2); }
+.ag p { font-size: var(--t-xs); color: var(--ink-3); line-height: 1.25; text-align: right; }
+.ag .v-btn { min-height: 28px; }
+/* on a narrower laptop the last node needs that room, so only the button stays */
+@media (min-width: 1100px) and (max-width: 1399px) { .ag p { display: none; } }
+
+.pipe { padding: 10px var(--sp-4); position: relative; }
+.pipe .v-steps { grid-template-columns: var(--cols); column-gap: var(--cg); }
+.pipe .v-step { grid-template-columns: minmax(0, 1fr); grid-template-rows: 28px auto 1fr; gap: 6px 0; padding: 0; isolation: isolate; }
+/* the connectors sit under everything else in the step, so a faded step never shows a line through its badge */
+.pipe .v-step::before, .pipe .v-step::after { z-index: -1; }
+/* a waiting step is dimmed by its ink, not by opacity, so its badge still masks the line behind it */
+.pipe .v-step[data-s="wait"] .v-step-body { opacity: 1; }
+.pipe .v-step[data-s="wait"] :is(.v-step-btn, dt, dd, .v-link) { color: var(--ink-3); }
+.pipe .v-step-n { grid-row: 1; justify-self: start; position: relative; z-index: 1; }
+/* the connector runs from this node to the next; it fills in with the accent colour once the step is done */
+.pipe .v-step::before { left: 34px; right: calc(-1 * var(--cg) + 6px); top: 13.5px; bottom: auto; width: auto; height: 1.5px; background: var(--line-2); }
+.pipe .v-step::after { content: ""; position: absolute; left: 34px; right: calc(-1 * var(--cg) + 6px); top: 13.5px; height: 1.5px; background: var(--accent);
+  transform: scaleX(0); transform-origin: left center; transition: transform 150ms var(--ease); }
+.pipe .v-step[data-s="done"]::after { transform: scaleX(1); }
+.pipe .v-step:last-child::after { display: none; }
+.pipe .v-step-body { grid-row: 2 / 4; align-content: start; gap: 4px; }
+.pipe .v-step-top { min-height: 0; }
+/* the status sits on the connector, right after the node, so all five read on one line */
+.pipe .v-st { position: absolute; top: 5px; left: 36px; z-index: 1; box-shadow: 0 0 0 4px var(--surface); }
+.pipe .v-st[data-status="run"], .pipe .v-st[data-status="wait"] { background: var(--surface); }
+.pipe .v-step-btn { flex: 1 1 auto; font-size: var(--t-m); }
+/* read and returned run as two short labelled lines under the step name */
+.pipe .v-step-io { display: block; font-size: var(--t-s); line-height: 1.38; }
+.pipe .v-step-io dt { display: inline; font-size: var(--t-xs); font-weight: 600; color: var(--ink-3); margin-right: 4px; }
+.pipe .v-step-io dd { display: inline; }
+.pipe .v-step-io dd::after { content: "\A"; white-space: pre; }
+.pipe .v-step-io dd.ret { display: block; margin-top: 3px; }
+.pipe .v-step-io dd:not(.ret) { color: var(--ink-2); }
+.pipe .v-step[data-linked] .v-step-n { box-shadow: 0 0 0 3px var(--lit-bg), 0 0 0 4px var(--lit-line); }
+
+/* each column hangs off its node by a short stem from the pipeline */
+.hang { flex: 1; min-height: 0; display: grid; grid-template-columns: var(--cols); column-gap: var(--cg); padding: 0 var(--sp-4); }
+.col { position: relative; display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; min-height: 0; padding-top: 10px; }
+.col::before, .col::after { content: ""; position: absolute; left: 13.5px; top: -11px; height: 21px; width: 1.5px; background: var(--line-2); }
+/* during a replay the stem draws down and the card drops in once its step is done */
+.col::after { background: var(--accent); transform: scaleY(0); transform-origin: top center; transition: transform 150ms var(--ease); }
+.col[data-done]::after { transform: scaleY(1); }
+.col[data-on]::after { background: var(--lit-line); transform: scaleY(1); }
+.col > .hc { transition: opacity 240ms var(--ease), transform 240ms var(--ease); }
+.col:not([data-done]) > .hc { opacity: 0; transform: translateY(-6px); }
+.col[data-from][data-lit="1"] { background: none; box-shadow: none; }
+.hc { padding: 10px var(--sp-3) var(--sp-3); display: grid; gap: 10px; border-radius: var(--r-l); }
+.hc > [hidden] { display: none; }
+.col[data-on] > .hc { border-color: var(--lit-line); }
+
+/* step 1 card: segment and group */
+.grp { display: grid; gap: 6px; }
+.grp .nm { font: 600 var(--t-m)/1.25 var(--f-ui); color: var(--ink); }
+.grp .seg { font-size: var(--t-xs); color: var(--ink-3); }
+.grp .seg b { color: var(--ink-2); font-weight: 600; }
+.grp .v-meta { line-height: 1.4; }
+
+/* narrow columns: the items stack their chart under the words */
+.col .v-item { padding: 6px var(--sp-2) 7px; }
+/* tokens.css sets the narrow stacking before the base .v-item rule, so the base wins; this restates it with more weight */
+@container (max-width: 300px) { .col .v-item { grid-template-columns: minmax(0, 1fr); } }
+.col .v-band-cap { margin-top: 0; }
+.col .v-bar-row { margin-top: 0; }
+.col .v-q .qt { font-size: var(--t-s); line-height: 1.4; }
+.col .v-qs { gap: var(--sp-3); }
+.col .v-ans .v-btn { min-height: 24px; font-size: var(--t-xs); }
+.col .v-ans { gap: 4px; }
+.col .v-ans .v-btn { padding: 0 6px; }
+.col .v-review .st { font-size: var(--t-s); }
+.col .v-care { padding: 6px var(--sp-2); }
+
+.foot { display: flex; justify-content: space-between; gap: var(--sp-5); padding: var(--sp-2) var(--sp-4); font-size: var(--t-xs); color: var(--ink-3); }
+.foot b { color: var(--ink-2); font-weight: 600; }
+.foot .v-foot-l { display: flex; gap: var(--sp-4); white-space: nowrap; }
+
+/* locked to the window on a desktop that is tall enough; otherwise the page scrolls like any document */
+@media (min-width: 1200px) and (min-height: 860px) {
+  body { height: 100vh; overflow: hidden; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+  .l2 { min-height: 0; }
+  .prof { min-height: 0; overflow: auto; }
+  .col { overflow: auto; }
+}
+/* below a laptop width the pipeline turns back into a list: profile first, then the agent, then the brief */
+@media (max-width: 1099px) {
+  .l2 { grid-template-columns: minmax(0, 1fr); }
+  .prof { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-3) var(--sp-5); }
+  .prof #timeline, .prof .wal { border-top: 0; padding-top: 0; }
+  .pipe .v-steps { grid-template-columns: minmax(0, 1fr); }
+  .pipe .v-step { grid-template-columns: 28px minmax(0, 1fr); grid-template-rows: auto; gap: 0 var(--sp-3); padding: 4px 0 var(--sp-3); }
+  .pipe .v-step-n { grid-row: 1; grid-column: 1; }
+  .pipe .v-step-body { grid-row: 1; grid-column: 2; }
+  .pipe .v-step::before { left: 13.5px; right: auto; top: 30px; bottom: -6px; width: 1.5px; height: auto; }
+  .pipe .v-step::after { display: none; }
+  .pipe .v-step:last-child::before { display: none; }
+  .hang { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-3); padding: 0; }
+  .col { padding-top: 0; }
+  .col::before, .col::after { display: none; }
+  .stage-h { flex-direction: column; align-items: flex-start; }
+  .ag { position: static; justify-content: space-between; margin-bottom: var(--sp-3); }
+  .ag p { text-align: left; }
+  .pipe .v-st { position: static; box-shadow: none; }
+}
+@media (max-width: 760px) {
+  .app { flex-wrap: wrap; height: auto; padding: var(--sp-2) var(--sp-4); gap: var(--sp-2); }
+  .brand span { display: none; }
+  .v-picker { order: 3; width: 100%; } .v-picker .v-sel { flex: 1; } .v-picker select { width: 100%; max-width: none; }
+  .app .links { display: none; }
+  .l2 { padding: var(--sp-3) var(--sp-4) 0; }
+  .prof { grid-template-columns: minmax(0, 1fr); }
+  .hang { grid-template-columns: minmax(0, 1fr); }
+  .ag { flex-wrap: wrap; }
+  .foot { flex-direction: column; padding: var(--sp-4); }
+}
+</style>
+</head>
+<body>
+<a class="v-skip" href="#stage">Skip to the agent and the brief</a>
+<header class="app">
+  <div class="brand"><span class="mk" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 3.5h10M3 8h10M3 12.5h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+    <b>Client brief</b><span>Djamel Zair, application for Junior Data Scientist, CLUE</span></div>
+  <div id="picker"></div>
+  <div id="scheme"></div>
+  <nav class="links" aria-label="Pages"><a href="../model.html">How the models perform</a><a id="code-l" href="https://github.com/DjamelZair/ClientMeetingBriefAgent">Code</a></nav>
+</header>
+
+<main class="l2" id="main">
+  <aside class="prof v-card" aria-label="Client profile">
+    <div id="identity"></div>
+    <div id="chips"></div>
+    <div id="timeline"></div>
+    <section class="wal" aria-labelledby="wal-h"><div class="prof-h"><h2 id="wal-h">Products</h2><span id="wq"></span></div><div id="wallet"></div></section>
+  </aside>
+
+  <section class="stage" id="stage" aria-label="The agent and the brief" tabindex="-1">
+    <div class="stage-h"><div id="headline"></div><div class="hbar" id="hbar"></div></div>
+    <div class="pipe v-card" aria-label="The agent's five steps"><div class="ag" id="agent-h"></div><div id="steps"></div></div>
+    <div class="hang">
+      <div class="col" data-col="1" data-from="1"><section class="hc v-card" id="group" aria-label="Segment and group"></section></div>
+      <div class="col" data-col="2" data-from="2"><div class="hc v-card"><div id="discuss"></div><div id="ask"></div></div></div>
+      <div class="col" data-col="3" data-from="3"><div class="hc v-card"><div id="care"></div><div id="held"></div><div id="aside"></div></div></div>
+      <div class="col" data-col="4" data-from="4"><div class="hc v-card"><div id="review"></div></div></div>
+      <div class="col" data-col="5" data-from="5"><div class="hc v-card"><div id="questions"></div><div id="followup"></div></div></div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot" id="foot" data-fold-end></footer>
+
+<script src="../field.js"></script>
+<script src="variants.js"></script>
+<script>
+/* l2 places components and adds three small pieces of its own: the agent header, the step 1 group card and the column stems */
+var esc = function(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); };
+function ready(n){ var S = V.state; return S.replaying && S.stepState[n - 1] !== "done" ? ' data-ready="0"' : ''; }
+
+/* the agent header: one agent, its call count, and replay or skip */
+function agentHead(el, ctx){
+  var S = V.state, n = ctx.v.nCalls;
+  el.innerHTML = '<p>One agent<br>' + n + ' logged ' + (n === 1 ? 'call' : 'calls') + '</p>' +
+    (S.replaying ? '<button type="button" class="v-btn" data-act="skip">Skip</button>'
+      : '<button type="button" class="v-btn" data-act="replay" aria-label="Replay the one agent, ' + n + ' logged ' + (n === 1 ? 'call' : 'calls') + '">' + V.glyph("replay", 14) + 'Replay</button>');
+}
+/* step 1 produced the segment and the group; the profile card carries the mismatch next to the group already */
+function groupCard(el, ctx){
+  var v = ctx.v, b = ctx.F.data.showcase[v.index].brief, p = b.who.profile || {};
+  el.innerHTML = '<div class="grp" data-from="1"' + ready(1) + '><h3 class="v-lane-h">' + V.glyph("group", 14) + 'Segment and group ' + V.fromTag(1) + '</h3>' +
+    '<p class="nm">' + esc(v.who.name) + '</p>' +
+    '<p class="seg">Bank segment <b>' + esc(p.segment ? V.util.cap(p.segment) : "not recorded") + '</b></p>' +
+    '<p class="v-meta">' + esc(V.util.cap(v.who.description)) + '.</p></div>';
+}
+
+/* the bar decides which scores step 2 keeps, so it sits with the headline it changes */
+function scoreBar(el, ctx){ V.components.bar(el, ctx); var l = el.querySelector("#v-bar-l"); if (l) l.textContent = "Only include scores above"; }
+/* the products the agent did not raise stay one click away, so a full wallet still fits the first screen */
+function wallet(el, ctx){
+  V.components.wallet(el, ctx, {quiet: "bottom", groupHeld: true});
+  document.getElementById("wq").innerHTML = "";
+  var q = el.querySelector(".v-wcat-quiet"); if (!q) return;
+  var h = q.querySelector(".v-wcat-h"), open = !!V.state.open.wq, n = 0;
+  q.querySelectorAll(".v-wquiet").forEach(function(p){ var t = p.textContent.split(":").slice(1).join(":"); n += t.split(",").length; });
+  /* the toggle sits on the products heading line; the list opens at the foot of the wallet */
+  q.id = "l2-wq"; q.hidden = !open;
+  document.getElementById("wq").innerHTML = '<button type="button" class="v-link" data-act="toggle" data-key="wq" aria-expanded="' + open + '" aria-controls="l2-wq">' + esc(h.textContent) + ' (' + n + ')</button>';
+}
+
+V.boot({
+  chrome: [["#picker", "picker"], ["#scheme", "scheme"], ["#foot", "footer"]],
+  mounts: {
+    "#identity": ["identity", {mismatch: "inline"}], "#chips": "chips", "#timeline": ["timeline", {}],
+    "#wallet": wallet,
+    "#headline": ["headline", {kicker: false}], "#agent-h": agentHead,
+    "#steps": ["steps", {head: false, readChars: 22}],
+    "#group": groupCard,
+    "#discuss": "discuss", "#hbar": scoreBar, "#ask": "ask",
+    "#care": "care", "#held": "held", "#aside": ["aside", {asideWhy: "toggle"}],
+    "#review": "review",
+    "#questions": ["questions", {why: "toggle"}], "#followup": "followup"
+  }
+}).then(function(F){ if (F && F.links.code) document.getElementById("code-l").href = F.links.code; });
+
+/* the stem under a node turns to the link colour when that step is selected */
+function stems(n){ document.querySelectorAll(".col").forEach(function(c){ c.toggleAttribute("data-on", +c.getAttribute("data-col") === n); }); }
+V.on("link", stems);
+/* a column counts as done when its step is done, or always when no replay is running */
+function marks(){ var S = V.state; document.querySelectorAll(".col").forEach(function(c){ var k = +c.getAttribute("data-col"); c.toggleAttribute("data-done", !S.replaying || S.stepState[k - 1] === "done"); }); }
+V.on("render", function(){ stems(V.links.current()); marks(); });
+V.on("step", marks);
+
+/* the timeline is drawn to its box, so it redraws when the box changes width */
+var tlw = 0;
+new ResizeObserver(function(){ var w = document.getElementById("timeline").clientWidth; if (w && Math.abs(w - tlw) > 2 && V.state.v){ tlw = w; V.components.timeline(document.getElementById("timeline"), {v: V.state.v, m: V.state.m}, {}); V.links.apply(); } }).observe(document.getElementById("timeline"));
+</script>
+</body></html>

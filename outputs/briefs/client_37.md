@@ -4,21 +4,16 @@ Meeting on 1 June 2016. Prepared to support the conversation. Scores are estimat
 
 ## 1. Who this client is
 
-**Growing payroll account holders** (cluster 3): Often hold a payroll account (84%), recently adding products (about 1.9 on average in the last six months), many products (4.4 on average).
+**Everyday inactive clients** (cluster 4): Everyday individual segment (98%), mostly inactive (6% active), rarely hold a current account (28%).
 
-Aged 32, with the bank for 8 months, income not recorded, individual segment, holds 1 product: Payroll account.
+Aged 55, with the bank for 7 months, income not recorded, holds no products.
 
 Recent changes:
-- Took up 2 new products in the last three months.
-- Closed 4 products in the last three months.
+- Client segment changed in the last six months.
 
 ## 2. What might help
 
-- **Direct debit**, scores 17%. In the test month, 15% of the 2,723 clients scoring between 10% and 20% took it up. The score leans on: closed 6 products in the last six months; an active client; already holds a payroll account.
-
-Likely already in progress:
-- **Pension paid in**, scores 47%. The client already has a payroll account, so this is likely already in progress rather than something to suggest.
-- **Salary paid in**, scores 41%. The client already has a payroll account, so this is likely already in progress rather than something to suggest.
+- **Current account**, scores 18%. In the test month, 12% of the 722 clients scoring between 10% and 20% took it up. The score leans on: closed 2 products in the last six months; with the bank for 7 months; aged 55.
 
 ## 3. What not to offer
 
@@ -26,26 +21,29 @@ No high scoring product was held back by the suitability check.
 
 ## 4. Due anyway
 
-No periodic review is due within 90 days; the next one is on 23 April 2019.
+No periodic review is due within 90 days; the next one is on 14 October 2017.
 
 *Review dates come from a synthetic layer made for this prototype, not real records.*
 
 ## 5. Questions to open with
 
-1. You closed a product with us recently. Was there a reason we should know about?
-2. You started using something new with us recently. How is it working for you so far?
-3. What are your thoughts on keeping on top of regular bills at the moment?
+1. Your situation with us has changed recently. Do your accounts still fit how you live now?
+   *Recent change. Why: Client segment changed in the last six months.*
+   - If "My work or studies changed": Update work and income details.
+   - If "Nothing has changed": No change to the brief.
+2. How do you handle your everyday payments at the moment?
+   *Top suggestion. Why: In the test month, 12% of the 722 clients scoring between 10% and 20% took up current account.*
+   - If "Open to talking about it": Discuss Current account if the client wants to.
+   - If "Already arranged elsewhere": Nothing new is raised. Current account is arranged at another bank. Record where it is arranged and do not raise Current account again in this meeting. Record it as declined: the brief will not raise Current account again for 182 days.
+   - If "Not a priority now": Nothing new is raised. Current account is not a priority for the client now. Record it as declined: the brief will not raise Current account again for 182 days.
 
 ## How this brief was prepared
 
-1. `get_profile`: aged 32, 1 product held
-2. `get_segment`: cluster 3, Growing payroll account holders
-3. `get_recent_changes`: 2 change flags
-4. `get_propensities`: 7 products scored, highest Pension paid in (47%)
-5. `check_suitability`: Pension paid in: allowed
-6. `check_linked`: Pension paid in: in progress
-7. `check_suitability`: Salary paid in: allowed
-8. `check_linked`: Salary paid in: in progress
-9. `check_suitability`: Direct debit: allowed
-10. `check_review_due`: not due, next review 2019-04-23 (1056 days)
-11. `draft_questions`: 3 questions drafted
+1. `get_profile`: aged 55, no products held
+2. `get_segment`: cluster 4, Everyday inactive clients
+3. `get_recent_changes`: 1 change flag
+4. `get_propensities`: 8 products scored, highest Current account (18%)
+5. `check_suitability`: Current account: allowed
+6. `check_care`: care check: no signs in the data
+7. `check_review_due`: not due, next review 2017-10-14 (500 days)
+8. `draft_questions`: 2 questions drafted, each with a reason and answer branches

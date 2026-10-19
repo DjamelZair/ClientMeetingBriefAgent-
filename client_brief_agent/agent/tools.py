@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 from client_brief_agent import config
-from client_brief_agent.agent import suitability
+from client_brief_agent.agent import branches, feedback, suitability
 
 # written as escapes so no dash character sits in the source itself
 EM_DASH, EN_DASH = "\u2014", "\u2013"
@@ -30,53 +30,11 @@ CHANGE_SENTENCES = {
     "flag_dropped_products": "Closed {drops_text} in the last three months.",
     "flag_activity_drop": "Was active three months ago and is not active now.",
     "flag_moved": "Moved to a different province in the last six months.",
-    "flag_new_client": "Joined the bank in the last six months ({joined_text}).",
+    "flag_new_client": "Joined {joined_text}.",
     "flag_segment_change": "Client segment changed in the last six months.",
 }
 
-# conversation starters, in the order i want them considered
-QUESTION_TEMPLATES = {
-    "review_due": ("Before we look ahead, has anything changed in your work, income or home "
-                   "that we should update in your details?"),
-    "flag_activity_drop": ("You seem to use your account a little less lately. Is there anything "
-                           "about how you bank with us that is not working well for you?"),
-    "flag_moved": ("You have moved recently. Is there anything we can help you settle, such as "
-                   "addresses or regular payments?"),
-    "flag_new_client": ("How have your first months with us gone, and is there anything you "
-                        "expected that is not set up yet?"),
-    "flag_dropped_products": ("You closed a product with us recently. Was there a reason we "
-                              "should know about?"),
-    "flag_new_products": ("You started using something new with us recently. How is it working "
-                          "for you so far?"),
-    "flag_segment_change": ("Your situation with us has changed a little recently. Are your "
-                            "current accounts still a good fit for how you live now?"),
-}
-
-# what a product is about, so a question can open the topic without naming a sale
-PRODUCT_TOPICS = {
-    "current_account": "your everyday money",
-    "online_account": "banking online or on your phone",
-    "credit_card": "paying for larger purchases and spreading costs",
-    "direct_debit": "keeping on top of regular bills",
-    "salary_deposit": "where your salary is paid",
-    "pension_deposit": "where your pension is paid",
-    "payroll_account": "where your salary is paid",
-    "tax_account": "paying taxes and official charges",
-    "term_deposit": "money you would like to set aside for a fixed period",
-    "investment_fund": "longer term saving",
-    "investment_account": "investing",
-    "pension_plan": "saving for retirement",
-    "plus_account": "how your savings are kept",
-    "particular_account": "your everyday money",
-    "particular_plus_account": "how your savings are kept",
-    "mortgage": "your plans for a home",
-    "personal_loan": "any larger costs coming up",
-}
-FALLBACK_QUESTIONS = [
-    "What matters most to you financially over the next year?",
-    "Is there anything about your banking you would like to make simpler?",
-]
-
+# the questions themselves, their reasons and answer branches live in branches.py
 
 @dataclass
 class Context:
@@ -96,6 +54,8 @@ class Context:
     synthetic: pd.DataFrame
     meeting_date: str = config.MEETING_DATE
     bands: pd.DataFrame = None
+    # what advisors recorded in earlier meetings (feedback.py); None means nothing was recorded
+    advisor_log: pd.DataFrame = None
     facts: pd.DataFrame = field(init=False, repr=False)
 
     def __post_init__(self):
@@ -142,9 +102,13 @@ def get_profile(ctx, cid):
 
 def get_segment(ctx, cid):
     cluster = int(ctx.segments["labels"].loc[cid])
+    profiles = ctx.segments.get("profiles")
+    typical = (float(profiles.loc[cluster, "n_products"])
+               if profiles is not None and "n_products" in profiles.columns else None)
     return {"cluster": cluster,
             "name": ctx.segments["names"][cluster],
-            "description": ctx.segments["descriptions"][cluster]}
+            "description": ctx.segments["descriptions"][cluster],
+            "typical_products": typical}
 
 
 def _fmt_count(value):
@@ -159,7 +123,7 @@ def _plural(value, noun):
 
 def _joined_text(tenure):
     if tenure is None or pd.isna(tenure):
-        return "date not recorded"
+        return "in the last six months, date not recorded"
     if round(float(tenure)) == 0:
         return "this month"
     return f"{_plural(tenure, 'month')} ago"
@@ -186,7 +150,27 @@ def get_propensities(ctx, cid, top_n=5):
 
 
 def check_suitability(ctx, cid, product):
-    return suitability.check(suitability.facts_row(ctx.facts, cid), product)
+    verdict = suitability.check(suitability.facts_row(ctx.facts, cid), product)
+    # a product the client declined recently is held back like any other rule, with its own reason
+    if feedback.declined(ctx.advisor_log, cid, product, ctx.meeting_date):
+        verdict = {"allowed": False,
+                   "rules_fired": verdict["rules_fired"] + [{"rule": "declined_recently", "reason": feedback.REASON}]}
+    return verdict
+
+
+# signs that a client may be in financial difficulty. the data has no debt or arrears, so this only reads
+# what is there: the synthetic vulnerability flag and a drop in account activity. it never claims more
+CARE_SIGNALS = [
+    ("vulnerable", "Marked as possibly vulnerable (synthetic flag)."),
+    ("flag_activity_drop", "Account activity dropped in the last three months."),
+]
+
+
+def check_care(ctx, cid):
+    """{'flag', 'signals': [sentences]}: whether the brief should open with a care check."""
+    row = suitability.facts_row(ctx.facts, cid)
+    signals = [sentence for key, sentence in CARE_SIGNALS if bool(row.get(key))]
+    return {"flag": bool(signals), "signals": signals}
 
 
 def check_review_due(ctx, cid, meeting_date=None):
@@ -275,23 +259,18 @@ def in_progress_mask(snapshot, products, index=None):
                         index=snap.index)
 
 
+def _with_top(facts):
+    """older callers pass only might_help codes; the top suggestion then gets its label and no band sentence."""
+    if facts.get("top") or not facts.get("might_help"):
+        return facts
+    p = facts["might_help"][0]
+    return dict(facts, top={"product": p, "label": label(p), "band_sentence": "it scores above the threshold."})
+
+
 def template_questions(facts):
-    """two or three open questions, picked by rule from the facts."""
-    keys = (["review_due"] if facts.get("review_due") else []) + list(facts.get("change_flags", []))
-    picked = [QUESTION_TEMPLATES[k] for k in QUESTION_TEMPLATES if k in keys][:2]
-    for product in facts.get("might_help", []):
-        if len(picked) >= config.MAX_QUESTIONS:
-            break
-        topic = PRODUCT_TOPICS.get(product)
-        q = f"What are your thoughts on {topic} at the moment?" if topic else None
-        if q and q not in picked:
-            picked.append(q)
-            break
-    for q in FALLBACK_QUESTIONS:
-        if len(picked) >= 2:
-            break
-        picked.append(q)
-    return picked[:config.MAX_QUESTIONS]
+    """two or three question cards, picked by rule from the facts (branches.pick), each with its reason and
+    answer branches."""
+    return branches.cards(_with_top(facts))
 
 
 def _claude_available():
@@ -320,13 +299,15 @@ def _claude_rephrase(facts, drafts):
 
 
 def draft_questions(ctx, facts, use_claude=None):
-    drafts = template_questions(facts)
+    """question cards. claude, when available, only rephrases the wording; the reasons and branches stay rules."""
+    cards = template_questions(facts)
     if use_claude is None:
         use_claude = _claude_available()
     if not use_claude:
-        return drafts
+        return cards
     try:
-        return _claude_rephrase(facts, drafts)
+        texts = _claude_rephrase(facts, [c["text"] for c in cards])
     except Exception:
         # any failure falls back to the templates, the brief must still be ready
-        return drafts
+        return cards
+    return [dict(c, text=t) for c, t in zip(cards, texts)]

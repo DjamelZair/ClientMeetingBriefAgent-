@@ -6,15 +6,15 @@ Meeting on 1 June 2016. Prepared to support the conversation. Scores are estimat
 
 **Growing payroll account holders** (cluster 3): Often hold a payroll account (84%), recently adding products (about 1.9 on average in the last six months), many products (4.4 on average).
 
-Aged 47, with the bank for 6 years, recorded income about 80,000, individual segment, holds 4 products: Online account, Salary paid in, Pension paid in, Payroll account.
+Aged 43, with the bank for 14 years, recorded income about 66,000, individual segment, holds 3 products: Current account, Online account, Credit card.
 
 Recent changes:
+- Took up 1 new product in the last three months.
 - Closed 1 product in the last three months.
 
 ## 2. What might help
 
-- **Direct debit**, scores 29%. In the test month, 29% of the 1,281 clients scoring between 20% and 30% took it up. The score leans on: closed 3 products in the last six months; an active client; already holds a payroll account.
-- **Credit card**, scores 18%. In the test month, 17% of the 1,080 clients scoring between 10% and 20% took it up. The score leans on: closed 3 products in the last six months; holds 4 products; an active client.
+- **Bills paid by direct debit**, scores 18%. In the test month, 14% of the 2,684 clients scoring between 10% and 20% took it up. The score leans on: closed 2 products in the last six months; an active client; already holds a current account.
 
 ## 3. What not to offer
 
@@ -22,22 +22,34 @@ No high scoring product was held back by the suitability check.
 
 ## 4. Due anyway
 
-No periodic review is due within 90 days; the next one is on 4 November 2020.
+No periodic review is due within 90 days; the next one is on 17 December 2017.
 
 *Review dates come from a synthetic layer made for this prototype, not real records.*
 
 ## 5. Questions to open with
 
-1. You closed a product with us recently. Was there a reason we should know about?
-2. What are your thoughts on keeping on top of regular bills at the moment?
+1. Some of your products with us were closed recently. How are those needs covered now?
+   *Recent change. Why: Closed 1 product in the last three months.*
+   - If "Moved to another bank": Nothing new is raised. Ask what made them move and record it for the advisor.
+   - If "No longer needed": No change to the brief.
+   - If "Something went wrong": Nothing new is raised. Log the complaint and agree a follow up.
+2. You started using something new with us recently. How is it working for you?
+   *Recent change. Why: Took up 1 new product in the last three months.*
+   - If "It works well": No change to the brief.
+   - If "Having trouble with it": Nothing new is raised. Help with the set up.
+3. How do you keep track of your regular bills?
+   *Top suggestion. Why: In the test month, 14% of the 2,684 clients scoring between 10% and 20% took up bills paid by direct debit. This client has no direct debits set up here.*
+   - If "Open to talking about it": Discuss Bills paid by direct debit if the client wants to.
+   - If "Already arranged elsewhere": Nothing new is raised. Bills paid by direct debit is arranged at another bank. Record where it is arranged and do not raise Bills paid by direct debit again in this meeting. Record it as declined: the brief will not raise Bills paid by direct debit again for 182 days.
+   - If "Not a priority now": Nothing new is raised. Bills paid by direct debit is not a priority for the client now. Record it as declined: the brief will not raise Bills paid by direct debit again for 182 days.
 
 ## How this brief was prepared
 
-1. `get_profile`: aged 47, 4 products held
+1. `get_profile`: aged 43, 3 products held
 2. `get_segment`: cluster 3, Growing payroll account holders
-3. `get_recent_changes`: 1 change flag
-4. `get_propensities`: 4 products scored, highest Direct debit (29%)
-5. `check_suitability`: Direct debit: allowed
-6. `check_suitability`: Credit card: allowed
-7. `check_review_due`: not due, next review 2020-11-04 (1617 days)
-8. `draft_questions`: 2 questions drafted
+3. `get_recent_changes`: 2 change flags
+4. `get_propensities`: 5 products scored, highest Bills paid by direct debit (18%)
+5. `check_suitability`: Bills paid by direct debit: allowed
+6. `check_care`: care check: no signs in the data
+7. `check_review_due`: not due, next review 2017-12-17 (564 days)
+8. `draft_questions`: 3 questions drafted, each with a reason and answer branches

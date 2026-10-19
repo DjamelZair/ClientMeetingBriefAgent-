@@ -123,7 +123,10 @@ def test_write_all(out_dirs):
     ctx = _with_page_bits(make_ctx())
     data = export.write_all(ctx, _extras())
     assert set(data) == {"meta", "data_facts", "segmentation", "propensity", "guardrail", "reviews",
-                         "showcase", "figures"}
+                         "showcase", "figures", "model_card"}
+    assert "run" in data["model_card"]["tuning"] and data["model_card"]["limits"]
+    assert [s["n"] for s in data["meta"]["agent_steps"]] == [1, 2, 3, 4, 5]
+    assert data["meta"]["product_categories"][-1] == {"category": "Insurance", "products": []}
     assert "generated_at" not in json.dumps(data)
     assert data["segmentation"]["k"] == 3 and len(data["segmentation"]["clusters"]) == 3
     assert data["propensity"]["metrics"][0]["roc_auc"] == 0.8123

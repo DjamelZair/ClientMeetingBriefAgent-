@@ -4,18 +4,16 @@ Meeting on 1 June 2016. Prepared to support the conversation. Scores are estimat
 
 ## 1. Who this client is
 
-**Growing payroll account holders** (cluster 3): Often hold a payroll account (84%), recently adding products (about 1.9 on average in the last six months), many products (4.4 on average).
+**Active everyday clients** (cluster 1): Mostly active (99% active), everyday individual segment (99%), often hold a current account (92%).
 
-Aged 34, with the bank for 9 months, recorded income about 56,000, individual segment, holds 3 products: Salary paid in, Pension paid in, Payroll account.
+Aged 30, with the bank for 9 months, recorded income about 99,000, individual segment, holds 1 product: Current account.
 
 Recent changes:
-- Took up 1 new product in the last three months.
-- Closed 2 products in the last three months.
-- Client segment changed in the last six months.
+- No notable changes in the last six months.
 
 ## 2. What might help
 
-- **Direct debit**, scores 40%. In the test month, 38% of the 1,263 clients scoring between 30% and 50% took it up. The score leans on: closed 4 products in the last six months; an active client; added 4 products in the last six months.
+- **Bills paid by direct debit**, scores 11%. In the test month, 14% of the 2,684 clients scoring between 10% and 20% took it up. The score leans on: closed 2 products in the last six months; an active client; added 1 product in the last six months.
 
 ## 3. What not to offer
 
@@ -23,22 +21,29 @@ No high scoring product was held back by the suitability check.
 
 ## 4. Due anyway
 
-The periodic client review (KYC/CDD) is due on 5 June 2016, 4 days after the meeting.
+No periodic review is due within 90 days; the next one is on 18 March 2019.
 
 *Review dates come from a synthetic layer made for this prototype, not real records.*
 
 ## 5. Questions to open with
 
-1. Before we look ahead, has anything changed in your work, income or home that we should update in your details?
-2. You closed a product with us recently. Was there a reason we should know about?
-3. What are your thoughts on keeping on top of regular bills at the moment?
+1. How do you keep track of your regular bills?
+   *Top suggestion. Why: In the test month, 14% of the 2,684 clients scoring between 10% and 20% took up bills paid by direct debit. This client has no direct debits set up here.*
+   - If "Open to talking about it": Discuss Bills paid by direct debit if the client wants to.
+   - If "Already arranged elsewhere": Nothing new is raised. Bills paid by direct debit is arranged at another bank. Record where it is arranged and do not raise Bills paid by direct debit again in this meeting. Record it as declined: the brief will not raise Bills paid by direct debit again for 182 days.
+   - If "Not a priority now": Nothing new is raised. Bills paid by direct debit is not a priority for the client now. Record it as declined: the brief will not raise Bills paid by direct debit again for 182 days.
+2. What matters most to you financially over the next year?
+   *Open. Why: No due review, recent change or suggestion to start from, so an open question.*
+   - If "Raises something specific": Record what the client raises; the brief has no data on it.
+   - If "Nothing in particular": No change to the brief.
 
 ## How this brief was prepared
 
-1. `get_profile`: aged 34, 3 products held
-2. `get_segment`: cluster 3, Growing payroll account holders
-3. `get_recent_changes`: 3 change flags
-4. `get_propensities`: 5 products scored, highest Direct debit (40%)
-5. `check_suitability`: Direct debit: allowed
-6. `check_review_due`: due soon, next review 2016-06-05 (4 days)
-7. `draft_questions`: 3 questions drafted
+1. `get_profile`: aged 30, 1 product held
+2. `get_segment`: cluster 1, Active everyday clients
+3. `get_recent_changes`: no change flags
+4. `get_propensities`: 7 products scored, highest Bills paid by direct debit (11%)
+5. `check_suitability`: Bills paid by direct debit: allowed
+6. `check_care`: care check: no signs in the data
+7. `check_review_due`: not due, next review 2019-03-18 (1020 days)
+8. `draft_questions`: 2 questions drafted, each with a reason and answer branches

@@ -1,0 +1,167 @@
+/* the field look, shared by field_v1 to field_v5 and model.html.
+   petrol client field on the left, an off white working page on the right, one accent (vermilion) for
+   anything held back or overdue. familjen grotesk for text, gelasio for what is said to a client,
+   jetbrains mono only for literal tool names. */
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+:root{
+  --petrol:oklch(33% 0.05 195);
+  --petrol-deep:oklch(28% 0.045 195);
+  --petrol-line:oklch(47% 0.045 195);
+  --on:oklch(97% 0.008 195);
+  --on-soft:oklch(84% 0.025 195);
+  --on-faint:oklch(68% 0.03 195);
+  --paper:oklch(97% 0.006 195);
+  --paper-sunk:oklch(94% 0.008 195);
+  --ink:oklch(20% 0.02 220);
+  --ink-soft:oklch(43% 0.02 215);
+  --rule:oklch(85% 0.012 200);
+  --band:oklch(84% 0.04 195);
+  --verm:#D9481F;
+  --verm-ink:#B23812;
+  --verm-on:oklch(76% 0.13 42);
+  --sans:"Familjen Grotesk", "Helvetica Neue", sans-serif;
+  --serif:"Gelasio", Georgia, serif;
+  --mono:"JetBrains Mono", ui-monospace, monospace;
+  --strip-h:72px;
+}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.4;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-variant-numeric:lining-nums}
+a{color:inherit;text-underline-offset:3px;text-decoration-thickness:1px}
+button,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--verm);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.loaderr{padding:16px 24px;background:var(--verm);color:#fff}
+
+/* ---------- the novelty strip ---------- */
+#strip{border-bottom:1px solid var(--rule);background:var(--paper)}
+.strip-in{display:grid;grid-template-columns:auto 1fr auto;gap:32px;align-items:center;padding:12px 32px 12px 48px;min-height:72px}
+.strip-h{font-size:15px;font-weight:700;line-height:1.15;letter-spacing:-0.01em;max-width:11em}
+.strip-list{list-style:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:22px}
+.strip-list li{font-size:13px;line-height:1.3}
+.strip-list b{display:block;font-weight:600}
+.strip-list span{display:block;color:var(--ink-soft);margin-top:2px}
+.to-model{display:inline-block;background:var(--petrol);color:var(--on);text-decoration:none;font-weight:600;font-size:14px;
+  padding:11px 16px;white-space:nowrap;transition:background-color .2s ease}
+.to-model::after{content:"";display:inline-block;width:7px;height:7px;border-top:1.5px solid currentColor;border-right:1.5px solid currentColor;
+  transform:rotate(45deg);margin-left:10px;vertical-align:1px}
+.to-model:hover{background:var(--petrol-deep)}
+
+/* ---------- the two fields ---------- */
+.page{display:grid;grid-template-columns:minmax(380px,32%) 1fr}
+/* the two fields only lock to the window when it is tall enough to hold them; below 880px the page scrolls instead,
+   so the client panel is never cut off on a 1280x800 or 1366x768 laptop */
+@media (min-width:1000px) and (min-height:880px){ .page{height:calc(100vh - var(--strip-h));min-height:640px} }
+.field{background:var(--petrol);color:var(--on);display:flex;flex-direction:column;padding:16px 32px 16px 48px;min-width:0;overflow:hidden}
+.paper{min-width:0;position:relative}
+
+/* ---------- client panel ---------- */
+.lock{font-size:13px;color:var(--on-soft)}
+.lock b{font-weight:700;color:var(--on)}
+.pick{display:flex;align-items:center;gap:12px;margin-top:10px;font-size:14px}
+.pick label{color:var(--on-soft)}
+.pick select{appearance:none;-webkit-appearance:none;background:transparent;border:0;border-bottom:1px solid var(--on-soft);
+  color:var(--on);padding:4px 22px 4px 0;font-weight:500;min-width:0;flex:1;cursor:pointer;
+  background-image:linear-gradient(45deg,transparent 50%,var(--on) 50%),linear-gradient(-45deg,transparent 50%,var(--on) 50%);
+  background-position:calc(100% - 9px) 55%,calc(100% - 4px) 55%;background-size:5px 5px;background-repeat:no-repeat}
+.pick select option{color:var(--ink);background:var(--paper)}
+.pick button{background:transparent;border:1px solid var(--on-soft);padding:5px 11px;border-radius:2px;cursor:pointer;font-weight:500;white-space:nowrap;
+  transition:background-color .2s ease,color .2s ease}
+.pick button:hover{background:var(--on);color:var(--petrol)}
+.pick button:active{transform:translateY(1px)}
+.field :focus-visible{outline-color:var(--on)}
+
+.ref{font-size:16px;font-weight:500;color:var(--on);margin-top:16px}
+.ref span{color:var(--on-soft);font-weight:400}
+/* the group is context, not the headline: the products to offer on the right are the news */
+.group-l{font-size:12.5px;color:var(--on-soft);margin-top:10px}
+.group{font-size:20px;font-weight:700;line-height:1.05;letter-spacing:-0.02em;margin-top:1px;text-wrap:balance}
+.desc{font-size:12.5px;color:var(--on-soft);margin-top:8px;max-width:52ch;line-height:1.35}
+.facts{list-style:none;display:grid;grid-template-columns:1fr 1fr;column-gap:18px;margin-top:10px}
+.facts li{font-size:13.5px;font-weight:500;padding:3px 0;border-top:1px solid var(--petrol-line)}
+.changes{list-style:none;margin-top:10px}
+.changes li{font-size:13px;padding-left:16px;position:relative;margin-top:2px}
+.changes li::before{content:"";position:absolute;left:0;top:.48em;width:6px;height:6px;background:var(--on)}
+.changes .none::before{background:transparent;border:1px solid var(--on-soft)}
+.changes .none{color:var(--on-soft)}
+
+/* holdings: one row per category, one chip per product, the chip's look is its state */
+.holdings{margin-top:auto;padding-top:10px}
+.fh{font-size:12.5px;font-weight:600;color:var(--on-soft);margin-bottom:4px}
+.hcat{display:grid;grid-template-columns:104px 1fr;gap:8px;padding:3px 0;border-top:1px solid var(--petrol-line);align-items:start}
+.hcat-name{font-size:11.5px;color:var(--on-soft);padding-top:2px;line-height:1.2}
+.hchips{display:flex;flex-wrap:wrap;gap:3px}
+.hchip{display:inline-block;font-size:11.5px;line-height:1.2;padding:2px 5px;border:1px solid transparent;border-radius:2px;white-space:nowrap}
+/* suggested is the news, so it is the brightest; what is already held stays quiet */
+.s-suggested{background:var(--on);color:var(--petrol);font-weight:700}
+.s-held{border-color:var(--on-faint);color:var(--on)}
+.s-in_progress{border:1px dashed var(--on-soft);color:var(--on-soft)}
+.s-held_back{border-color:var(--verm-on);color:var(--verm-on);text-decoration:line-through;text-decoration-thickness:1.5px}
+.s-lower_ranked{border:1px dotted var(--on);color:var(--on)}
+.s-below_threshold{color:var(--on-soft);background:oklch(38% 0.045 195)}
+.s-not_modelled{color:var(--on-faint)}
+.s-not_in_data{border:1px dotted var(--on-faint);color:var(--on-faint);font-style:italic}
+.hkeys{display:flex;flex-wrap:wrap;gap:3px 10px;margin-top:6px;font-size:11.5px;color:var(--on-soft)}
+.hkey{display:inline-flex;align-items:center;gap:5px}
+.hkey .hchip{width:16px;height:11px;padding:0}
+.hkey .s-not_modelled{border-bottom:1px solid var(--on-faint)}
+
+/* ---------- shared atoms for the working page ---------- */
+.h{font-size:13px;font-weight:600;color:var(--ink-soft)}
+.tool{font-family:var(--mono);font-size:11px;color:var(--ink-soft)}
+.say{font-family:var(--serif)}
+/* a score: the band in petrol tint, the observed take up rate as a solid mark */
+.scale{position:relative;height:10px;background:linear-gradient(var(--rule),var(--rule)) 0 50%/100% 1px no-repeat}
+.scale .bd{position:absolute;top:2px;bottom:2px;background:var(--band)}
+.scale .ob{position:absolute;top:-2px;bottom:-2px;width:3px;margin-left:-1.5px;background:var(--ink)}
+.struck{display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-right:6px}
+
+/* the care line: first on the page when it is there, in petrol, not the vermilion of an error */
+.care{padding-bottom:4px}
+.care-l{font-size:22px;font-weight:600;line-height:1.12;letter-spacing:-0.02em;color:var(--petrol);max-width:40ch}
+.care-w{font-size:13px;margin-top:4px;color:var(--ink);line-height:1.38}
+.care-w b{font-weight:700;color:var(--petrol)}
+.care-w span{color:var(--ink-soft)}
+.qwhy b.k-care{color:var(--petrol)}
+
+/* the follow up draft: a calm serif block, plain text with its line breaks kept */
+.fu-tog{background:none;border:0;padding:0;cursor:pointer;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;color:var(--ink)}
+.fu-tog::after{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);
+  position:relative;top:-2px;transition:transform .2s ease}
+.fu-tog[aria-expanded="true"]::after{transform:rotate(-135deg);top:1px}
+.fu-tog:hover{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.fu-l{font-size:12.5px;font-weight:600;color:var(--petrol);margin-top:2px}
+.fu-after{font-size:12px;color:var(--ink-soft);margin-top:8px}
+.fu-t{font-family:var(--serif);font-size:13.5px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:4px;padding:2px 0 2px 12px;border-left:1px solid var(--ink)}
+.fu-acts{margin-top:8px;display:flex;align-items:center;gap:10px}
+.fu-copy{background:transparent;border:1px solid var(--ink-soft);border-radius:2px;padding:3px 10px;font-size:12.5px;font-weight:500;cursor:pointer}
+.fu-copy:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.fu-st{font-size:12px;color:var(--ink-soft)}
+/* the declined note gets a line of its own under an answer's outcome */
+.decl{font-size:12.5px;font-weight:600;margin-top:2px;color:var(--ink)}
+
+/* ---------- footer ---------- */
+#foot{border-top:1px solid var(--rule);background:var(--paper)}
+.foot-in{padding:22px 48px 28px;display:grid;grid-template-columns:1.2fr 1fr;gap:12px 48px;font-size:13.5px;color:var(--ink-soft)}
+.foot-pitch b,.foot-kpi b{color:var(--ink)}
+.foot-small{grid-column:1 / -1;font-size:12.5px}
+.foot-small a{margin-left:12px;color:var(--ink)}
+
+/* ---------- smaller screens: the client panel first ---------- */
+@media (max-width:999px){
+  /* the client comes first on a phone, the novelty strip after the brief */
+  body{display:flex;flex-direction:column}
+  .page{order:1}#strip{order:2}#foot{order:3}
+  .strip-in{grid-template-columns:1fr;gap:10px;padding:14px 18px}
+  .strip-list{grid-template-columns:1fr 1fr;gap:10px 18px}
+  .page{grid-template-columns:minmax(0,1fr)}
+  .field{padding:18px 18px 22px}
+  .group{font-size:24px}
+  .foot-in{grid-template-columns:1fr;padding:20px 18px 28px}
+}
+@media (max-width:560px){
+  .strip-list{grid-template-columns:1fr}
+  .hcat{grid-template-columns:1fr;gap:3px}
+  .pick{flex-wrap:wrap}.pick select{flex-basis:100%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

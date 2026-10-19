@@ -6,6 +6,9 @@ SEED = 42
 ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = ROOT / "data" / "raw" / "santander" / "parquet"
 INTERIM_DIR = ROOT / "data" / "interim"
+# what advisors record in meetings; there are none in this prototype, so the file usually does not exist
+ADVISOR_LOG_PATH = ROOT / "data" / "advisor_log.csv"
+DECLINE_COOLDOWN_DAYS = 182
 OUTPUTS = ROOT / "outputs"
 FIG_DIR = OUTPUTS / "figures"
 TABLE_DIR = OUTPUTS / "tables"
@@ -51,9 +54,9 @@ PRODUCT_LABELS = {
     "current_account": "Current account",
     "online_account": "Online account",
     "credit_card": "Credit card",
-    "direct_debit": "Direct debit",
-    "salary_deposit": "Salary paid in",
-    "pension_deposit": "Pension paid in",
+    "direct_debit": "Bills paid by direct debit",
+    "salary_deposit": "Salary paid into the account",
+    "pension_deposit": "Pension paid into the account",
     "payroll_account": "Payroll account",
     "tax_account": "Tax payment account",
     "term_deposit": "Term deposit",
@@ -146,6 +149,43 @@ MIN_BAND_CLIENTS = 30
 SCORE_DISPLAY_CAP = 0.50
 # salary, pension and payroll move together: holding one means the others are likely under way
 LINKED_INCOME_PRODUCTS = {"payroll_account", "salary_deposit", "pension_deposit"}
+
+# the data counts these as products, but a bank does not sell them: they say where the client's money flows.
+# the brief asks about them instead of offering them
+MONEY_FLOWS = {"salary_deposit", "pension_deposit", "direct_debit"}
+# salary and pension paid in start in the same month for almost every client in the data, so the brief shows
+# them as one signal: the second one found is folded into the first
+SAME_SIGNAL = {"salary_deposit": "pension_deposit", "pension_deposit": "salary_deposit"}
 INCOME_ROUNDING = 1000
 CODE_URL = "https://github.com/DjamelZair/ClientMeetingBriefAgent"
 MAX_PCA_POINTS = 3000
+
+# ---- round three: holdings by category, tuning, fairness audit ----
+# how the 17 products group in the client panel. insurance has no column in the santander data,
+# so it is listed with no products and the page says so instead of inventing anything
+PRODUCT_CATEGORIES = [
+    ("Accounts", ["current_account", "payroll_account", "online_account", "plus_account",
+                  "particular_account", "particular_plus_account"]),
+    ("Cards", ["credit_card"]),
+    ("Payments and income", ["direct_debit", "tax_account", "salary_deposit"]),
+    ("Savings and deposits", ["term_deposit"]),
+    ("Investments and funds", ["investment_fund", "investment_account"]),
+    ("Pensions", ["pension_plan", "pension_deposit"]),
+    ("Loans and mortgage", ["personal_loan", "mortgage"]),
+    ("Insurance", []),
+]
+
+# hyperparameter search: optuna tpe, tuned on the validation month only, the test month stays untouched
+TUNING_TRIALS = 30
+# trials train on a fixed random share of the training rows to keep the search affordable on this
+# machine; the chosen setting is then refitted on all training rows
+TUNING_TRAIN_ROWS = 400_000
+TUNED_PARAMS_PATH = OUTPUTS / "tables" / "lgbm_tuned_params.json"
+
+# fairness audit: groups are only used to check the output, never as model features
+FAIRNESS_MIN_POSITIVES = 30
+# a group's suggestion or held back rate outside these ratios of the overall rate gets flagged
+FAIRNESS_RATE_RATIO = (0.8, 1.25)
+# a group's roc auc this far below the overall roc auc for a product gets flagged
+FAIRNESS_AUC_GAP = 0.05
+AGE_BANDS = [(0, 25, "under 25"), (25, 45, "25 to 44"), (45, 65, "45 to 64"), (65, 200, "65 and over")]

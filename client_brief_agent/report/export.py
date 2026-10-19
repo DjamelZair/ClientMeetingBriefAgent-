@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 from client_brief_agent import config
-from client_brief_agent.agent import run, suitability, tools
+from client_brief_agent.agent import branches, run, steps, suitability, tools
 
 SOURCE = "Santander Product Recommendation data (public, anonymised, Kaggle)"
 SYNTHETIC_NOTE = ("KYC risk class, review dates, risk profile and vulnerability are synthetic, "
@@ -266,8 +266,70 @@ def meta_section(ctx, extras):
             "review_window_days": config.REVIEW_WINDOW_DAYS, "synthetic_note": SYNTHETIC_NOTE}
     meta["n_excluded_deceased"] = n_excluded_deceased(ctx)
     meta["curve_population"] = int(len(population(ctx)))
+    meta["agent_steps"] = steps.step_specs(k=ctx.segments.get("k"),
+                                           n_features=extras.get("data_facts", {}).get("n_model_features"))
+    meta["novelty"] = steps.NOVELTY
+    meta["product_categories"] = [{"category": c, "products": ps} for c, ps in config.PRODUCT_CATEGORIES]
+    meta["state_words"] = run.STATE_WORDS
+    meta["money_flows"] = sorted(config.MONEY_FLOWS)
+    meta["not_held"] = branches.NOT_HELD
     meta.update(extras.get("meta", {}))
     return meta
+
+
+def tuning_section():
+    """the saved search with every trial, or a plain statement that none has been run."""
+    from client_brief_agent.models import tune
+    saved = tune.load()
+    if saved is None or not tune.TRIALS_PATH.exists():
+        return {"run": False, "default_params": dict(config.LGBM_PARAMS)}
+    trials = pd.read_csv(tune.TRIALS_PATH)
+    saved = dict(saved, run=True,
+                 trials={p: g.drop(columns="product").to_dict("records") for p, g in trials.groupby("product")})
+    return saved
+
+
+def limits_section(extras):
+    """the limits, with the numbers taken from the run, never typed in."""
+    facts = extras.get("data_facts", {})
+    metrics = extras.get("metrics")
+    out = [{"title": "Linked products and leakage",
+            "text": ("Salary paid in, pension paid in and the payroll account tend to arrive together (salary and pension "
+                     "start in the same month for almost every client, so the brief shows them as one signal), so part of what "
+                     "those models learn is that one follows the other. The brief marks them as likely already in "
+                     "progress instead of suggesting them, and keeps them in the metrics. Features only use history "
+                     "up to the month before the target month, so the label never leaks into them.")},
+           {"title": "The KYC layer is synthetic",
+            "text": ("Review dates, risk class, risk profile and vulnerability are made up with a fixed seed, "
+                     "independently of the real data. The rules and review intervals are illustrative.")}]
+    if facts:
+        out.append({"title": "Spanish retail data, " + facts.get("first_month", "") + " to " + facts.get("last_month", ""),
+                    "text": ("The patterns come from one Spanish bank's anonymised clients in that period. They may not "
+                             "hold for other markets, products or years, and the score says nothing about intent.")})
+    if metrics is not None and len(metrics):
+        m = metrics.set_index("product") if "product" in metrics else metrics
+        if "plus_account" in m.index:
+            r = m.loc["plus_account"]
+            out.append({"title": "The plus account sample is small",
+                        "text": (f"Only {int(r['n_test_pos'])} take ups in the test month. The lift over the baseline has a "
+                                 f"95% interval from {r['lift_pr_auc_lo']:+.3f} to {r['lift_pr_auc_hi']:+.3f}, so it is "
+                                 "not clearly better than logistic regression for this product.")})
+    out.append({"title": "One test month",
+                "text": f"Every metric comes from {config.TEST_TARGET} alone; another month could look different."})
+    out.append({"title": "No learning from advisors yet",
+                "text": (f"When an advisor records a decline, the brief does not raise that product again for "
+                         f"{config.DECLINE_COOLDOWN_DAYS} days. There are no real advisors here, so the log is empty "
+                         "and nothing is learned from it. With real logs, declines could become a feature or a "
+                         "negative label for the models; I do not fake that with made up records.")})
+    out.append({"title": "Care signals are limited",
+                "text": ("The care check reads only the synthetic vulnerability flag and a drop in activity. The "
+                         "data has no debts, arrears or spending, so it cannot spot over borrowing; an advisor "
+                         "still has to ask.")})
+    return out
+
+
+def model_card_section(extras):
+    return {"tuning": tuning_section(), "fairness": extras.get("fairness"), "limits": limits_section(extras)}
 
 
 def rule_coverage(ctx):
@@ -343,7 +405,7 @@ def build_data(ctx, extras=None, make_figures=True):
             "segmentation": segmentation_section(ctx.segments),
             "propensity": propensity_section(ctx, extras),
             "guardrail": guardrail_section(curve, rules, rule_coverage(ctx)), "reviews": reviews,
-            "showcase": showcase, "figures": figures}
+            "showcase": showcase, "figures": figures, "model_card": model_card_section(extras)}
     return to_plain(data), (curve, rules, review_table, showcase)
 
 

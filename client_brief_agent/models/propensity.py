@@ -44,8 +44,8 @@ def eligible(frame, product, features):
     return X, y
 
 
-def fit_lgbm(X_tr, y_tr, X_va, y_va, seed=config.SEED):
-    model = lgb.LGBMClassifier(**config.LGBM_PARAMS, n_jobs=config.N_JOBS, random_state=seed, verbose=-1)
+def fit_lgbm(X_tr, y_tr, X_va, y_va, seed=config.SEED, params=None):
+    model = lgb.LGBMClassifier(**(params or config.LGBM_PARAMS), n_jobs=config.N_JOBS, random_state=seed, verbose=-1)
     model.fit(X_tr, y_tr, eval_set=[(X_va, y_va)], eval_metric="binary_logloss",
               callbacks=[lgb.early_stopping(config.EARLY_STOPPING_ROUNDS, verbose=False)])
     return model
@@ -120,8 +120,11 @@ def train_product(frames, product, features, seed=config.SEED):
     X_va, y_va = eligible(frames["val"], product, features)
     X_te, y_te = eligible(frames["test"], product, features)
 
-    bundle = {"product": product, "features": features}
-    bundle["lgbm"] = fit_lgbm(X_tr, y_tr, X_va, y_va, seed)
+    # the tuned setting when the validation search chose it (models/tune.py), otherwise my default
+    from client_brief_agent.models.tune import params_for
+    params, source = params_for(product)
+    bundle = {"product": product, "features": features, "params": params, "params_source": source}
+    bundle["lgbm"] = fit_lgbm(X_tr, y_tr, X_va, y_va, seed, params)
     bundle["logreg"] = fit_logreg(X_tr, y_tr, seed)
     # isotonic sees validation only; the test month stays untouched until scoring
     bundle["isotonic"] = fit_isotonic(lgbm_proba(bundle, X_va, calibrated=False), y_va)
@@ -130,7 +133,7 @@ def train_product(frames, product, features, seed=config.SEED):
              "logreg": bundle["logreg"].predict_proba(X_te)[:, 1]}
     row = {"product": product, "n_train": int(len(y_tr)), "n_train_pos": int(y_tr.sum()),
            "n_test": int(len(y_te)), "n_test_pos": int(y_te.sum()), "base_rate": float(y_te.mean()),
-           "lgbm_best_iteration": int(bundle["lgbm"].best_iteration_)}
+           "lgbm_best_iteration": int(bundle["lgbm"].best_iteration_), "params_source": source}
     for m, p in preds.items():
         row.update({f"{m}_{k}": v for k, v in evaluate(y_te, p).items()})
     # the isotonic version gets no ci of its own: it is only the comparison i rejected

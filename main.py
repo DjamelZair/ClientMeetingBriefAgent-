@@ -2,16 +2,17 @@
 
 python main.py            rebuilds everything from the raw files (about ten minutes here)
 python main.py --reuse    reuses the cached panel, snapshots and models, handy while editing the page
+python main.py --tune     runs the validation month hyperparameter search first, then retrains with its choice
 """
 import argparse
 import time
 
 from client_brief_agent import config
-from client_brief_agent.agent import tools
+from client_brief_agent.agent import feedback, tools
 from client_brief_agent.data import load, synthetic
 from client_brief_agent.features import build
-from client_brief_agent.models import explain, propensity, segment
-from client_brief_agent.report import export, figures, readme
+from client_brief_agent.models import explain, propensity, segment, tune
+from client_brief_agent.report import export, fairness, figures, readme
 
 
 def step(msg, t0):
@@ -34,7 +35,7 @@ def data_facts(frames, products, panel_rows):
     return facts
 
 
-def main(reuse=False):
+def main(reuse=False, tune_first=False):
     t0 = time.time()
     config.TABLE_DIR.mkdir(parents=True, exist_ok=True)
     panel = load.get_panel(force=not reuse)
@@ -51,7 +52,11 @@ def main(reuse=False):
     segment.write_tables(seg)
     step(f"segments: k={seg['k']}, ari vs gmm {seg['ari_gmm']:.4f}", t0)
 
-    if reuse and all((config.MODEL_DIR / f"{p}.joblib").exists() for p in products):
+    if tune_first:
+        # the search only reads train and validation; the refit below uses whatever it chose per product
+        tune.tune_all(frames, products)
+        step("hyperparameter search done", t0)
+    if reuse and not tune_first and all((config.MODEL_DIR / f"{p}.joblib").exists() for p in products):
         # metrics come from the last full run's tables in this mode, so i say so loudly
         print("reusing saved models and their metric tables", flush=True)
         import pandas as pd
@@ -71,8 +76,11 @@ def main(reuse=False):
 
     ctx = tools.Context(snapshot=brief, segments=seg, scores=propensity.score(models, brief),
                         reasons=explain.reasons_provider(models, brief), synthetic=layer,
-                        bands=bands)
+                        bands=bands, advisor_log=feedback.load())
+    audit = fairness.audit(ctx, models, frames["test"])
+    step(f"fairness audit: {audit['n_flags']} flags", t0)
     extras = {
+        "fairness": audit,
         "data_facts": data_facts(frames, products, panel_rows),
         "metrics": metrics.reset_index(),
         "calibration": {"quantile": calib[calib["model"].isin(["lgbm", "logreg"])], "bands": bands},
@@ -94,4 +102,6 @@ def main(reuse=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--reuse", action="store_true", help="reuse cached panel, snapshots and models")
-    main(parser.parse_args().reuse)
+    parser.add_argument("--tune", action="store_true", help="run the hyperparameter search before training")
+    args = parser.parse_args()
+    main(args.reuse, args.tune)

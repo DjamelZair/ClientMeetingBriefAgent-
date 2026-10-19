@@ -8,6 +8,8 @@ pyarrow==19.0.1
 matplotlib==3.10.0
 joblib==1.4.2
 pytest==9.0.2
+# the validation month hyperparameter search (python main.py --tune)
+optuna==4.6.0
 # only for rebuilding the walkthrough notebook
 nbformat==5.10.4
 nbconvert==7.16.6

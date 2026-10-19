@@ -6,17 +6,15 @@ Meeting on 1 June 2016. Prepared to support the conversation. Scores are estimat
 
 **Growing payroll account holders** (cluster 3): Often hold a payroll account (84%), recently adding products (about 1.9 on average in the last six months), many products (4.4 on average).
 
-Aged 45, with the bank for 17 years, recorded income about 81,000, individual segment, holds 6 products: Online account, Credit card, Direct debit, Tax payment account, Pension plan, Everyday account.
+Aged 51, with the bank for 2 years, income not recorded, individual segment, holds 2 products: Bills paid by direct debit, Tax payment account.
 
 Recent changes:
-- Took up 3 new products in the last three months.
 - Closed 3 products in the last three months.
 
 ## 2. What might help
 
-- **Payroll account**, scores above 50%. In the test month, 72% of the 242 clients scoring between 50% and 100% took it up. The score leans on: closed 3 products in the last three months; already pays bills by direct debit; an active client.
-- **Salary paid in**, scores above 50%. In the test month, 56% of the 338 clients scoring between 50% and 100% took it up. The score leans on: closed 3 products in the last three months; already pays bills by direct debit; an active client.
-- **Pension paid in**, scores above 50%. In the test month, 55% of the 273 clients scoring between 50% and 100% took it up. The score leans on: closed 3 products in the last three months; already pays bills by direct debit; an active client.
+- **Payroll account**, scores above 50%. In the test month, 71% of the 228 clients scoring between 50% and 100% took it up. The score leans on: closed 3 products in the last three months; already pays bills by direct debit; an active client.
+- **Pension paid into the account**, scores 31%. In the test month, 43% of the 779 clients scoring between 30% and 50% took it up. The score leans on: closed 3 products in the last three months; already pays bills by direct debit; an active client.
 
 ## 3. What not to offer
 
@@ -24,28 +22,35 @@ No high scoring product was held back by the suitability check.
 
 ## 4. Due anyway
 
-No periodic review is due within 90 days; the next one is on 21 April 2018.
+No periodic review is due within 90 days; the next one is on 10 May 2020.
 
 *Review dates come from a synthetic layer made for this prototype, not real records.*
 
 ## 5. Questions to open with
 
-1. You closed a product with us recently. Was there a reason we should know about?
-2. You started using something new with us recently. How is it working for you so far?
-3. What are your thoughts on where your salary is paid at the moment?
+1. Some of your products with us were closed recently. How are those needs covered now?
+   *Recent change. Why: Closed 3 products in the last three months.*
+   - If "Moved to another bank": Nothing new is raised. Ask what made them move and record it for the advisor.
+   - If "No longer needed": No change to the brief.
+   - If "Something went wrong": Nothing new is raised. Log the complaint and agree a follow up.
+2. How do you prefer to handle your income and regular payments?
+   *Top suggestion. Why: In the test month, 71% of the 228 clients scoring between 50% and 100% took up payroll account. This client's salary is not paid into this bank.*
+   - If "Open to talking about it": Discuss Payroll account if the client wants to.
+   - If "Already arranged elsewhere": Still on the brief: Pension paid into the account. Payroll account is arranged at another bank. Record where it is arranged and do not raise Payroll account again in this meeting. Record it as declined: the brief will not raise Payroll account again for 182 days.
+   - If "Not a priority now": Still on the brief: Pension paid into the account. Payroll account is not a priority for the client now. Record it as declined: the brief will not raise Payroll account again for 182 days.
 
 ## How this brief was prepared
 
-1. `get_profile`: aged 45, 6 products held
+1. `get_profile`: aged 51, 2 products held
 2. `get_segment`: cluster 3, Growing payroll account holders
-3. `get_recent_changes`: 2 change flags
-4. `get_propensities`: 5 products scored, highest Payroll account (above 50%)
+3. `get_recent_changes`: 1 change flag
+4. `get_propensities`: 7 products scored, highest Payroll account (above 50%)
 5. `check_suitability`: Payroll account: allowed
 6. `check_linked`: Payroll account: not linked
-7. `check_suitability`: Salary paid in: allowed
-8. `check_linked`: Salary paid in: not linked
-9. `check_suitability`: Pension paid in: allowed
-10. `check_linked`: Pension paid in: not linked
-11. `check_suitability`: Current account: allowed
-12. `check_review_due`: not due, next review 2018-04-21 (689 days)
-13. `draft_questions`: 3 questions drafted
+7. `check_suitability`: Pension paid into the account: allowed
+8. `check_linked`: Pension paid into the account: not linked
+9. `check_suitability`: Salary paid into the account: allowed
+10. `check_linked`: Salary paid into the account: not linked
+11. `check_care`: care check: no signs in the data
+12. `check_review_due`: not due, next review 2020-05-10 (1439 days)
+13. `draft_questions`: 2 questions drafted, each with a reason and answer branches

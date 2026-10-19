@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 
 from client_brief_agent import config
-from client_brief_agent.agent import tools
+from client_brief_agent.agent import branches, tools
 
 PRODUCTS = ["current_account", "online_account", "credit_card", "direct_debit", "term_deposit",
             "investment_fund", "investment_account", "pension_plan", "personal_loan",
@@ -118,7 +118,8 @@ def test_profile(ctx):
 
 def test_segment(ctx):
     s = tools.get_segment(ctx, 103)
-    assert s == {"cluster": 2, "name": "Young starters", "description": "younger, short tenure, few products"}
+    assert s == {"cluster": 2, "name": "Young starters", "description": "younger, short tenure, few products",
+                 "typical_products": None}
 
 
 def test_recent_changes(ctx):
@@ -159,15 +160,19 @@ def test_suitability_tool(ctx):
 
 def test_questions_templates(ctx, monkeypatch):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-    facts = {"review_due": True, "change_flags": ["flag_moved"], "might_help": ["pension_plan"]}
+    facts = {"review_due": True, "review_days": 34, "change_flags": ["flag_moved"],
+             "changes": {"flag_moved": "Moved to a different province in the last six months."},
+             "might_help": ["pension_plan"]}
     q = tools.draft_questions(ctx, facts)
-    assert len(q) == 3
-    assert q[0].startswith("Before we look ahead") and "moved" in q[1] and "retirement" in q[2]
+    assert [c["key"] for c in q] == ["review_due", "flag_moved", "topic"]
+    assert q[0]["kind"] == "Periodic review" and q[0]["why"] == "Periodic review due in 34 days (synthetic date)."
+    assert q[1]["why"] == "Moved to a different province in the last six months."
+    assert "retirement" in q[2]["text"]
     assert q == tools.draft_questions(ctx, facts)
     quiet = tools.draft_questions(ctx, {"review_due": False, "change_flags": [], "might_help": []})
-    assert quiet == tools.FALLBACK_QUESTIONS
-    for text in q + quiet:
-        assert text.endswith("?")
+    assert [c["text"] for c in quiet] == branches.OPEN_QUESTIONS
+    for c in q + quiet:
+        assert c["text"].endswith("?") and c["why"] and 2 <= len(c["answers"]) <= 3
 
 
 def test_questions_fall_back_without_package(ctx, monkeypatch):
@@ -186,13 +191,24 @@ def test_questions_fall_back_on_error(ctx, monkeypatch):
     assert tools.draft_questions(ctx, facts, use_claude=True) == tools.template_questions(facts)
 
 
+def test_claude_only_changes_wording(ctx, monkeypatch):
+    monkeypatch.setattr(tools, "_claude_rephrase", lambda facts, drafts: [d.upper() for d in drafts])
+    facts = {"review_due": True, "change_flags": [], "might_help": ["credit_card"]}
+    plain, smooth = tools.template_questions(facts), tools.draft_questions(ctx, facts, use_claude=True)
+    assert [c["text"].upper() for c in plain] == [c["text"] for c in smooth]
+    assert [c["answers"] for c in plain] == [c["answers"] for c in smooth]
+
+
 def test_claude_needs_key(monkeypatch):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     assert tools._claude_available() is False
 
 
 def test_template_text_is_clean():
-    texts = list(tools.QUESTION_TEMPLATES.values()) + tools.FALLBACK_QUESTIONS + list(tools.CHANGE_SENTENCES.values())
+    texts = (list(branches.CHANGE_QUESTIONS.values()) + list(branches.TOPIC_QUESTIONS.values()) + branches.OPEN_QUESTIONS
+             + list(tools.CHANGE_SENTENCES.values()) + list(branches.NOT_HELD.values())
+             + [a for v in branches.ANSWERS.values() for a, _ in v]
+             + [t for v in branches.ANSWERS.values() for _, effects in v for _, t in effects])
     for t in texts:
         assert not tools.has_dash(t)
         assert "sell" not in t.lower() and "target" not in t.lower()
