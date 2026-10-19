@@ -1,7 +1,7 @@
 {
  "meta": {
   "source": "Santander Product Recommendation data (public, anonymised, Kaggle)",
-  "code_url": "https://github.com/DjamelZair/ClientMeetingBriefAgent",
+  "code_url": "https://github.com/DjamelZair/ClientMeetingBriefAgent-",
   "sample_size": 200000,
   "brief_population": 200000,
   "seed": 42,

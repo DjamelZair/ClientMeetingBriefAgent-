@@ -157,7 +157,7 @@ MONEY_FLOWS = {"salary_deposit", "pension_deposit", "direct_debit"}
 # them as one signal: the second one found is folded into the first
 SAME_SIGNAL = {"salary_deposit": "pension_deposit", "pension_deposit": "salary_deposit"}
 INCOME_ROUNDING = 1000
-CODE_URL = "https://github.com/DjamelZair/ClientMeetingBriefAgent"
+CODE_URL = "https://github.com/DjamelZair/ClientMeetingBriefAgent-"
 MAX_PCA_POINTS = 3000
 
 # ---- round three: holdings by category, tuning, fairness audit ----

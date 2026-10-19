@@ -2,11 +2,11 @@
 
 # Client meeting brief agent
 
-### 👉 &nbsp;[**OPEN THE LIVE INTERACTIVE PAGE**](https://djamelzair.github.io/ClientMeetingBriefAgent/)&nbsp; 👈
+### 👉 &nbsp;[**OPEN THE LIVE INTERACTIVE PAGE**](https://djamelzair.github.io/ClientMeetingBriefAgent-/)&nbsp; 👈
 
 **What should the advisor know before the client walks in?**
 
-📓 [Read the walkthrough notebook](https://djamelzair.github.io/ClientMeetingBriefAgent/notebook.html) &nbsp;·&nbsp; 💻 source code below
+📓 [Read the walkthrough notebook](https://djamelzair.github.io/ClientMeetingBriefAgent-/notebook.html) &nbsp;·&nbsp; 💻 source code below
 
 </div>
 
