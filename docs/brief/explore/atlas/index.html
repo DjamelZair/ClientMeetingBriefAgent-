@@ -22,9 +22,9 @@
     <button type="button" class="v-btn find-btn" id="find-open" aria-haspopup="dialog" aria-controls="find">Search client</button>
     <div id="picker"></div>
     <div class="pals" role="group" aria-label="Colour palette">
-      <button type="button" class="pal" data-pal="fabric" data-palbtn aria-pressed="false" title="Fabric: navy, steel, stone, burgundy"><span class="sw" aria-hidden="true"><i></i><i></i><i></i></span>Fabric</button>
-      <button type="button" class="pal" data-pal="calm" data-palbtn aria-pressed="false" title="Calm: sage, moss, ivory, sand, rust"><span class="sw" aria-hidden="true"><i></i><i></i><i></i></span>Calm</button>
-      <button type="button" class="pal" data-pal="graphite" data-palbtn aria-pressed="false" title="Graphite: near black, slate, greys, orange"><span class="sw" aria-hidden="true"><i></i><i></i><i></i></span>Graphite</button>
+      <button type="button" class="pal" data-pal="fabric" data-palbtn aria-pressed="false" title="Fabric: navy, steel, stone, burgundy"><span class="sw" aria-hidden="true"><i></i><i></i><i></i></span><span class="pl">Fabric</span></button>
+      <button type="button" class="pal" data-pal="calm" data-palbtn aria-pressed="false" title="Calm: sage, moss, ivory, sand, rust"><span class="sw" aria-hidden="true"><i></i><i></i><i></i></span><span class="pl">Calm</span></button>
+      <button type="button" class="pal" data-pal="graphite" data-palbtn aria-pressed="false" title="Graphite: near black, slate, greys, orange"><span class="sw" aria-hidden="true"><i></i><i></i><i></i></span><span class="pl">Graphite</span></button>
     </div>
     <nav class="links" aria-label="Pages"><a href="../../../model.html">How the models perform</a><a id="code-l" href="https://github.com/DjamelZair/ClientMeetingBriefAgent-">Code</a></nav>
   </header>
@@ -300,9 +300,8 @@ document.getElementById("find-f").addEventListener("submit", function(e){
   if (!raw){ dOut.textContent = other ? "No match. " + PH : "Enter a client ID, for example 10 or C10."; return; }
   var m = /^(?:c|client)?\s*0*(\d{1,3})$/i.exec(raw), n = m ? +m[1] : -1;
   var i = F ? F.clients.findIndex(function(c){ return +c.ref.replace(/\D/g, "") === n; }) : -1;
-  if (i < 0){ dOut.textContent = "No showcase client with that ID. The showcase has clients 1 to " + (F ? F.count : 40) + "." + (other ? " Name and date of birth cannot match: " + PH.charAt(0).toLowerCase() + PH.slice(1) : ""); return; }
+  if (i < 0){ dOut.textContent = "No showcase client with that ID. The showcase has clients 1 to " + (F ? F.count : 40) + "." + (other ? " " + PH : ""); return; }
   dlg.close(); V.show(i, true);
-  var st = document.getElementById("report"); if (st) st.focus({preventScroll: true});
 });
 
 /* the stepper casts its shadow only while it rides at the top, which is once the masthead has left the screen */

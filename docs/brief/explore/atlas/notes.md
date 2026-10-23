@@ -106,3 +106,34 @@ Mist #8FA1B1 and rose are never used as text. Mist on paper is 2.32, so it is us
 ## Not done
 - No dark mode: it is a paper report, and the main page has none either.
 - No ds or scheme switcher, because this direction is its own system.
+
+## Round 2: the user picked Atlas
+
+### Three palettes
+The switcher is in the header. The order of precedence is `?pal=fabric|calm|graphite`, then this viewer's last choice, then Fabric. The last choice is kept in localStorage under `atlas-pal`, wrapped in try/catch.
+
+Each swatch button carries `data-pal` and paints itself from its own palette block. All colours are role tokens: paper, stone, prime, ink, second, mist, hold, focus.
+
+| Palette | 60 (surface) | 30 (ink and supports) | 10 (focus) | Held back |
+|---|---|---|---|---|
+| Fabric (default) | Paper #F2EFEA | Navy, steel, stone | Rose | Burgundy #56061D |
+| Calm | Ivory #F4EFE8 | Sage, darkened to #34473A for text; moss and mist | Sand | Rust #8E3317 |
+| Graphite | Light grey #EDEEF0 | #0A0C12, graphite #3F3A42, slate #76828E | Light slate | #DB5227 darkened to #A9400F for text, used only for held back, what not to offer and overdue |
+
+- No palette pairs dark navy with orange.
+- The five product states keep their glyph and word in every palette.
+- `contrast.py` checks 34 pairs in each of the 3 palettes: 0 failures, exit 0.
+
+### Search client
+The dialog is a native modal `<dialog>`, so the page behind it is inert and Esc closes it. Focus moves to Client ID when it opens and returns to the button when it closes. Closing clears the fields.
+
+- **Client ID (klant ID)** matches the 40 showcase clients, for example 10, C10 or "client 10", and jumps to that client.
+- **Name and date of birth** never match. They show the placeholder line. The inputs have no name attribute and the form never submits.
+- The check confirms that a typed name and birth date never reach the URL, localStorage or the console.
+
+### Critique fixes
+- **Step 2 figure.** It now shows how many products were scored, with the line "Worth discussing only after the checks". There is no count of suggestions.
+- **Review figure.** A review that is not due shows its date and "Not due". The check confirms that no review figure is a long day count.
+- **Part titles.** They are now prime and semibold, so they no longer look like links.
+- **Figures.** They are slightly smaller (52px), so the headline is the clear first read.
+- **Author line.** It sits under "Client brief". Below 1600px the palette names move to a tooltip and to text that only screen readers read.

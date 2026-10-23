@@ -19,12 +19,12 @@ def serve():
         try: yield f"http://127.0.0.1:{h.server_address[1]}"
         finally: h.shutdown()
 
-def open_page(b, base, w, h, reduce=False):
+def open_page(b, base, w, h, reduce=False, q=""):
     pg = b.new_page(viewport={"width": w, "height": h}, reduced_motion="reduce" if reduce else "no-preference")
     errs = []
     pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
     pg.on("pageerror", lambda e: errs.append(str(e)))
-    pg.goto(f"{base}/{PAGE}")
+    pg.goto(f"{base}/{PAGE}{q}")
     pg.wait_for_function("window.__brief && document.querySelectorAll('[aria-busy=true]').length === 0", timeout=15000)
     pg.evaluate("document.fonts.ready"); pg.wait_for_timeout(1500)
     return pg, errs
