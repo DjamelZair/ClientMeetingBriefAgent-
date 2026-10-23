@@ -2,9 +2,9 @@
 
 # Client meeting brief agent
 
-###  &nbsp;[**OPEN THE LIVE INTERACTIVE PAGE**](https://djamelzair.github.io/ClientMeetingBriefAgent-/)&nbsp; 
+###  &nbsp;[**OPEN THE INTERACTIVE CLIENT DASHBOARD**](https://djamelzair.github.io/ClientMeetingBriefAgent-/)&nbsp; 
 
-**What should the advisor know before the client walks in?**
+**How can we improve our advisor-client interaction?**
 
 📓 [Read the walkthrough notebook](https://djamelzair.github.io/ClientMeetingBriefAgent-/notebook.html) &nbsp;·&nbsp; 💻 source code below
 
@@ -14,18 +14,20 @@
 
 ## What this is
 
-I built this for my application to the CLUE team (Client Lifecycle Understanding Engine), which asked how I would use an AI agent to support a client advisor in their client interaction. My answer is a small agent that prepares the meeting and then gets out of the way.
+For my application to the CLUE team (Client Lifecycle Understanding Engine), besides describing how I would use an agent to improve cliënt interactions I also build a working prototype: a small agent preparing the meeting and then leave it to the analist their expertise.
+
+*The Workflow*
 
 Before a meeting it writes a one page brief with five parts:
 
 1. **Who the client is**: their cluster and what changed recently (new products, closed products, a drop in activity, a move).
 2. **What might help**: the products the model scores highest, each with what the score leans on and how often scores like it came true in the test month.
 3. **What not to offer**: products that score high but fail a suitability check. A high score never overrides fit.
-4. **What is due anyway**: whether the periodic client review (KYC/CDD) is coming up, so it can be covered in the same conversation.
+4. **What is due anyway**: whether the periodic client review (KYC/CDD) is coming up, so it can be covered in the same conversation. This can apply for also e.g. event driven review.
 5. **Questions to ask**: two or three questions about the client's situation, each with the signal it comes from
    (for example "Periodic review due in 88 days") and two or three likely answers that show how the brief would change.
 
-The agent only prepares. The advisor decides.
+The agent only prepares. The analist decides.
 
 ## The data: real, public, plus a small synthetic layer
 
