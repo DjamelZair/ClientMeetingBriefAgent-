@@ -84,6 +84,7 @@ client_brief_agent/
   report/               figures (300 dpi), tables, docs/data.json and the briefs
 main.py                 runs everything end to end
 docs/                   the github pages site: brief/ (the agent and the brief) and model.html read data.json
+                        brief/ takes ?ds=ibm|mercury|linear (type, space, depth) and ?scheme=S1 to S4 (colour)
 outputs/                figures/, tables/, briefs/
 ```
 

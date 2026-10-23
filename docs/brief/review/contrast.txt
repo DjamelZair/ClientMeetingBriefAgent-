@@ -1,0 +1,578 @@
+WCAG contrast report for docs/brief/tokens.css, written by contrast.py
+text needs 4.5:1, non text marks need 3:1
+
+S1, teal and cherry
+  pass  15.87  text  ink on bg: body text on the page
+  pass  16.52  text  ink on surface: body text on a card
+  pass  15.07  text  ink on surface-2: text in chips, items and review
+  pass   8.36  text  ink-2 on surface: secondary text on a card
+  pass   7.63  text  ink-2 on surface-2: secondary text in items
+  pass   8.03  text  ink-2 on bg: secondary text on the page
+  pass   5.94  text  ink-3 on surface: quiet text on a card
+  pass   5.42  text  ink-3 on surface-2: chip labels, quiet text in items
+  pass   5.70  text  ink-3 on bg: footer text
+  pass   9.03  text  accent-text on surface: links and the segment badge on a card
+  pass   7.79  text  accent-text on accent-soft: segment badge, done status
+  pass   8.78  text  on-accent on accent: pressed buttons, done step numbers
+  pass   7.71  text  alarm-text on surface: held back rule names
+  pass   6.78  text  alarm-text on alarm-soft: overdue chip and review, held back status
+  pass   6.78  text  alarm-text on st-heldback-bg: rule names inside a held back item
+  pass   7.71  text  surface on alarm: number of a step that held something back
+  pass   9.25  text  st-held on st-held-bg: wallet: held
+  pass   6.70  text  st-discuss on st-discuss-bg: wallet: worth discussing
+  pass   6.11  text  st-progress on st-progress-bg: wallet: likely in progress, review due chip
+  pass   6.78  text  st-heldback on st-heldback-bg: wallet: held back
+  pass   5.49  text  st-none on st-none-bg: wallet: not in data
+  pass  14.22  text  ink on st-discuss-bg: item names in worth discussing
+  pass   7.20  text  ink-2 on st-discuss-bg: evidence lines in worth discussing
+  pass  14.51  text  ink on st-heldback-bg: item names in held back
+  pass   7.35  text  ink-2 on st-heldback-bg: reasons in held back
+  pass   5.48  text  ink-3 on st-none-bg: not in data product names
+  pass  14.19  text  ink on st-held-bg: held product names
+  pass  14.51  text  ink on st-progress-bg: in progress product names
+  pass  14.58  text  ink on lit-bg: text inside a linked part
+  pass   7.38  text  ink-2 on lit-bg: secondary text inside a linked part
+  pass  14.25  text  ink on accent-soft: answer outcome text
+  pass   9.17  text  care-ink on care-bg: care line and care chip
+  pass  10.43  text  care-ink on surface: care question kind
+  pass   8.78  text  avatar-ink on avatar-bg: monogram avatar
+  pass   7.63  text  ink-2 on surface-2: not raised items
+  pass   7.78  text  surface on lit-line: pressed step marker number
+  pass   5.24  text  ink-3 on lit-bg: quiet text inside a linked part
+  pass  10.77  ui    st-held on surface: held glyph on a card
+  pass   7.78  ui    st-discuss on surface: discuss glyph on a card
+  pass   6.96  ui    st-progress on surface: in progress glyph on a card
+  pass   7.71  ui    st-heldback on surface: held back glyph on a card
+  pass   5.95  ui    st-none on surface: not in data glyph on a card
+  pass   7.10  ui    chart-me on surface-2: this client's bar in the band chart
+  pass   6.70  ui    chart-me on st-discuss-bg: this client's bar inside a discuss item
+  pass   7.20  ui    chart-rule on st-discuss-bg: the dashed bar line
+  pass   9.03  ui    focus on surface: focus ring on a card
+  pass   8.68  ui    focus on bg: focus ring on the page
+  pass   9.03  ui    mark on surface: meeting dot on the timeline
+  pass   7.71  ui    alarm on surface: overdue dot on the timeline
+  pass   7.78  ui    lit-line on surface: outline of a linked part
+  pass   9.03  ui    accent on surface: pressed scheme and step markers
+  pass  10.77  text  st-held on surface: wallet: held, as a word on the card
+  pass   7.78  text  st-discuss on surface: wallet: worth discussing, as a word on the card
+  pass   6.96  text  st-progress on surface: review due status word in the summary
+  pass   7.71  text  st-heldback on surface: held back count, status word and part title
+  pass   5.95  text  st-none on surface: wallet: not in data, as a word on the card
+  pass  10.02  text  care-ink on bg: care fact under the client name
+  pass   8.36  text  ink-2 on surface: header links
+  pass   5.70  text  ink-3 on bg: a waiting status on the rail
+  pass   8.68  ui    accent on bg: focus ring and pressed markers on the page
+  pass   8.03  text  ink-2 on bg: the context line under the header
+  pass  15.07  text  ink on surface-2: a hovered tab or switch
+  pass   9.82  ui    st-held on surface-2: has it glyph in the wallet group
+  pass   6.78  ui    st-heldback on st-heldback-bg: held back glyph on a tinted wallet row
+  pass  14.51  text  ink on st-heldback-bg: product name on a held back wallet row
+  pass   7.41  ui    st-heldback on bg: held back top rule seen against the page
+
+S1 with ds=ibm
+  pass  16.52  text  ink on card-bg: text in a part or a summary card
+  pass   8.36  text  ink-2 on card-bg: secondary text in a part
+  pass   5.94  text  ink-3 on card-bg: labels and quiet text in a part
+  pass   9.03  text  accent-text on card-bg: links in a part
+  pass  10.77  text  st-held on card-bg: wallet word: held
+  pass   7.78  text  st-discuss on card-bg: wallet word: worth discussing
+  pass   6.96  text  st-progress on card-bg: summary word: review due
+  pass   7.71  text  st-heldback on card-bg: summary and wallet word: held back
+  pass   5.95  text  st-none on card-bg: wallet word: not in data
+  pass   9.17  text  care-ink on care-bg: care line inside a part
+  pass  15.07  text  ink on item-bg: item names and the review line
+  pass   7.63  text  ink-2 on item-bg: item evidence and review detail
+  pass   5.42  text  ink-3 on item-bg: synthetic date note in the review line
+  pass   6.35  text  st-progress on item-bg: review due inside the review line
+  pass  16.52  text  tab-on-ink on tab-on-bg: selected tab: ds, scheme and bar
+  pass   8.36  text  tab-off-ink on tab-off-bg: unselected tab: ds, scheme and bar
+  pass   9.03  ui    tab-on-line on tab-on-bg: underline of a selected tab
+  pass   7.71  ui    st-heldback on card-bg: top rule of what not to offer and the held back card
+  pass   7.78  ui    lit-line on card-bg: ring of a lit part
+  pass   7.71  ui    st-heldback on card-bg: held back glyph in a part
+  pass   8.03  text  tab-off-ink on bg: unselected tab where its own fill is transparent
+  pass   5.42  text  ink-3 on item-bg: quiet text in the wallet group
+  pass   9.82  text  st-held on item-bg: has it word in the wallet group
+  pass   5.95  ui    st-none on card-bg: not in data glyph in the wallet row
+
+S1 with ds=linear
+  pass  16.52  text  ink on card-bg: text in a part or a summary card
+  pass   8.36  text  ink-2 on card-bg: secondary text in a part
+  pass   5.94  text  ink-3 on card-bg: labels and quiet text in a part
+  pass   9.03  text  accent-text on card-bg: links in a part
+  pass  10.77  text  st-held on card-bg: wallet word: held
+  pass   7.78  text  st-discuss on card-bg: wallet word: worth discussing
+  pass   6.96  text  st-progress on card-bg: summary word: review due
+  pass   7.71  text  st-heldback on card-bg: summary and wallet word: held back
+  pass   5.95  text  st-none on card-bg: wallet word: not in data
+  pass   9.17  text  care-ink on care-bg: care line inside a part
+  pass  15.07  text  ink on item-bg: item names and the review line
+  pass   7.63  text  ink-2 on item-bg: item evidence and review detail
+  pass   5.42  text  ink-3 on item-bg: synthetic date note in the review line
+  pass   6.35  text  st-progress on item-bg: review due inside the review line
+  pass  15.07  text  tab-on-ink on tab-on-bg: selected tab: ds, scheme and bar
+  pass   5.70  text  tab-off-ink on tab-off-bg: unselected tab: ds, scheme and bar
+  pass   7.71  ui    st-heldback on card-bg: top rule of what not to offer and the held back card
+  pass   7.78  ui    lit-line on card-bg: ring of a lit part
+  pass   7.71  ui    st-heldback on card-bg: held back glyph in a part
+  pass   5.70  text  tab-off-ink on bg: unselected tab where its own fill is transparent
+  pass   5.42  text  ink-3 on item-bg: quiet text in the wallet group
+  pass   9.82  text  st-held on item-bg: has it word in the wallet group
+  pass   5.95  ui    st-none on card-bg: not in data glyph in the wallet row
+
+S1 with ds=mercury
+  pass  16.52  text  ink on card-bg: text in a part or a summary card
+  pass   8.36  text  ink-2 on card-bg: secondary text in a part
+  pass   5.94  text  ink-3 on card-bg: labels and quiet text in a part
+  pass   9.03  text  accent-text on card-bg: links in a part
+  pass  10.77  text  st-held on card-bg: wallet word: held
+  pass   7.78  text  st-discuss on card-bg: wallet word: worth discussing
+  pass   6.96  text  st-progress on card-bg: summary word: review due
+  pass   7.71  text  st-heldback on card-bg: summary and wallet word: held back
+  pass   5.95  text  st-none on card-bg: wallet word: not in data
+  pass   9.17  text  care-ink on care-bg: care line inside a part
+  pass  15.07  text  ink on item-bg: item names and the review line
+  pass   7.63  text  ink-2 on item-bg: item evidence and review detail
+  pass   5.42  text  ink-3 on item-bg: synthetic date note in the review line
+  pass   6.35  text  st-progress on item-bg: review due inside the review line
+  pass   7.79  text  tab-on-ink on tab-on-bg: selected tab: ds, scheme and bar
+  pass   7.71  ui    st-heldback on card-bg: top rule of what not to offer and the held back card
+  pass   7.78  ui    lit-line on card-bg: ring of a lit part
+  pass   7.71  ui    st-heldback on card-bg: held back glyph in a part
+  pass   8.03  text  tab-off-ink on bg: unselected tab where its own fill is transparent
+  pass   5.42  text  ink-3 on item-bg: quiet text in the wallet group
+  pass   9.82  text  st-held on item-bg: has it word in the wallet group
+  pass   5.95  ui    st-none on card-bg: not in data glyph in the wallet row
+
+S2, calm banking light
+  pass  14.15  text  ink on bg: body text on the page
+  pass  15.90  text  ink on surface: body text on a card
+  pass  14.49  text  ink on surface-2: text in chips, items and review
+  pass   8.74  text  ink-2 on surface: secondary text on a card
+  pass   7.97  text  ink-2 on surface-2: secondary text in items
+  pass   7.78  text  ink-2 on bg: secondary text on the page
+  pass   6.20  text  ink-3 on surface: quiet text on a card
+  pass   5.65  text  ink-3 on surface-2: chip labels, quiet text in items
+  pass   5.51  text  ink-3 on bg: footer text
+  pass  10.88  text  accent-text on surface: links and the segment badge on a card
+  pass   9.23  text  accent-text on accent-soft: segment badge, done status
+  pass  11.95  text  on-accent on accent: pressed buttons, done step numbers
+  pass   7.36  text  alarm-text on surface: held back rule names
+  pass   6.50  text  alarm-text on alarm-soft: overdue chip and review, held back status
+  pass   6.50  text  alarm-text on st-heldback-bg: rule names inside a held back item
+  pass   7.36  text  surface on alarm: number of a step that held something back
+  pass   9.26  text  st-held on st-held-bg: wallet: held
+  pass   6.17  text  st-discuss on st-discuss-bg: wallet: worth discussing
+  pass   5.88  text  st-progress on st-progress-bg: wallet: likely in progress, review due chip
+  pass   6.50  text  st-heldback on st-heldback-bg: wallet: held back
+  pass   5.50  text  st-none on st-none-bg: wallet: not in data
+  pass  14.07  text  ink on st-discuss-bg: item names in worth discussing
+  pass   7.74  text  ink-2 on st-discuss-bg: evidence lines in worth discussing
+  pass  14.05  text  ink on st-heldback-bg: item names in held back
+  pass   7.72  text  ink-2 on st-heldback-bg: reasons in held back
+  pass   5.75  text  ink-3 on st-none-bg: not in data product names
+  pass  13.66  text  ink on st-held-bg: held product names
+  pass  14.13  text  ink on st-progress-bg: in progress product names
+  pass  14.07  text  ink on lit-bg: text inside a linked part
+  pass   7.74  text  ink-2 on lit-bg: secondary text inside a linked part
+  pass  13.50  text  ink on accent-soft: answer outcome text
+  pass   8.57  text  care-ink on care-bg: care line and care chip
+  pass   9.77  text  care-ink on surface: care question kind
+  pass  11.95  text  avatar-ink on avatar-bg: monogram avatar
+  pass   7.97  text  ink-2 on surface-2: not raised items
+  pass   6.98  text  surface on lit-line: pressed step marker number
+  pass   5.48  text  ink-3 on lit-bg: quiet text inside a linked part
+  pass  10.78  ui    st-held on surface: held glyph on a card
+  pass   6.98  ui    st-discuss on surface: discuss glyph on a card
+  pass   6.62  ui    st-progress on surface: in progress glyph on a card
+  pass   7.36  ui    st-heldback on surface: held back glyph on a card
+  pass   5.93  ui    st-none on surface: not in data glyph on a card
+  pass   6.36  ui    chart-me on surface-2: this client's bar in the band chart
+  pass   6.17  ui    chart-me on st-discuss-bg: this client's bar inside a discuss item
+  pass   7.74  ui    chart-rule on st-discuss-bg: the dashed bar line
+  pass  12.22  ui    focus on surface: focus ring on a card
+  pass  10.88  ui    focus on bg: focus ring on the page
+  pass  12.22  ui    mark on surface: meeting dot on the timeline
+  pass   7.36  ui    alarm on surface: overdue dot on the timeline
+  pass   6.98  ui    lit-line on surface: outline of a linked part
+  pass  12.22  ui    accent on surface: pressed scheme and step markers
+  pass  10.78  text  st-held on surface: wallet: held, as a word on the card
+  pass   6.98  text  st-discuss on surface: wallet: worth discussing, as a word on the card
+  pass   6.62  text  st-progress on surface: review due status word in the summary
+  pass   7.36  text  st-heldback on surface: held back count, status word and part title
+  pass   5.93  text  st-none on surface: wallet: not in data, as a word on the card
+  pass   8.69  text  care-ink on bg: care fact under the client name
+  pass   8.74  text  ink-2 on surface: header links
+  pass   5.51  text  ink-3 on bg: a waiting status on the rail
+  pass  10.88  ui    accent on bg: focus ring and pressed markers on the page
+  pass   7.78  text  ink-2 on bg: the context line under the header
+  pass  14.49  text  ink on surface-2: a hovered tab or switch
+  pass   9.83  ui    st-held on surface-2: has it glyph in the wallet group
+  pass   6.50  ui    st-heldback on st-heldback-bg: held back glyph on a tinted wallet row
+  pass  14.05  text  ink on st-heldback-bg: product name on a held back wallet row
+  pass   6.55  ui    st-heldback on bg: held back top rule seen against the page
+
+S2 with ds=ibm
+  pass  15.90  text  ink on card-bg: text in a part or a summary card
+  pass   8.74  text  ink-2 on card-bg: secondary text in a part
+  pass   6.20  text  ink-3 on card-bg: labels and quiet text in a part
+  pass  10.88  text  accent-text on card-bg: links in a part
+  pass  10.78  text  st-held on card-bg: wallet word: held
+  pass   6.98  text  st-discuss on card-bg: wallet word: worth discussing
+  pass   6.62  text  st-progress on card-bg: summary word: review due
+  pass   7.36  text  st-heldback on card-bg: summary and wallet word: held back
+  pass   5.93  text  st-none on card-bg: wallet word: not in data
+  pass   8.57  text  care-ink on care-bg: care line inside a part
+  pass  14.49  text  ink on item-bg: item names and the review line
+  pass   7.97  text  ink-2 on item-bg: item evidence and review detail
+  pass   5.65  text  ink-3 on item-bg: synthetic date note in the review line
+  pass   6.04  text  st-progress on item-bg: review due inside the review line
+  pass  15.90  text  tab-on-ink on tab-on-bg: selected tab: ds, scheme and bar
+  pass   8.74  text  tab-off-ink on tab-off-bg: unselected tab: ds, scheme and bar
+  pass  12.22  ui    tab-on-line on tab-on-bg: underline of a selected tab
+  pass   7.36  ui    st-heldback on card-bg: top rule of what not to offer and the held back card
+  pass   6.98  ui    lit-line on card-bg: ring of a lit part
+  pass   7.36  ui    st-heldback on card-bg: held back glyph in a part
+  pass   7.78  text  tab-off-ink on bg: unselected tab where its own fill is transparent
+  pass   5.65  text  ink-3 on item-bg: quiet text in the wallet group
+  pass   9.83  text  st-held on item-bg: has it word in the wallet group
+  pass   5.93  ui    st-none on card-bg: not in data glyph in the wallet row
+
+S2 with ds=linear
+  pass  15.90  text  ink on card-bg: text in a part or a summary card
+  pass   8.74  text  ink-2 on card-bg: secondary text in a part
+  pass   6.20  text  ink-3 on card-bg: labels and quiet text in a part
+  pass  10.88  text  accent-text on card-bg: links in a part
+  pass  10.78  text  st-held on card-bg: wallet word: held
+  pass   6.98  text  st-discuss on card-bg: wallet word: worth discussing
+  pass   6.62  text  st-progress on card-bg: summary word: review due
+  pass   7.36  text  st-heldback on card-bg: summary and wallet word: held back
+  pass   5.93  text  st-none on card-bg: wallet word: not in data
+  pass   8.57  text  care-ink on care-bg: care line inside a part
+  pass  14.49  text  ink on item-bg: item names and the review line
+  pass   7.97  text  ink-2 on item-bg: item evidence and review detail
+  pass   5.65  text  ink-3 on item-bg: synthetic date note in the review line
+  pass   6.04  text  st-progress on item-bg: review due inside the review line
+  pass  14.49  text  tab-on-ink on tab-on-bg: selected tab: ds, scheme and bar
+  pass   5.51  text  tab-off-ink on tab-off-bg: unselected tab: ds, scheme and bar
+  pass   7.36  ui    st-heldback on card-bg: top rule of what not to offer and the held back card
+  pass   6.98  ui    lit-line on card-bg: ring of a lit part
+  pass   7.36  ui    st-heldback on card-bg: held back glyph in a part
+  pass   5.51  text  tab-off-ink on bg: unselected tab where its own fill is transparent
+  pass   5.65  text  ink-3 on item-bg: quiet text in the wallet group
+  pass   9.83  text  st-held on item-bg: has it word in the wallet group
+  pass   5.93  ui    st-none on card-bg: not in data glyph in the wallet row
+
+S2 with ds=mercury
+  pass  15.90  text  ink on card-bg: text in a part or a summary card
+  pass   8.74  text  ink-2 on card-bg: secondary text in a part
+  pass   6.20  text  ink-3 on card-bg: labels and quiet text in a part
+  pass  10.88  text  accent-text on card-bg: links in a part
+  pass  10.78  text  st-held on card-bg: wallet word: held
+  pass   6.98  text  st-discuss on card-bg: wallet word: worth discussing
+  pass   6.62  text  st-progress on card-bg: summary word: review due
+  pass   7.36  text  st-heldback on card-bg: summary and wallet word: held back
+  pass   5.93  text  st-none on card-bg: wallet word: not in data
+  pass   8.57  text  care-ink on care-bg: care line inside a part
+  pass  14.49  text  ink on item-bg: item names and the review line
+  pass   7.97  text  ink-2 on item-bg: item evidence and review detail
+  pass   5.65  text  ink-3 on item-bg: synthetic date note in the review line
+  pass   6.04  text  st-progress on item-bg: review due inside the review line
+  pass   9.23  text  tab-on-ink on tab-on-bg: selected tab: ds, scheme and bar
+  pass   7.36  ui    st-heldback on card-bg: top rule of what not to offer and the held back card
+  pass   6.98  ui    lit-line on card-bg: ring of a lit part
+  pass   7.36  ui    st-heldback on card-bg: held back glyph in a part
+  pass   7.78  text  tab-off-ink on bg: unselected tab where its own fill is transparent
+  pass   5.65  text  ink-3 on item-bg: quiet text in the wallet group
+  pass   9.83  text  st-held on item-bg: has it word in the wallet group
+  pass   5.93  ui    st-none on card-bg: not in data glyph in the wallet row
+
+S3, dark slate
+  pass  16.35  text  ink on bg: body text on the page
+  pass  15.00  text  ink on surface: body text on a card
+  pass  13.42  text  ink on surface-2: text in chips, items and review
+  pass   9.48  text  ink-2 on surface: secondary text on a card
+  pass   8.48  text  ink-2 on surface-2: secondary text in items
+  pass  10.33  text  ink-2 on bg: secondary text on the page
+  pass   6.90  text  ink-3 on surface: quiet text on a card
+  pass   6.17  text  ink-3 on surface-2: chip labels, quiet text in items
+  pass   7.52  text  ink-3 on bg: footer text
+  pass  10.53  text  accent-text on surface: links and the segment badge on a card
+  pass   8.08  text  accent-text on accent-soft: segment badge, done status
+  pass   9.94  text  on-accent on accent: pressed buttons, done step numbers
+  pass   8.64  text  alarm-text on surface: held back rule names
+  pass   7.08  text  alarm-text on alarm-soft: overdue chip and review, held back status
+  pass   7.08  text  alarm-text on st-heldback-bg: rule names inside a held back item
+  pass   6.67  text  surface on alarm: number of a step that held something back
+  pass   8.36  text  st-held on st-held-bg: wallet: held
+  pass   8.06  text  st-discuss on st-discuss-bg: wallet: worth discussing
+  pass   8.31  text  st-progress on st-progress-bg: wallet: likely in progress, review due chip
+  pass   6.61  text  st-heldback on st-heldback-bg: wallet: held back
+  pass   6.63  text  st-none on st-none-bg: wallet: not in data
+  pass  11.71  text  ink on st-discuss-bg: item names in worth discussing
+  pass   7.40  text  ink-2 on st-discuss-bg: evidence lines in worth discussing
+  pass  12.28  text  ink on st-heldback-bg: item names in held back
+  pass   7.76  text  ink-2 on st-heldback-bg: reasons in held back
+  pass   6.64  text  ink-3 on st-none-bg: not in data product names
+  pass  11.94  text  ink on st-held-bg: held product names
+  pass  11.60  text  ink on st-progress-bg: in progress product names
+  pass  12.15  text  ink on lit-bg: text inside a linked part
+  pass   7.68  text  ink-2 on lit-bg: secondary text inside a linked part
+  pass  11.52  text  ink on accent-soft: answer outcome text
+  pass   8.89  text  care-ink on care-bg: care line and care chip
+  pass  10.63  text  care-ink on surface: care question kind
+  pass   9.19  text  avatar-ink on avatar-bg: monogram avatar
+  pass   8.48  text  ink-2 on surface-2: not raised items
+  pass  10.33  text  surface on lit-line: pressed step marker number
+  pass   5.59  text  ink-3 on lit-bg: quiet text inside a linked part
+  pass  10.50  ui    st-held on surface: held glyph on a card
+  pass  10.33  ui    st-discuss on surface: discuss glyph on a card
+  pass  10.74  ui    st-progress on surface: in progress glyph on a card
+  pass   8.07  ui    st-heldback on surface: held back glyph on a card
+  pass   6.90  ui    st-none on surface: not in data glyph on a card
+  pass   9.24  ui    chart-me on surface-2: this client's bar in the band chart
+  pass   8.06  ui    chart-me on st-discuss-bg: this client's bar inside a discuss item
+  pass   7.40  ui    chart-rule on st-discuss-bg: the dashed bar line
+  pass   9.21  ui    focus on surface: focus ring on a card
+  pass  10.04  ui    focus on bg: focus ring on the page
+  pass   9.21  ui    mark on surface: meeting dot on the timeline
+  pass   6.67  ui    alarm on surface: overdue dot on the timeline
+  pass  10.33  ui    lit-line on surface: outline of a linked part
+  pass   9.21  ui    accent on surface: pressed scheme and step markers
+  pass  10.50  text  st-held on surface: wallet: held, as a word on the card
+  pass  10.33  text  st-discuss on surface: wallet: worth discussing, as a word on the card
+  pass  10.74  text  st-progress on surface: review due status word in the summary
+  pass   8.07  text  st-heldback on surface: held back count, status word and part title
+  pass   6.90  text  st-none on surface: wallet: not in data, as a word on the card
+  pass  11.59  text  care-ink on bg: care fact under the client name
+  pass   9.48  text  ink-2 on surface: header links
+  pass   7.52  text  ink-3 on bg: a waiting status on the rail
+  pass  10.04  ui    accent on bg: focus ring and pressed markers on the page
+  pass  10.33  text  ink-2 on bg: the context line under the header
+  pass  13.42  text  ink on surface-2: a hovered tab or switch
+  pass   9.39  ui    st-held on surface-2: has it glyph in the wallet group
+  pass   6.61  ui    st-heldback on st-heldback-bg: held back glyph on a tinted wallet row
+  pass  12.28  text  ink on st-heldback-bg: product name on a held back wallet row
+  pass   8.79  ui    st-heldback on bg: held back top rule seen against the page
+
+S3 with ds=ibm
+  pass  15.00  text  ink on card-bg: text in a part or a summary card
+  pass   9.48  text  ink-2 on card-bg: secondary text in a part
+  pass   6.90  text  ink-3 on card-bg: labels and quiet text in a part
+  pass  10.53  text  accent-text on card-bg: links in a part
+  pass  10.50  text  st-held on card-bg: wallet word: held
+  pass  10.33  text  st-discuss on card-bg: wallet word: worth discussing
+  pass  10.74  text  st-progress on card-bg: summary word: review due
+  pass   8.07  text  st-heldback on card-bg: summary and wallet word: held back
+  pass   6.90  text  st-none on card-bg: wallet word: not in data
+  pass   8.89  text  care-ink on care-bg: care line inside a part
+  pass  13.42  text  ink on item-bg: item names and the review line
+  pass   8.48  text  ink-2 on item-bg: item evidence and review detail
+  pass   6.17  text  ink-3 on item-bg: synthetic date note in the review line
+  pass   9.61  text  st-progress on item-bg: review due inside the review line
+  pass  15.00  text  tab-on-ink on tab-on-bg: selected tab: ds, scheme and bar
+  pass   9.48  text  tab-off-ink on tab-off-bg: unselected tab: ds, scheme and bar
+  pass   9.21  ui    tab-on-line on tab-on-bg: underline of a selected tab
+  pass   8.07  ui    st-heldback on card-bg: top rule of what not to offer and the held back card
+  pass  10.33  ui    lit-line on card-bg: ring of a lit part
+  pass   8.07  ui    st-heldback on card-bg: held back glyph in a part
+  pass  10.33  text  tab-off-ink on bg: unselected tab where its own fill is transparent
+  pass   6.17  text  ink-3 on item-bg: quiet text in the wallet group
+  pass   9.39  text  st-held on item-bg: has it word in the wallet group
+  pass   6.90  ui    st-none on card-bg: not in data glyph in the wallet row
+
+S3 with ds=linear
+  pass  15.00  text  ink on card-bg: text in a part or a summary card
+  pass   9.48  text  ink-2 on card-bg: secondary text in a part
+  pass   6.90  text  ink-3 on card-bg: labels and quiet text in a part
+  pass  10.53  text  accent-text on card-bg: links in a part
+  pass  10.50  text  st-held on card-bg: wallet word: held
+  pass  10.33  text  st-discuss on card-bg: wallet word: worth discussing
+  pass  10.74  text  st-progress on card-bg: summary word: review due
+  pass   8.07  text  st-heldback on card-bg: summary and wallet word: held back
+  pass   6.90  text  st-none on card-bg: wallet word: not in data
+  pass   8.89  text  care-ink on care-bg: care line inside a part
+  pass  13.42  text  ink on item-bg: item names and the review line
+  pass   8.48  text  ink-2 on item-bg: item evidence and review detail
+  pass   6.17  text  ink-3 on item-bg: synthetic date note in the review line
+  pass   9.61  text  st-progress on item-bg: review due inside the review line
+  pass  13.42  text  tab-on-ink on tab-on-bg: selected tab: ds, scheme and bar
+  pass   7.52  text  tab-off-ink on tab-off-bg: unselected tab: ds, scheme and bar
+  pass   8.07  ui    st-heldback on card-bg: top rule of what not to offer and the held back card
+  pass  10.33  ui    lit-line on card-bg: ring of a lit part
+  pass   8.07  ui    st-heldback on card-bg: held back glyph in a part
+  pass   7.52  text  tab-off-ink on bg: unselected tab where its own fill is transparent
+  pass   6.17  text  ink-3 on item-bg: quiet text in the wallet group
+  pass   9.39  text  st-held on item-bg: has it word in the wallet group
+  pass   6.90  ui    st-none on card-bg: not in data glyph in the wallet row
+
+S3 with ds=mercury
+  pass  15.00  text  ink on card-bg: text in a part or a summary card
+  pass   9.48  text  ink-2 on card-bg: secondary text in a part
+  pass   6.90  text  ink-3 on card-bg: labels and quiet text in a part
+  pass  10.53  text  accent-text on card-bg: links in a part
+  pass  10.50  text  st-held on card-bg: wallet word: held
+  pass  10.33  text  st-discuss on card-bg: wallet word: worth discussing
+  pass  10.74  text  st-progress on card-bg: summary word: review due
+  pass   8.07  text  st-heldback on card-bg: summary and wallet word: held back
+  pass   6.90  text  st-none on card-bg: wallet word: not in data
+  pass   8.89  text  care-ink on care-bg: care line inside a part
+  pass  13.42  text  ink on item-bg: item names and the review line
+  pass   8.48  text  ink-2 on item-bg: item evidence and review detail
+  pass   6.17  text  ink-3 on item-bg: synthetic date note in the review line
+  pass   9.61  text  st-progress on item-bg: review due inside the review line
+  pass   8.08  text  tab-on-ink on tab-on-bg: selected tab: ds, scheme and bar
+  pass   8.07  ui    st-heldback on card-bg: top rule of what not to offer and the held back card
+  pass  10.33  ui    lit-line on card-bg: ring of a lit part
+  pass   8.07  ui    st-heldback on card-bg: held back glyph in a part
+  pass  10.33  text  tab-off-ink on bg: unselected tab where its own fill is transparent
+  pass   6.17  text  ink-3 on item-bg: quiet text in the wallet group
+  pass   9.39  text  st-held on item-bg: has it word in the wallet group
+  pass   6.90  ui    st-none on card-bg: not in data glyph in the wallet row
+
+S4, warm paper
+  pass  14.78  text  ink on bg: body text on the page
+  pass  15.85  text  ink on surface: body text on a card
+  pass  13.67  text  ink on surface-2: text in chips, items and review
+  pass   8.53  text  ink-2 on surface: secondary text on a card
+  pass   7.35  text  ink-2 on surface-2: secondary text in items
+  pass   7.95  text  ink-2 on bg: secondary text on the page
+  pass   6.31  text  ink-3 on surface: quiet text on a card
+  pass   5.44  text  ink-3 on surface-2: chip labels, quiet text in items
+  pass   5.89  text  ink-3 on bg: footer text
+  pass   8.52  text  accent-text on surface: links and the segment badge on a card
+  pass   7.24  text  accent-text on accent-soft: segment badge, done status
+  pass   8.19  text  on-accent on accent: pressed buttons, done step numbers
+  pass   7.71  text  alarm-text on surface: held back rule names
+  pass   6.76  text  alarm-text on alarm-soft: overdue chip and review, held back status
+  pass   6.76  text  alarm-text on st-heldback-bg: rule names inside a held back item
+  pass   7.38  text  surface on alarm: number of a step that held something back
+  pass   9.57  text  st-held on st-held-bg: wallet: held
+  pass   6.75  text  st-discuss on st-discuss-bg: wallet: worth discussing
+  pass   6.08  text  st-progress on st-progress-bg: wallet: likely in progress, review due chip
+  pass   6.47  text  st-heldback on st-heldback-bg: wallet: held back
+  pass   5.49  text  st-none on st-none-bg: wallet: not in data
+  pass  13.74  text  ink on st-discuss-bg: item names in worth discussing
+  pass   7.39  text  ink-2 on st-discuss-bg: evidence lines in worth discussing
+  pass  13.91  text  ink on st-heldback-bg: item names in held back
+  pass   7.48  text  ink-2 on st-heldback-bg: reasons in held back
+  pass   5.75  text  ink-3 on st-none-bg: not in data product names
+  pass  13.34  text  ink on st-held-bg: held product names
+  pass  13.74  text  ink on st-progress-bg: in progress product names
+  pass  13.26  text  ink on lit-bg: text inside a linked part
+  pass   7.13  text  ink-2 on lit-bg: secondary text inside a linked part
+  pass  13.47  text  ink on accent-soft: answer outcome text
+  pass   8.65  text  care-ink on care-bg: care line and care chip
+  pass  10.01  text  care-ink on surface: care question kind
+  pass   5.90  text  avatar-ink on avatar-bg: monogram avatar
+  pass   7.35  text  ink-2 on surface-2: not raised items
+  pass   5.67  text  surface on lit-line: pressed step marker number
+  pass   5.28  text  ink-3 on lit-bg: quiet text inside a linked part
+  pass  11.37  ui    st-held on surface: held glyph on a card
+  pass   7.79  ui    st-discuss on surface: discuss glyph on a card
+  pass   7.02  ui    st-progress on surface: in progress glyph on a card
+  pass   7.38  ui    st-heldback on surface: held back glyph on a card
+  pass   6.03  ui    st-none on surface: not in data glyph on a card
+  pass   6.72  ui    chart-me on surface-2: this client's bar in the band chart
+  pass   6.75  ui    chart-me on st-discuss-bg: this client's bar inside a discuss item
+  pass   7.39  ui    chart-rule on st-discuss-bg: the dashed bar line
+  pass   8.19  ui    focus on surface: focus ring on a card
+  pass   7.64  ui    focus on bg: focus ring on the page
+  pass   3.75  ui    mark on surface: meeting dot on the timeline
+  pass   7.38  ui    alarm on surface: overdue dot on the timeline
+  pass   5.67  ui    lit-line on surface: outline of a linked part
+  pass   8.19  ui    accent on surface: pressed scheme and step markers
+  pass  11.37  text  st-held on surface: wallet: held, as a word on the card
+  pass   7.79  text  st-discuss on surface: wallet: worth discussing, as a word on the card
+  pass   7.02  text  st-progress on surface: review due status word in the summary
+  pass   7.38  text  st-heldback on surface: held back count, status word and part title
+  pass   6.03  text  st-none on surface: wallet: not in data, as a word on the card
+  pass   9.34  text  care-ink on bg: care fact under the client name
+  pass   8.53  text  ink-2 on surface: header links
+  pass   5.89  text  ink-3 on bg: a waiting status on the rail
+  pass   7.64  ui    accent on bg: focus ring and pressed markers on the page
+  pass   7.95  text  ink-2 on bg: the context line under the header
+  pass  13.67  text  ink on surface-2: a hovered tab or switch
+  pass   9.81  ui    st-held on surface-2: has it glyph in the wallet group
+  pass   6.47  ui    st-heldback on st-heldback-bg: held back glyph on a tinted wallet row
+  pass  13.91  text  ink on st-heldback-bg: product name on a held back wallet row
+  pass   6.88  ui    st-heldback on bg: held back top rule seen against the page
+
+S4 with ds=ibm
+  pass  15.85  text  ink on card-bg: text in a part or a summary card
+  pass   8.53  text  ink-2 on card-bg: secondary text in a part
+  pass   6.31  text  ink-3 on card-bg: labels and quiet text in a part
+  pass   8.52  text  accent-text on card-bg: links in a part
+  pass  11.37  text  st-held on card-bg: wallet word: held
+  pass   7.79  text  st-discuss on card-bg: wallet word: worth discussing
+  pass   7.02  text  st-progress on card-bg: summary word: review due
+  pass   7.38  text  st-heldback on card-bg: summary and wallet word: held back
+  pass   6.03  text  st-none on card-bg: wallet word: not in data
+  pass   8.65  text  care-ink on care-bg: care line inside a part
+  pass  13.67  text  ink on item-bg: item names and the review line
+  pass   7.35  text  ink-2 on item-bg: item evidence and review detail
+  pass   5.44  text  ink-3 on item-bg: synthetic date note in the review line
+  pass   6.05  text  st-progress on item-bg: review due inside the review line
+  pass  15.85  text  tab-on-ink on tab-on-bg: selected tab: ds, scheme and bar
+  pass   8.53  text  tab-off-ink on tab-off-bg: unselected tab: ds, scheme and bar
+  pass   8.19  ui    tab-on-line on tab-on-bg: underline of a selected tab
+  pass   7.38  ui    st-heldback on card-bg: top rule of what not to offer and the held back card
+  pass   5.67  ui    lit-line on card-bg: ring of a lit part
+  pass   7.38  ui    st-heldback on card-bg: held back glyph in a part
+  pass   7.95  text  tab-off-ink on bg: unselected tab where its own fill is transparent
+  pass   5.44  text  ink-3 on item-bg: quiet text in the wallet group
+  pass   9.81  text  st-held on item-bg: has it word in the wallet group
+  pass   6.03  ui    st-none on card-bg: not in data glyph in the wallet row
+
+S4 with ds=linear
+  pass  15.85  text  ink on card-bg: text in a part or a summary card
+  pass   8.53  text  ink-2 on card-bg: secondary text in a part
+  pass   6.31  text  ink-3 on card-bg: labels and quiet text in a part
+  pass   8.52  text  accent-text on card-bg: links in a part
+  pass  11.37  text  st-held on card-bg: wallet word: held
+  pass   7.79  text  st-discuss on card-bg: wallet word: worth discussing
+  pass   7.02  text  st-progress on card-bg: summary word: review due
+  pass   7.38  text  st-heldback on card-bg: summary and wallet word: held back
+  pass   6.03  text  st-none on card-bg: wallet word: not in data
+  pass   8.65  text  care-ink on care-bg: care line inside a part
+  pass  13.67  text  ink on item-bg: item names and the review line
+  pass   7.35  text  ink-2 on item-bg: item evidence and review detail
+  pass   5.44  text  ink-3 on item-bg: synthetic date note in the review line
+  pass   6.05  text  st-progress on item-bg: review due inside the review line
+  pass  13.67  text  tab-on-ink on tab-on-bg: selected tab: ds, scheme and bar
+  pass   5.89  text  tab-off-ink on tab-off-bg: unselected tab: ds, scheme and bar
+  pass   7.38  ui    st-heldback on card-bg: top rule of what not to offer and the held back card
+  pass   5.67  ui    lit-line on card-bg: ring of a lit part
+  pass   7.38  ui    st-heldback on card-bg: held back glyph in a part
+  pass   5.89  text  tab-off-ink on bg: unselected tab where its own fill is transparent
+  pass   5.44  text  ink-3 on item-bg: quiet text in the wallet group
+  pass   9.81  text  st-held on item-bg: has it word in the wallet group
+  pass   6.03  ui    st-none on card-bg: not in data glyph in the wallet row
+
+S4 with ds=mercury
+  pass  15.85  text  ink on card-bg: text in a part or a summary card
+  pass   8.53  text  ink-2 on card-bg: secondary text in a part
+  pass   6.31  text  ink-3 on card-bg: labels and quiet text in a part
+  pass   8.52  text  accent-text on card-bg: links in a part
+  pass  11.37  text  st-held on card-bg: wallet word: held
+  pass   7.79  text  st-discuss on card-bg: wallet word: worth discussing
+  pass   7.02  text  st-progress on card-bg: summary word: review due
+  pass   7.38  text  st-heldback on card-bg: summary and wallet word: held back
+  pass   6.03  text  st-none on card-bg: wallet word: not in data
+  pass   8.65  text  care-ink on care-bg: care line inside a part
+  pass  13.67  text  ink on item-bg: item names and the review line
+  pass   7.35  text  ink-2 on item-bg: item evidence and review detail
+  pass   5.44  text  ink-3 on item-bg: synthetic date note in the review line
+  pass   6.05  text  st-progress on item-bg: review due inside the review line
+  pass   7.24  text  tab-on-ink on tab-on-bg: selected tab: ds, scheme and bar
+  pass   7.38  ui    st-heldback on card-bg: top rule of what not to offer and the held back card
+  pass   5.67  ui    lit-line on card-bg: ring of a lit part
+  pass   7.38  ui    st-heldback on card-bg: held back glyph in a part
+  pass   7.95  text  tab-off-ink on bg: unselected tab where its own fill is transparent
+  pass   5.44  text  ink-3 on item-bg: quiet text in the wallet group
+  pass   9.81  text  st-held on item-bg: has it word in the wallet group
+  pass   6.03  ui    st-none on card-bg: not in data glyph in the wallet row
+
+raw colours outside the scheme blocks: 0
+
+540 pairs checked over 4 schemes and 3 ds layers, 0 failing

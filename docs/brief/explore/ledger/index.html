@@ -1,0 +1,223 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Client Brief Ledger</title>
+<meta name="description" content="Ledger, a warm editorial direction for the client meeting brief: one agent runs five steps, and each step sits beside the part of the brief it produced.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- google fonts css2 has no version parameter, so the url pins the exact families and weights instead -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Geist:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="ledger.css">
+</head>
+<body>
+<a class="v-skip" href="#stage">Skip to the brief</a>
+
+<aside class="rail" aria-label="Client and brief index">
+  <div class="brand"><span class="mk" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 3.5h10M3 8h10M3 12.5h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><b>Client brief</b></div>
+  <section class="rail-sec"><h2 class="rail-h">Client</h2><div id="picker"></div></section>
+  <section class="rail-sec rn-sec"><h2 class="rail-h">The brief, step by step</h2><nav id="railnav" aria-label="The five parts of the brief"></nav></section>
+  <section class="rail-sec"><h2 class="rail-h" id="pal-h">Colours</h2><div class="pal" role="group" aria-labelledby="pal-h" id="pal"></div></section>
+  <div class="agent" id="agent-h"></div>
+  <div class="rail-foot"><a href="../../../model.html">How the models perform</a><a id="code-l" href="https://github.com/DjamelZair/ClientMeetingBriefAgent-">Code</a></div>
+</aside>
+
+<main class="page" id="main">
+  <div class="ctx" id="context"></div>
+
+  <header class="mast" aria-label="Client"><div id="identity"></div><div id="facts"></div></header>
+
+  <section class="sum" aria-label="Client summary"><div id="summary"></div></section>
+
+  <section class="head" id="stage" aria-label="Headline" tabindex="-1">
+    <div id="headline"></div>
+    <div class="hbar" id="hbar"></div>
+  </section>
+
+  <ol class="spine" aria-label="The agent's five steps, each beside the part of the brief it produced">
+    <li class="lane" data-n="1" id="row-1">
+      <div class="node" id="node-1"></div>
+      <section class="part v-card" aria-labelledby="ph-1"><div id="ph1"></div>
+        <div class="p1">
+          <div class="p1-l"><div id="group"></div><div id="changes"></div><div><h3 class="sub-h">Relationship timeline</h3><div id="timeline"></div></div></div>
+          <div><h3 class="sub-h">Products</h3><div id="wallet"></div></div>
+        </div>
+      </section>
+    </li>
+    <li class="lane" data-n="2" id="row-2">
+      <div class="node" id="node-2"></div>
+      <section class="part v-card" aria-labelledby="ph-2"><div id="ph2"></div><div class="cols"><div id="discuss"></div><div id="ask"></div></div></section>
+    </li>
+    <li class="lane" data-n="3" id="row-3">
+      <div class="node" id="node-3"></div>
+      <section class="part v-card" aria-labelledby="ph-3"><div id="ph3"></div><div id="care"></div><div class="cols"><div id="held"></div><div id="aside"></div></div></section>
+    </li>
+    <li class="lane" data-n="4" id="row-4">
+      <div class="node" id="node-4"></div>
+      <section class="part v-card" aria-labelledby="ph-4"><div id="ph4"></div><div id="review"></div></section>
+    </li>
+    <li class="lane" data-n="5" id="row-5">
+      <div class="node" id="node-5"></div>
+      <section class="part v-card" aria-labelledby="ph-5"><div id="ph5"></div><div id="followup"></div><div id="questions"></div></section>
+    </li>
+  </ol>
+
+  <footer class="foot" id="foot"></footer>
+</main>
+
+<script src="../../../field.js"></script>
+<script src="brief.js"></script>
+<script>
+/* this page only places components. its own pieces: the kpi cards, the rail index, the agent box, the group and the changes */
+var esc = function(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); };
+var MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+function day(s){ var d = new Date(s + "T00:00:00"); return d.getDate() + " " + MON[d.getMonth()] + " " + d.getFullYear(); }
+function briefOf(v){ return V.state.F.data.showcase[v.index].brief; }
+function plural(n, w){ return V.state.F.plural(n, w); }
+function ready(n){ var S = V.state; return S.replaying && S.stepState[n - 1] !== "done" ? ' data-ready="0"' : ''; }
+
+/* the kpi cards: group, tenure, review and held back. the group card carries the one series data.json has for it,
+   the share of clients in each group, with this client's group in teal */
+function kpis(el, ctx){
+  var v = ctx.v, b = briefOf(v), p = b.who.profile || {}, d = v.due, hold = V.lane(ctx.m, "hold"), cards = [];
+  function card(n, key, val, lbl, st, word, tone, extra){
+    cards.push('<li class="v-stat" data-key="' + key + '" data-from="' + n + '"' + ready(n) + (tone ? ' data-tone="' + tone + '"' : '') + '><span class="lbl">' + esc(lbl) + '</span>' + V.fromTag(n) +
+      (extra ? '<div class="kpi-row"><span class="val">' + esc(val) + '</span>' + extra + '</div>' : '<span class="val">' + esc(val) + '</span>') +
+      '<span class="sw st-' + st + '">' + V.glyph(st, 14) + '<span>' + esc(word) + '</span></span></li>');
+  }
+  var cl = V.state.F.data.segmentation.clusters, me = cl.find(function(c){ return c.cluster === b.who.cluster; }) || {}, mx = Math.max.apply(null, cl.map(function(c){ return c.share; }));
+  var bars = '<span class="kpi-bars" role="img" aria-label="Share of clients in each of the ' + cl.length + ' groups. ' + esc(cl.map(function(c){ return c.name + " " + V.util.pct(c.share); }).join(", ")) + '">' +
+    cl.map(function(c){ return '<i style="height:' + Math.max(3, Math.round(c.share / mx * 40)) + 'px"' + (c.cluster === b.who.cluster ? ' data-me' : '') + ' title="' + esc(c.name + ": " + V.util.pct(c.share)) + '"></i>'; }).join("") + '</span>';
+  card(1, "group", v.who.name, "Group", "quiet", me.share != null ? V.util.pct(me.share) + " of clients are in this group" : "Group size not recorded", "", bars);
+  var joined = "";
+  if (p.tenure_months != null){ var j = new Date(b.meeting_date + "T00:00:00"); j.setMonth(j.getMonth() - Math.round(p.tenure_months)); joined = "Joined " + MON[j.getMonth()] + " " + j.getFullYear(); }
+  card(1, "tenure", V.util.tenureWords(p.tenure_months), "Tenure", "quiet", joined || "Start date not recorded");
+  var rs = d.state === "overdue" ? ["heldback", "Overdue by " + plural(-d.days, "day")] : d.state === "due" ? ["progress", "Due in " + plural(d.days, "day")] : d.state === "not_due" ? ["quiet", "Not due"] : ["none", "No review date"];
+  card(4, "review", b.due_anyway.next_review ? day(b.due_anyway.next_review) : "No date on file", "Periodic review, synthetic date", rs[0], rs[1]);
+  var nChecked = v.toolLog.filter(function(e){ return e.tool === "check_suitability"; }).length;
+  card(3, "held", hold.length ? V.util.list(hold.map(function(it){ return it.label; })) : "Nothing", "Held back", hold.length ? "heldback" : "quiet",
+    hold.length ? (hold.length === 1 ? "The reason is in part 3" : "The reasons are in part 3") : nChecked ? plural(nChecked, "product") + " checked against the rules" : "Nothing to check", hold.length ? "heldback" : "");
+  el.innerHTML = '<ul class="v-sum" aria-label="Client summary">' + cards.join("") + '</ul>';
+}
+kpis.deps = ["client", "model", "replay"];
+
+/* the rail index: each part with the step that made it and what it holds now, so the whole brief is in view at once */
+var PARTS = ["Who the client is", "What might help", "What not to offer", "What is due anyway", "Questions to ask"];
+function railNav(el, ctx){
+  var v = ctx.v, m = ctx.m, S = V.state, c = V.walletCounts(v);
+  var offers = V.lane(m, "offer").length + V.lane(m, "ask").length, hold = V.lane(m, "hold").length;
+  var words = [
+    "Has it: " + plural(c.held, "product"),
+    offers ? offers + " worth discussing" : "Nothing to discuss",
+    hold ? hold + " held back" : "Nothing held back",
+    v.due.headline,
+    plural(v.questions.length, "question") + (v.followUp ? " and a draft" : "")
+  ];
+  el.innerHTML = '<ol class="rn">' + PARTS.map(function(t, k){
+    var n = k + 1, run = S.replaying ? (S.stepState[k] || "wait") : "done";
+    var st = run === "done" ? V.stepStatus(v, k) : run, w = run === "done" ? words[k] : run === "run" ? "Running" : "Waiting";
+    return '<li><button type="button" data-act="link" data-step="' + n + '" aria-pressed="' + (S.link === n) + '" data-s="' + st + '"' + (k === 2 && hold && run === "done" ? ' data-hold' : '') + '>' +
+      '<span class="n" aria-hidden="true">' + n + '</span><span class="t">' + esc(t) + '</span><span class="w">' + esc(w) + '</span></button></li>';
+  }).join("") + '</ol>';
+}
+railNav.deps = ["client", "model", "replay"];
+
+/* the agent box: one agent, its call count, and replay or skip */
+function agentBox(el, ctx){
+  var S = V.state, n = ctx.v.nCalls;
+  el.innerHTML = '<p>One agent prepared this brief in five steps, with ' + plural(n, "logged call") + '. The advisor decides.</p>' +
+    (S.replaying ? '<button type="button" class="v-btn" data-act="skip">Skip</button>'
+      : '<button type="button" class="v-btn" data-act="replay" aria-label="Replay the one agent, ' + plural(n, "logged call") + '">' + V.glyph("replay", 14) + 'Replay the agent</button>');
+}
+agentBox.deps = ["client", "replay"];
+/* step 1 produced the group and what changed */
+function groupCard(el, ctx){
+  var v = ctx.v;
+  el.innerHTML = '<div class="grp" data-from="1"><h3 class="sub-h">' + V.glyph("group", 14) + 'Segment and group</h3>' +
+    '<p class="nm">' + esc(v.who.name) + '</p><p class="v-meta">' + esc(V.util.cap(v.who.description)) + '.</p></div>';
+}
+function changes(el, ctx){
+  var ch = briefOf(ctx.v).who.changes;
+  el.innerHTML = '<div data-from="1"><h3 class="sub-h">What changed</h3><ul class="chg">' +
+    (ch.length ? ch.map(function(s){ return '<li>' + esc(s) + '</li>'; }).join("") : '<li class="none">No changes recorded in the last six months.</li>') + '</ul></div>';
+}
+/* the bar decides which scores step 2 keeps, so it sits with the headline it changes */
+function scoreBar(el, ctx){ V.components.bar(el, ctx); var l = el.querySelector("#v-bar-l"); if (l) l.textContent = "Only include scores above"; }
+scoreBar.deps = ["client", "model"];
+/* the products the agent did not raise stay one click away, so a full wallet stays short */
+function wallet(el, ctx){
+  V.components.wallet(el, ctx, {split: true});
+  var q = el.querySelector(".v-wcat-quiet"); if (!q) return;
+  var h = q.querySelector(".v-wcat-h"), open = !!V.state.open.wq, n = 0;
+  q.querySelectorAll(".v-wquiet").forEach(function(p){ var t = p.textContent.split(":").slice(1).join(":"); n += t.split(",").length; });
+  q.id = "l2-wq"; q.hidden = !open; h.remove();
+  var line = el.querySelector(".v-wnone");
+  (line || q).insertAdjacentHTML(line ? "beforeend" : "beforebegin", '<button type="button" class="v-link v-wq-tog" data-act="toggle" data-key="wq" aria-expanded="' + open + '" aria-controls="l2-wq">' + esc(h.textContent) + ' (' + n + ')</button>');
+}
+wallet.deps = ["client", "model"];
+
+var mounts = {
+  "#identity": ["identity", {mismatch: "inline", sk: 2}], "#facts": ["facts", {sk: 1}], "#summary": [kpis, {sk: 3}],
+  "#headline": ["headline", {kicker: false, sk: 2}], "#hbar": scoreBar, "#agent-h": [agentBox, {sk: 2}], "#railnav": [railNav, {sk: 5}],
+  "#group": [groupCard, {sk: 3}], "#changes": [changes, {sk: 2}], "#timeline": ["timeline", {sk: 2}], "#wallet": [wallet, {sk: 5}],
+  "#discuss": ["discuss", {tags: false, sk: 4}], "#ask": ["ask", {tags: false, sk: 2}],
+  "#care": "care", "#held": ["held", {tags: false, sk: 3}], "#aside": ["aside", {asideWhy: "toggle", tags: false, sk: 2}],
+  "#review": ["review", {tags: false, sk: 3}],
+  "#questions": ["questions", {why: "toggle", tags: false, sk: 6}], "#followup": ["followup", {tags: false, sk: 1}]
+};
+for (var n = 1; n <= 5; n++){
+  mounts["#node-" + n] = ["step", {n: n, readChars: 34, sk: 3}];
+  mounts["#ph" + n] = ["partHead", {n: n, title: PARTS[n - 1], sk: 1}];
+}
+V.boot({url: "../../../data.json", chrome: [["#picker", "picker"], ["#context", "context"], ["#foot", "footer"]], mounts: mounts})
+  .then(function(F){ if (F && F.links.code) document.getElementById("code-l").href = F.links.code; });
+
+/* the row of the selected step stays lit; a row counts as done when its step is done, or always outside a replay */
+function lanes(){
+  var S = V.state, cur = V.links.current();
+  document.querySelectorAll(".lane").forEach(function(l){
+    var k = +l.getAttribute("data-n");
+    l.toggleAttribute("data-on", k === cur);
+    l.toggleAttribute("data-done", !S.replaying || S.stepState[k - 1] === "done");
+  });
+  var hold = S.m ? V.lane(S.m, "hold").length : 0;
+  document.querySelector('.lane[data-n="3"] > .part').toggleAttribute("data-hold", hold > 0);
+}
+V.on("render", lanes);
+V.on("link", lanes);
+/* the rail index follows a replay step by step */
+V.on("step", function(){ lanes(); var el = document.getElementById("railnav"); if (V.state.v) railNav(el, {v: V.state.v, m: V.state.m}); V.links.apply(); });
+
+/* a click in the rail index also brings that row into view */
+var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+document.addEventListener("click", function(e){
+  var b = e.target.closest(".rn button"); if (!b) return;
+  var n = +b.getAttribute("data-step");
+  if (V.links.current() === n) document.getElementById("row-" + n).scrollIntoView({behavior: reduceMotion ? "auto" : "smooth", block: "start"});
+});
+
+/* the timeline is drawn to its box, so it redraws when the box or the face changes */
+var tlw = 0, tl = document.getElementById("timeline");
+function redrawTimeline(force){ var w = tl.clientWidth; if (w && (force || Math.abs(w - tlw) > 2) && V.state.v){ tlw = w; V.components.timeline(tl, {v: V.state.v, m: V.state.m}, {}); V.links.apply(); } }
+new ResizeObserver(function(){ redrawTimeline(false); }).observe(tl);
+V.on("resize", function(){ redrawTimeline(true); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ redrawTimeline(true); });
+/* colours: five palettes from the reference folder, picked with ?pal= or the swatches in the rail.
+   the choice is a per viewer convenience, so storage may fail and the page still works */
+var PALS = [["tokyo", "Tokyo"], ["calm", "Calm"], ["berry", "Berry"], ["bordeaux", "Bordeaux"], ["sunset", "Sunset"]];
+function setPal(id, push){
+  if (!PALS.some(function(p){ return p[0] === id; })) id = "tokyo";
+  if (id === "tokyo") document.documentElement.removeAttribute("data-pal"); else document.documentElement.setAttribute("data-pal", id);
+  document.querySelectorAll("#pal button").forEach(function(b){ b.setAttribute("aria-pressed", String(b.getAttribute("data-pal") === id || (id === "tokyo" && b.getAttribute("data-p") === "tokyo"))); });
+  try { localStorage.setItem("ledger-pal", id); } catch (e) {}
+  if (push !== false){ try { var u = new URL(location.href); u.searchParams.set("pal", id); history.replaceState(null, "", u); } catch (e) {} }
+  if (typeof redrawTimeline === "function") redrawTimeline(true);
+}
+(function(){
+  var el = document.getElementById("pal");
+  el.innerHTML = PALS.map(function(p){
+    return '<button type="button" data-p="' + p[0] + '"' + (p[0] === "tokyo" ? "" : ' data-pal="' + p[0] + '"') + ' aria-label="' + p[1] + ' colours" title="' + p[1] + '"><i></i><i></i><i></i><i></i></button>';
+  }).join("");
+  el.addEventListener("click", function(e){ var b = e.target.closest("button"); if (b) setPal(b.getAttribute("data-p")); });
+  var m = /[?&]pal=([a-z]+)/.exec(location.search), saved = null;
+  try { saved = localStorage.getItem("ledger-pal"); } catch (e) {}
+  setPal(m ? m[1] : saved || "tokyo", !!m);
+})();
+</script>
+</body></html>

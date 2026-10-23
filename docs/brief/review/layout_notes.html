@@ -1,0 +1,155 @@
+<!doctype html><html lang="en-GB" data-scheme="S1" data-ds="ibm"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief Layout Notes</title>
+<meta name="description" content="Before and after of the client brief layout, the critique, what each design system layer adopts and rejects, the hard rules and the fallbacks.">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../tokens.css">
+<style>
+/* a one page poster; every colour is a token from ../tokens.css (S1 with the ibm layer) */
+body { padding: var(--sp-6) var(--sp-5) var(--sp-7); }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; gap: var(--sp-7); }
+h1 { font: var(--w-head) var(--t-2xl)/var(--lh-2xl) var(--f-head); }
+h2 { font: var(--w-title) var(--t-xl)/var(--lh-xl) var(--f-head); margin-bottom: var(--sp-4); }
+h3 { font: var(--w-strong) var(--t-m)/var(--lh-m) var(--f-ui); margin-bottom: var(--sp-2); }
+p, li { font-size: var(--t-s); line-height: 1.5; color: var(--ink-2); max-width: 75ch; }
+.lead { font-size: var(--t-m); color: var(--ink-2); margin-top: var(--sp-2); }
+.lead b { white-space: nowrap; }
+.pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-4); }
+figure { display: grid; gap: var(--sp-2); }
+figure img { width: 100%; height: auto; border: 1px solid var(--line); display: block; }
+figcaption { font-size: var(--t-xs); color: var(--ink-3); }
+.phones { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-4); align-items: start; }
+.phones img { max-height: 900px; object-fit: cover; object-position: top; }
+.cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-5); }
+.box { background: var(--surface); border: 1px solid var(--line); padding: var(--sp-4); display: grid; gap: var(--sp-3); align-content: start; }
+ul.l { display: grid; gap: var(--sp-1); }
+ul.l li { padding-left: var(--sp-4); position: relative; }
+ul.l li::before { content: ""; position: absolute; left: 2px; top: 0.6em; width: 6px; height: 6px; background: var(--line-2); }
+.yes li::before { background: var(--st-discuss); }
+.no li::before { background: var(--st-heldback); }
+.fb li::before { background: var(--st-progress); }
+table { border-collapse: collapse; width: 100%; font-size: var(--t-s); }
+th, td { text-align: left; vertical-align: top; padding: var(--sp-2) var(--sp-3); border-top: 1px solid var(--line); color: var(--ink-2); }
+th { color: var(--ink); font-weight: var(--w-strong); width: 30%; }
+.tag { display: inline-block; font-size: var(--t-xs); font-weight: var(--w-strong); color: var(--st-discuss); }
+@media (max-width: 900px) { .pair, .cols { grid-template-columns: minmax(0, 1fr); } .phones { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+</style></head>
+<body><div class="wrap">
+
+<header>
+  <h1>Client brief: layout notes</h1>
+  <p class="lead">One improved layout with a design system layer on top: <b>?ds=ibm</b> (the default), <b>?ds=mercury</b> or <b>?ds=linear</b>, each with any of the four schemes. The page still answers one question: what should the advisor know before the client walks in.</p>
+</header>
+
+<section>
+  <h2>Before and after, client 10 (credit card held back)</h2>
+  <div class="pair">
+    <figure><img src="before/desktop_client10.png" alt="Before: profile column on the left, a pipeline card, five equal columns under it"><figcaption>Before. Profile column on the left, five narrow columns, held back is a small card in column 3.</figcaption></figure>
+    <figure><img src="after/desktop_ibm_S1_client10.png" alt="After: summary strip, headline, then five steps each with its part directly underneath"><figcaption>After, ds=ibm, S1. Summary strip with the held back count, the headline, then each part directly under its step.</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>The three layers on the same client (S1, 1440 by 900)</h2>
+  <div class="cols">
+    <figure><img src="after/desktop_ibm_S1_client04.png" alt="IBM layer, client 04"><figcaption>IBM: Plex Sans, square corners, hairlines, underlined tabs.</figcaption></figure>
+    <figure><img src="after/desktop_mercury_S1_client04.png" alt="Mercury layer, client 04"><figcaption>Mercury: Inter at light weights, tonal cards without borders, pill buttons.</figcaption></figure>
+    <figure><img src="after/desktop_linear_S1_client04.png" alt="Linear layer, client 04"><figcaption>Linear: Roboto, surface ladder with hairlines, 12px cards, pill tabs.</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>Phone, 390 wide</h2>
+  <div class="phones">
+    <figure><img src="before/phone_client10.png" alt="Before on a phone"><figcaption>Before: the pipeline stacks first, the brief follows, the link is lost.</figcaption></figure>
+    <figure><img src="after/phone_ibm_S1_client10.png" alt="After on a phone, IBM"><figcaption>After, ibm: summary first, then each step with its part under it.</figcaption></figure>
+    <figure><img src="after/phone_mercury_S1_client11.png" alt="After on a phone, Mercury"><figcaption>After, mercury, client 11.</figcaption></figure>
+    <figure><img src="after/phone_linear_S1_client04.png" alt="After on a phone, Linear"><figcaption>After, linear, client 04.</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>The critique, and what answers it</h2>
+  <table>
+    <tr><th>No summary; the gist is spread over chips and steps</th><td>A summary strip: identity with age, income, meeting date and care, then four stat cards (segment, tenure, review, held back), each with a value, a label and a status word with its glyph.</td></tr>
+    <tr><th>The left column competes with the stage</th><td>The column is gone. The wallet moved into step 1's part, as a plain list with hairlines instead of tinted rows.</td></tr>
+    <tr><th>What not to offer is easy to miss</th><td>A held back card in the summary names the products, the part gets a cherry top rule and a cherry title. With nothing held back both stay quiet: a grey "Nothing held back".</td></tr>
+    <tr><th>Five equal columns</th><td>Lane widths follow content (1.1, 1.25, 1.05, 1, 1.3), and parts end where their content ends instead of stretching.</td></tr>
+    <tr><th>Repeated text</th><td>Steps 1 and 4 drop their Returned line: the part right under them says the same words. Steps 2, 3 and 5 keep it because it adds counts.</td></tr>
+    <tr><th>The step to brief link is thin, lost on a phone</th><td>Each part sits directly under its step with a stem from the marker; a rail joins the markers; hover or focus in a lane lights marker, stem and part; a click still pins it. On a phone each part stays under its step.</td></tr>
+    <tr><th>A step feeds more than one part without saying so</th><td>Each part heading carries the numbered marker of its step; the summary cards carry theirs (click selects the step and lights everything it made).</td></tr>
+    <tr><th>The same tinted card everywhere; weak type contrast; tracked capitals</th><td>One card per part; inside it, type and space carry the hierarchy. Each layer brings its own type scale. Every label is sentence case.</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>Per design system: adopted, rejected and why</h2>
+  <div class="cols">
+    <div class="box"><h3>IBM (Carbon)</h3>
+      <ul class="l yes"><li>IBM Plex Sans 400 and 600, one family for everything</li><li>Type: caption 12/1.33/0.32px, body-sm 14/1.29/0.16px, body 16/1.5/0.16px, subhead 20, card-title 24, headline 32 at weight 400</li><li>Spacing 4, 8, 12, 16, 24, 32, 48</li><li>Radius 0 on cards, buttons and inputs; 2px on small badges; square step markers</li><li>Depth: 1px hairline, surface change on hover, no shadow</li><li>Tabs: selected gets ink, 600 and a 2px accent underline</li><li>Top nav 48; button padding 12 16; compact controls at the utility bar's 32; touch 48; 2px focus outline</li><li>Sentence case labels</li></ul>
+      <ul class="l no"><li>IBM Blue and the greys: the palette is the user's</li><li>Charcoal footer inversion: a colour decision</li><li>Weight 300 display: nothing here is 42px or larger</li><li>16 column grid and the 1584 max: the spine has five lanes</li><li>24 to 48px card padding: too wide for a 230px lane</li></ul></div>
+    <div class="box"><h3>Mercury</h3>
+      <ul class="l yes"><li>Inter, the substitute the file names (360 to 500)</li><li>Type: legal 12/1.4/0.24px, ui-sm 14 at 420, body 16/1.4, body-lg 18/1.35 at 360, lead 24, heading-2 28/1.2/0.42px at 480; never above 500</li><li>Spacing 8, 12, 16, 24, 32, 40</li><li>Radius: tags 4, controls 8, cards 12, buttons 40 (pill)</li><li>Depth is tonal: cards are a step of fill, no border, no shadow</li><li>Wallet rows as accordion rows: 10px with a 1px rule</li><li>Buttons 40 tall with 0 20 padding; small buttons 32 with 0 16; one solid pill per group</li></ul>
+      <ul class="l no"><li>Night nav and footer, lavender cards, indigo: palette</li><li>Uppercase eyebrows: the user asked for sentence case</li><li>Centred headlines: left aligned scans faster in a brief</li><li>80 to 128px section spacing and 32px card padding: would push every part under the fold</li><li>72px nav: the header must stay slim</li></ul></div>
+    <div class="box"><h3>Linear</h3>
+      <ul class="l yes"><li>Roboto: the first face in Linear's own fallback list that Google Fonts serves</li><li>Type: caption 12/1.4, body-sm 14/1.5, body 16/1.5/-0.05px, subhead 20/1.4/-0.2px, card-title 22, headline 28/1.2/-0.6px at 600; buttons 500</li><li>Spacing 4, 8, 12, 16, 24, 32, 48</li><li>Radius: chips 4, buttons 8, cards 12, status pills full</li><li>Depth: surface ladder plus hairline; hover lifts to surface-2 with the stronger hairline</li><li>Pricing tabs: canvas with ink-subtle, selected lifts to surface-2</li><li>Top nav 56; button padding 8 14; status badge 2 8</li></ul>
+      <ul class="l no"><li>Dark only canvas: the user's four schemes stay, the ladder runs on whichever is active (noted conflict)</li><li>Lavender accent: palette</li><li>Focus ring at 50% opacity: it would fall under 3:1, kept solid</li><li>Display tracking of -1 to -3px: nothing here is above 28px</li><li>Product screenshots as protagonist, Linear Mono: not applicable</li></ul></div>
+  </div>
+</section>
+
+<section>
+  <h2>Fallbacks (marked "not specified" in tokens.css)</h2>
+  <div class="cols">
+    <div class="box"><h3>IBM</h3><ul class="l fb"><li>Badge padding: 2px 8px</li><li>Wallet row padding: 4px (the xxs step)</li><li>Card padding 16 is the resource tile's, used for every part</li></ul></div>
+    <div class="box"><h3>Mercury</h3><ul class="l fb"><li>A 4px step: not in its scale, 4px kept for hairline gaps</li><li>Line height for 14px running text: 1.4 (ui-sm is set at 1 for one line labels)</li><li>Badge padding: 2px 8px</li><li>Header: 56 instead of the 72 nav</li><li>Tabs: not specified; selected is the solid primary pill, the rest the 10% tint</li><li>Focus ring: 2px</li><li>Card padding: the toast's 12 16 instead of 32</li></ul></div>
+    <div class="box"><h3>Linear</h3><ul class="l fb"><li>Font: Roboto, not the Inter its note suggests, because the rule was the first free fallback in its list</li><li>Compact control height: 32</li><li>Wallet row padding: 4px instead of the changelog's 24</li><li>Card padding: 16 instead of 24</li><li>The white top edge highlight on lifted panels has no value in the file: not adopted</li></ul></div>
+  </div>
+  <p style="margin-top: var(--sp-4)">For all three: Google Fonts css2 has no version parameter, so each URL pins the exact family and weight axis. Code text stays on the system mono stack. Chart labels inside the small SVGs keep their 10 and 11px sizes, which no file covers.</p>
+</section>
+
+<section>
+  <h2>The six hard rules</h2>
+  <table>
+    <tr><th>1. The agent prepares, the advisor decides</th><td><span class="tag">Met.</span> No layout element is an action to sell: the only buttons are replay, the bar, the answers, the toggles and copy. The headline keeps "Worth discussing" and "Worth asking about"; the summary speaks of held back items and reviews.</td></tr>
+    <tr><th>2. Synthetic fields stay labelled</th><td><span class="tag">Met.</span> The review card label reads "Periodic review, synthetic date"; the review part ends with "Synthetic date."; the timeline says "synthetic"; the footer says review dates and vulnerability flags are synthetic.</td></tr>
+    <tr><th>3. No raw probability</th><td><span class="tag">Met.</span> The ranked component is not mounted. The summary shows counts, dates and words only; scores appear as bands ("Scores 50% to 100%") and take up rates, as before.</td></tr>
+    <tr><th>4. Held back stays visible and explained</th><td><span class="tag">Met.</span> Named in the summary card and in the headline sub line, listed with rule and reason in part 3, marked in the wallet with glyph and word; nothing is collapsed.</td></tr>
+    <tr><th>5. Every number from data.json</th><td><span class="tag">Met.</span> The HTML holds only words and mounts. Counts, dates, tenure and step numbers come from the components reading data.json once through field.js.</td></tr>
+    <tr><th>6. The step to part link gets clearer</th><td><span class="tag">Met.</span> Part under step on every width, a stem and a rail, hover and focus light the pair, the part heading carries the step marker, replay fades each part until its step is done.</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>Round 2: what changed, and which report asked for it</h2>
+  <figure><img src="compare2_desktop_client10.png" alt="Client 10 at 1440 by 900 in ibm: round 1 on the left, round 2 on the right"><figcaption>Round 1 and round 2, ibm, client 10.</figcaption></figure>
+  <figure><img src="compare2_desktop_ds_client10.png" alt="Client 10 at 1440 by 900 in round 2: ibm, mercury and linear side by side"><figcaption>Round 2 in ibm, mercury and linear.</figcaption></figure>
+  <div class="cols">
+    <div class="box"><h3>Layout (critique, user research)</h3><ul class="l yes">
+      <li>Products and the timeline left part 1 for their own row under parts 1 to 4, tagged as from step 1 with a short stem up into part 1; parts 1 to 4 now share one height, so no lane leaves a hole</li>
+      <li>Spine columns 1, 0.95, 0.95, 1.05, 1.65: no answer group stacks one per row and no part title wraps at 1440</li>
+      <li>The follow up line sits at the top of part 5; the band chart moved behind each item's Why</li>
+      <li>The part number sits left of the title, on the stem's side</li></ul></div>
+    <div class="box"><h3>Wording and the summary (user research, critique)</h3><ul class="l yes">
+      <li>Step 2 returns the count only ("4 products scored")</li>
+      <li>A held back item shows no score on its face; the band is behind Why, said to be the model's</li>
+      <li>"Nothing to discuss after the checks."; the question kind "Top suggestion" reads "Highest after the checks"</li>
+      <li>The user's decision: a product the client owns is "Has it" (mapped in variants.js; data.json still says "Held"). Owned products sit in one group; held back rows are tinted and ruled apart</li>
+      <li>The summary drops the repeated segment and adds "What changed"; every card carries a focusable step tag; a calm glyph when nothing is held back</li>
+      <li>One context line under the header; the data source is read from data.json</li></ul></div>
+    <div class="box"><h3>Design system (design_system.md)</h3><ul class="l yes">
+      <li>Group A: skeleton bars on a hairline token (the Mercury skeleton shows again), one held back rule for all layers, a single lit ring, swatches painted from each scheme's tokens, contrast.py now scans variants.js</li>
+      <li>Group C: five role sizes (caption, body-sm, body, title, headline) plus a phone headline; no 10 or 11px literals; line height tokens; Mercury titles 480, Linear titles 500</li>
+      <li>Group D (cheap part): a 2px step, size, border and motion tokens; the js reads easing and durations from tokens.css</li>
+      <li>Mercury: white cards with a 1px rule and tinted items; selected tabs take the soft tint instead of the solid pill</li>
+      <li>ibm borrows linear's zero tracking on 12 and 14px text, flagged as a deviation</li></ul>
+      <ul class="l no"><li>Groups B (colour tidy) and E (renames, dead code) are left for later: safe but wide</li></ul></div>
+  </div>
+  <p>Phone: summary first, each step above its part, products folded behind one button that counts what is inside; "What not to offer" starts about 300px higher.</p>
+</section>
+
+<section>
+  <h2>Checks</h2>
+  <p>Round 1: contrast.py 468 pairs over 4 schemes and 3 layers, 0 failing, no raw colours outside the scheme blocks (see contrast.txt). For each layer in S1 and all 40 clients: every mount renders real data, nothing clipped at 1440 by 900, 1280 by 800 and 390, no horizontal scroll at 390, no console errors; the bar, an answer, a step link and a replay rerender only the mounts that depend on them.</p>
+  <p>Round 2: contrast.py 540 pairs, 0 failing, now also scanning variants.js. 135 tests pass. Every layer in S1, all 40 clients: every mount renders, nothing clipped at 1280 by 800, no horizontal scroll at 390, no console errors, interaction checks pass.</p>
+</section>
+
+</div></body></html>

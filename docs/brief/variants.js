@@ -1,6 +1,8 @@
-/* the shared layer for the four layout variants. it loads ../data.json through ../field.js, keeps one state
+/* the shared layer for the brief page. it loads ../data.json once through ../field.js, keeps one state
    (client, bar, chosen answer, linked step), and renders components into whatever containers a layout hands it.
    a layout only says where each component goes: V.boot({mounts: {"#wallet": "wallet", ...}}).
+   every mount shows a skeleton until the data is in, and says what it depends on, so a change only
+   rerenders the mounts it touches: a new client redraws the brief, the bar or an answer only the parts that move.
    no number is typed in here; everything comes from data.json. no raw probability is ever printed, except
    by V.components.ranked, which a layout must label as the raw model output. */
 (function(){
@@ -10,6 +12,11 @@ var Field = window.Field, esc = Field.esc;
 var reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
 /* ---------- small words ---------- */
+/* motion comes from tokens.css, so the js never keeps its own copy of an easing or a duration */
+function motion(name, fallback){
+  var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return fallback == null ? (v || "ease") : (parseFloat(v) || fallback);
+}
 function pct(x){ return Math.round(x * 100) + "%"; }
 function list(a){ return a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1]; }
 function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
@@ -29,19 +36,28 @@ function tenureWords(m){
 }
 /* how a money flow reads: asked about, never sold */
 var FLOW_ASK = {salary_deposit: "where the salary is paid", pension_deposit: "where the pension is paid", direct_debit: "how the bills are paid"};
+/* no colour lives here: each swatch carries its scheme id and tokens.css paints it from that scheme's tokens */
 var SCHEMES = [
-  {id: "S1", name: "Teal and cherry", sw: ["#1F4E5F", "#982649"]},
-  {id: "S2", name: "Calm banking light", sw: ["oklch(33% 0.095 262)", "oklch(45% 0.11 152)"]},
-  {id: "S3", name: "Dark slate", sw: ["oklch(22.5% 0.018 252)", "oklch(82% 0.13 165)"]},
-  {id: "S4", name: "Warm paper", sw: ["oklch(68% 0.13 72)", "oklch(41% 0.07 195)"]}
+  {id: "S1", name: "Teal and cherry"},
+  {id: "S2", name: "Calm banking light"},
+  {id: "S3", name: "Dark slate"},
+  {id: "S4", name: "Warm paper"}
+];
+/* the design system layer: type, space, depth and shape from each DESIGN.md; the colours stay the scheme's */
+var DSS = [
+  {id: "ibm", name: "IBM Carbon"},
+  {id: "mercury", name: "Mercury"},
+  {id: "linear", name: "Linear"}
 ];
 /* which agent step produced which part of the brief */
 var STEP_OF = {who: 1, help: 2, not: 3, due: 4, qs: 5};
 var BARS = [0.1, 0.2, 0.3, 0.5];
+/* the question kinds come from data.json; "top suggestion" read like a sales opener, so the page says what it means */
+var KIND_WORDS = {"Top suggestion": "Highest after the checks"};
 
 /* ---------- state ---------- */
 var S = {F: null, v: null, m: null, thr: 0.1, q: -1, a: -1, open: {}, fu: false, link: 0, replaying: false, stepState: [], cancel: function(){}};
-var mounts = [], handlers = {render: [], link: [], step: [], client: [], ready: []};
+var mounts = [], handlers = {render: [], link: [], step: [], client: [], ready: [], resize: []};
 function emit(evt){ var a = [].slice.call(arguments, 1); handlers[evt].forEach(function(fn){ fn.apply(null, a); }); }
 
 /* ---------- the model: every product the agent looked at, and the lane it sits in now (ported from brief.html) ---------- */
@@ -110,14 +126,17 @@ function headline(m){
 }
 
 /* where a product in the wallet stands now, after the bar and any chosen answer */
-var STATE_WORDS = {held: "Held", discuss: "Worth discussing", ask: "Worth asking about", progress: "Likely in progress", heldback: "Held back", none: "Not in data"};
+/* "has it" is the word for a product the client owns, so it never reads like "held back". data.json still says "Held";
+   i map it here and leave the data alone */
+var STATE_WORDS = {held: "Has it", discuss: "Worth discussing", ask: "Worth asking about", progress: "Likely in progress", heldback: "Held back", none: "Not in data"};
+function dataWord(w){ return w === "Held" ? STATE_WORDS.held : w; }
 function walletState(p){
   if (!p.product) return {s: "none", w: STATE_WORDS.none, from: 1};
   var it = itemOf(S.m, p.product);
   if (p.state === "held") return {s: "held", w: STATE_WORDS.held, from: 1};
   if (!it){
     if (p.state === "not_in_data") return {s: "none", w: STATE_WORDS.none, from: 1};
-    return {s: "quiet", w: p.state_words, from: 2};
+    return {s: "quiet", w: dataWord(p.state_words), from: 2};
   }
   if (it.lane === "offer") return {s: "discuss", w: STATE_WORDS.discuss, from: 2};
   if (it.lane === "ask") return {s: "discuss", w: STATE_WORDS.ask, from: 2};
@@ -127,8 +146,8 @@ function walletState(p){
   if (it.kind === "prog" && !it.fell) return {s: "progress", w: STATE_WORDS.progress, from: 3};
   if (it.fell) return {s: "quiet", w: "Under the " + pct(S.m.t) + " bar", from: 2};
   if (it.ans) return {s: "quiet", w: "Not raised after the answer", from: 5};
-  if (it.lane === "below") return {s: "quiet", w: p.state_words, from: 2};
-  return {s: "quiet", w: p.state_words, from: 2};
+  if (it.lane === "below") return {s: "quiet", w: dataWord(p.state_words), from: 2};
+  return {s: "quiet", w: dataWord(p.state_words), from: 2};
 }
 
 /* ---------- glyphs: one simple shape per state, drawn here, never from an icon pack ---------- */
@@ -191,6 +210,45 @@ C.chips = function(el, ctx, opts){
   if (v.care) chip("Care", "Check first", "care", 3, v.care.signals.join(" "));
   el.innerHTML = '<ul class="v-chips" aria-label="Key facts">' + chips.join("") + '</ul>';
 };
+/* the quiet facts under the name: age, income, the meeting date, and the care check when there is one */
+C.facts = function(el, ctx){
+  var v = ctx.v, p = briefOf(v).who.profile || {};
+  el.innerHTML = '<p class="v-facts" aria-label="Key facts"><span' + fromAttr(1) + '>Age<b>' + esc(p.age == null ? "not recorded" : String(Math.round(p.age))) + '</b></span>' +
+    '<span' + fromAttr(1) + '>Income recorded<b>' + (p.income == null ? "No" : "Yes") + '</b></span>' +
+    '<span>Meeting<b>' + esc(v.meeting) + '</b></span>' +
+    (v.care ? '<span class="care"' + fromAttr(3) + ' title="' + esc(v.care.signals.join(" ")) + '">Care<b>Check first</b></span>' : '') + '</p>';
+};
+/* the summary strip: what changed, tenure, review and held back. the segment is already the badge next to the name,
+   so it is not repeated here. each card has a value, a label, a status word with its glyph, coloured only by the state
+   tokens, and the tag of the step that produced it, which is the keyboard route to that step */
+var CHANGE_SHORT = {flag_new_products: "Took up products", flag_dropped_products: "Closed products", flag_activity_drop: "Became inactive",
+  flag_moved: "Moved province", flag_new_client: "New client", flag_segment_change: "Segment changed"};
+C.summary = function(el, ctx){
+  var v = ctx.v, b = briefOf(v), p = b.who.profile || {}, d = v.due, flags = b.who.change_flags, cards = [];
+  var hold = lane(ctx.m, "hold");
+  function card(n, key, val, lbl, st, word, tone){
+    cards.push('<li class="v-stat" data-key="' + key + '"' + fromAttr(n) + (tone ? ' data-tone="' + tone + '"' : '') + '><span class="lbl">' + esc(lbl) + '</span>' + fromTag(n) +
+      '<span class="val">' + esc(val) + '</span><span class="sw st-' + st + '">' + glyph(st === "info" ? "info" : st, 14) + '<span>' + esc(word) + '</span></span></li>');
+  }
+  var ch = flags.map(function(f, k){ return {short: CHANGE_SHORT[f], sentence: b.who.changes[k]}; }).filter(function(c){ return c.short; });
+  /* the first change is the value; any others are counted in the status line and drawn on the timeline */
+  card(1, "changed", ch.length ? ch[0].short : "Nothing recorded", "What changed", ch.length ? "info" : "quiet",
+    ch.length ? ch[0].sentence.replace(/\.$/, "") + (ch.length > 1 ? ", and " + (ch.length - 1) + " more on the timeline" : "") + "." : "No changes in the last six months");
+  var meet = iso(b.meeting_date), joined = p.tenure_months != null ? addMonths(meet, -Math.round(p.tenure_months)) : null;
+  card(1, "tenure", tenureWords(p.tenure_months), "Tenure", "quiet", joined ? "Joined " + monYear(joined) : "Start date not recorded");
+  var rv = b.due_anyway.next_review ? dayMon(iso(b.due_anyway.next_review)) : "No date on file";
+  var rs = d.state === "overdue" ? ["heldback", "Overdue by " + plural(-d.days, "day")] : d.state === "due" ? ["progress", "Due in " + plural(d.days, "day")] : d.state === "not_due" ? ["quiet", "Not due"] : ["none", "No review date"];
+  card(4, "review", rv, "Periodic review, synthetic date", rs[0], rs[1]);
+  var nChecked = v.toolLog.filter(function(e){ return e.tool === "check_suitability"; }).length;
+  card(3, "held", hold.length ? list(hold.map(function(it){ return it.label; })) : "Nothing", "Held back", hold.length ? "heldback" : "quiet",
+    hold.length ? (hold.length === 1 ? "The reason is in part 3" : "The reasons are in part 3") : nChecked ? plural(nChecked, "product") + " checked against the rules" : "Nothing to check", hold.length ? "heldback" : "");
+  el.innerHTML = '<ul class="v-sum" aria-label="Client summary">' + cards.join("") + '</ul>';
+};
+/* one quiet line under the header that says what the page is. the data source comes from data.json */
+C.context = function(el){
+  var src = (S.F.data.meta || {}).source;
+  el.innerHTML = '<p>Prototype for a job application' + (src ? ', built on the ' + esc(src) : '') + '. Review dates and vulnerability flags are synthetic. The agent prepares the brief; the advisor decides.</p>';
+};
 C.meeting = function(el, ctx){ el.innerHTML = '<p class="v-meeting">Meeting on <b>' + esc(ctx.v.meeting) + '</b></p>'; };
 
 /* the relationship timeline. the data gives windows, not dates, for changes, so those are drawn as spans over the window */
@@ -240,7 +298,7 @@ C.timeline = function(el, ctx, opts){
   if (rv) pt(X(rv), "rev" + (overdue ? " overdue" : ""), overdue ? "Review overdue" : "Next review", dayMon(rv) + ", synthetic", 4);
   /* labels: place left to right, drop to a second row when two would touch */
   labs.sort(function(a, c){ return a.x - c.x; });
-  var rows = [[], []], LW = function(l){ return Math.max(l.lab.length, l.sub.length) * 6.3 + 8; };
+  var rows = [[], []], LW = function(l){ return Math.max(l.lab.length, l.sub.length) * 6.9 + 8; };
   function setA(l, anchor){ var w = LW(l); l.anchor = anchor; l.a0 = anchor === "start" ? l.x - 4 : anchor === "end" ? l.x - w + 4 : l.x - w / 2; l.a1 = l.a0 + w; }
   function hit(l, set){ return set.some(function(o){ return o !== l && !(l.a1 < o.a0 || l.a0 > o.a1); }); }
   labs.forEach(function(l, i){
@@ -274,6 +332,7 @@ C.timeline = function(el, ctx, opts){
 /* the wallet: every product by category; the five states carry a glyph, a colour and a word, the quiet ones are one muted line */
 C.wallet = function(el, ctx, opts){
   opts = opts || {};
+  if (opts.split) return walletSplit(el, ctx, opts);
   /* quiet: "inline" lists the quiet products under their own category; "bottom" gathers them by state under the wallet */
   var v = ctx.v, bottom = opts.quiet === "bottom", allQuiet = {};
   function quietHTML(q){ return Object.keys(q).map(function(w){ return '<p class="v-wquiet"' + fromAttr(2) + '><b>' + esc(w) + ':</b> ' + esc(q[w].join(", ")) + '</p>'; }).join(""); }
@@ -300,6 +359,38 @@ C.wallet = function(el, ctx, opts){
   }
   el.innerHTML = '<div class="v-wallet">' + html + '</div>';
 };
+/* the split wallet: what the client has sits in one quiet group, what the brief raised or held back sits apart as rows,
+   so "has it" and "held back" never share a column. empty categories fold into one "not in data" line */
+function walletCounts(v){
+  var c = {held: 0, discuss: 0, progress: 0, heldback: 0};
+  v.holdings.forEach(function(cat){ cat.products.forEach(function(p){ var ws = walletState(p); if (ws.s in c) c[ws.s]++; }); });
+  return c;
+}
+function walletSplit(el, ctx, opts){
+  var v = ctx.v, has = [], rows = [], none = [], quiet = {}, nHas = 0;
+  v.holdings.forEach(function(c){
+    if (!c.products.length){ none.push(c.category); return; }
+    var mine = [];
+    c.products.forEach(function(p){
+      var ws = walletState(p);
+      if (ws.s === "quiet"){ (quiet[ws.w] = quiet[ws.w] || []).push(p.label); return; }
+      if (ws.s === "held"){ mine.push(p); return; }
+      if (ws.s === "none"){ none.push(p.product ? p.label : c.category); return; }
+      rows.push('<li class="v-wrow" data-st="' + ws.s + '" data-item="w-' + esc(p.product) + '" data-p="' + esc(p.product) + '"' + fromAttr(ws.from) + (ws.t ? ' title="' + esc(ws.t) + '"' : '') + '>' +
+        glyph(ws.s, 16) + '<span class="nm">' + esc(p.label) + '<span class="cat">' + esc(c.category) + '</span></span><span class="sw st-' + ws.s + '">' + esc(ws.w) + '</span></li>');
+    });
+    if (mine.length){ nHas += mine.length; has.push('<li><span class="cat">' + esc(c.category) + '</span> ' + mine.map(function(p){ return '<span data-item="w-' + esc(p.product) + '" data-st="held">' + esc(p.label) + '</span>'; }).join(", ") + '</li>'); }
+  });
+  var html = '<div class="v-wsplit">' +
+    '<section class="v-wgrp v-whas" aria-label="' + esc(STATE_WORDS.held) + '"' + fromAttr(1) + '><h4 class="v-wgrp-h">' + glyph("held", 16) + '<span class="st-held">' + esc(STATE_WORDS.held) + '</span> <span class="v-count">' + nHas + '</span></h4>' +
+      (has.length ? '<ul class="v-whas-l">' + has.join("") + '</ul>' : '<p class="v-none">No products with this bank in this data.</p>') + '</section>' +
+    (rows.length ? '<section class="v-wgrp" aria-label="In this brief"><h4 class="v-wgrp-h">In this brief</h4><ul class="v-wrows">' + rows.join("") + '</ul></section>' : '') +
+    '</div>' +
+    (none.length ? '<p class="v-wnone"' + fromAttr(1) + '>' + glyph("none", 14) + '<span><b>' + esc(STATE_WORDS.none) + ':</b> ' + esc(list(none)) + '</span></p>' : '');
+  if (Object.keys(quiet).length) html += '<div class="v-wcat v-wcat-quiet"><p class="v-wcat-h">' + esc(opts.quietTitle || "Not raised for this client") + '</p>' +
+    Object.keys(quiet).map(function(w){ return '<p class="v-wquiet"' + fromAttr(2) + '><b>' + esc(w) + ':</b> ' + esc(quiet[w].join(", ")) + '</p>'; }).join("") + '</div>';
+  el.innerHTML = '<div class="v-wallet v-wallet-split">' + html + '</div>';
+}
 C.legend = function(el){
   el.innerHTML = '<p class="v-legend" aria-label="Product states">' + ["held", "discuss", "progress", "heldback", "none"].map(function(s){
     return '<span>' + glyph(s, 14) + esc(STATE_WORDS[s]) + '</span>'; }).join("") + '</p>';
@@ -319,37 +410,56 @@ function stepStatus(v, k){
   return "done";
 }
 function statusWords(v, k, st){
-  if (st === "blocked") return k === 2 ? "Held back " + v.steps[2].calls.filter(function(e){ return / blocked by /.test(e.summary); }).length : "Holds products";
+  if (st === "blocked") return k === 2 ? "Held back " + v.steps[2].calls.filter(function(e){ return / blocked by /.test(e.summary); }).length : "Holds back products";
   if (st === "none") return "Nothing found";
   return "Done";
 }
+/* what a step returned, in plain words. step 2 gives the count only: naming the highest scored product here
+   would put a product, maybe a held back one, above the brief as if it were the pick */
+function retWords(v, k){
+  if (k === 1){ var m = /^\d+ products? scored/.exec(v.steps[1].result || ""); return m ? m[0] : plural(v.ranked.length, "product") + " scored"; }
+  return cap(Field.clean(v.steps[k].result)) || "Nothing";
+}
 /* what the step read for this client, in plain words: the specs list the inputs, the calls say what came back */
 function readWords(s){ return s.reads; }
+function stepHTML(v, k, opts){
+  var s = v.steps[k], n = k + 1, st = S.replaying ? (S.stepState[k] || "wait") : "done", status = stepStatus(v, k);
+  var stw = st === "done" ? statusWords(v, k, status) : st === "run" ? "Running" : "Waiting";
+  var reads = readWords(s), budget = opts.readChars || 30, shown = [], open = !!S.open["step" + k];
+  /* opts.ret: the steps that keep their returned line. a step whose part sits right under it and says the same words drops it */
+  var ret = !opts.ret || opts.ret.indexOf(n) >= 0;
+  /* the read line shows what fits in about one line; the rest sits behind "and n more" */
+  for (var r = 0; r < reads.length; r++){ if (shown.length && shown.concat([reads[r]]).join(", ").length > budget) break; shown.push(reads[r]); }
+  var tools = s.calls.map(function(e){ return '<li><span class="v-tool">' + esc(e.tool) + '</span> ' + esc(Field.clean(e.summary)) + '</li>'; }).join("");
+  var Tag = opts.tag || "li";
+  return '<' + Tag + ' class="v-step" id="v-step-' + n + '" data-step-n="' + n + '" data-s="' + st + '" data-status="' + status + '">' +
+    '<span class="v-step-n" aria-hidden="true">' + n + '</span><div class="v-step-body">' +
+    '<div class="v-step-top"><button type="button" class="v-step-btn" data-act="link" data-step="' + n + '" aria-pressed="' + (S.link === n) + '" aria-label="Step ' + n + ', ' + esc(s.name) + '. Show what this step produced" title="Show what this step produced">' +
+      '<span>' + esc(s.name) + '</span></button>' +
+      '<span class="v-st" data-status="' + (st === "done" ? status : st) + '">' + esc(stw) + '</span></div>' +
+    '<dl class="v-step-io"><dt>Read</dt><dd>' + esc(cap(shown.join(", "))) + (reads.length > shown.length ? ' <button type="button" class="v-link" data-act="toggle" data-key="step' + k + '" aria-expanded="' + open + '" aria-controls="v-sm-' + n + '">and ' + (reads.length - shown.length) + ' more</button>' : '') + '</dd>' +
+    (ret ? '<dt>Returned</dt><dd class="ret">' + (st === "done" ? esc(retWords(v, k)) : '<span class="v-meta">' + (st === "run" ? "Working" : "Not run yet") + '</span>') + '</dd>' : '') + '</dl>' +
+    '<div class="v-step-more" id="v-sm-' + n + '"' + (open ? '' : ' hidden') + '><p>Also read: ' + esc(reads.slice(shown.length).join(", ")) + '.</p><ul>' + tools + '</ul><p>' + esc(s.rule) + '</p></div>' +
+    '</div></' + Tag + '>';
+}
 C.steps = function(el, ctx, opts){
   opts = opts || {};
   var v = ctx.v;
   var head = opts.head === false ? '' :
-    '<div class="v-agent-h"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><h2 class="v-agent-t">' + esc(opts.title || "The agent") + '</h2>' +
-    (S.replaying ? '<button type="button" class="v-btn v-replay" data-act="skip">Skip</button>' : '<button type="button" class="v-btn v-replay" data-act="replay">' + glyph("replay", 14) + 'Replay</button>') + '</div>' +
+    '<div class="v-agent-h"><h2 class="v-agent-t">' + esc(opts.title || "The agent") + '</h2>' +
+    (S.replaying ? '<button type="button" class="v-btn v-replay" data-act="skip">Skip</button>' : '<button type="button" class="v-btn v-replay" data-act="replay">' + glyph("replay", 14) + 'Replay</button>') +
     '<p class="v-agent-sub">' + esc(opts.sub || ("One agent, five tool steps, " + plural(v.nCalls, "logged call") + ".")) + '</p></div>';
-  var steps = v.steps.map(function(s, k){
-    var n = k + 1, st = S.replaying ? (S.stepState[k] || "wait") : "done", status = stepStatus(v, k);
-    var stw = st === "done" ? statusWords(v, k, status) : st === "run" ? "Running" : "Waiting";
-    var reads = readWords(s), budget = opts.readChars || 30, shown = [], open = !!S.open["step" + k];
-    /* the read line shows what fits in about one line; the rest sits behind "and n more" */
-    for (var r = 0; r < reads.length; r++){ if (shown.length && shown.concat([reads[r]]).join(", ").length > budget) break; shown.push(reads[r]); }
-    var tools = s.calls.map(function(e){ return '<li><span class="v-tool">' + esc(e.tool) + '</span> ' + esc(Field.clean(e.summary)) + '</li>'; }).join("");
-    return '<li class="v-step" id="v-step-' + n + '" data-step-n="' + n + '" data-s="' + st + '" data-status="' + status + '">' +
-      '<span class="v-step-n" aria-hidden="true">' + n + '</span><div class="v-step-body">' +
-      '<div class="v-step-top"><button type="button" class="v-step-btn" data-act="link" data-step="' + n + '" aria-pressed="' + (S.link === n) + '" title="Show what this step produced">' +
-        '<span>' + esc(s.name) + '</span></button>' +
-        '<span class="v-st" data-status="' + (st === "done" ? status : st) + '">' + esc(stw) + '</span></div>' +
-      '<dl class="v-step-io"><dt>Read</dt><dd>' + esc(cap(shown.join(", "))) + (reads.length > shown.length ? ' <button type="button" class="v-link" data-act="toggle" data-key="step' + k + '" aria-expanded="' + open + '" aria-controls="v-sm-' + n + '">and ' + (reads.length - shown.length) + ' more</button>' : '') + '</dd>' +
-      '<dt>Returned</dt><dd class="ret">' + (st === "done" ? esc(cap(Field.clean(s.result)) || "Nothing") : '<span class="v-meta">' + (st === "run" ? "Working" : "Not run yet") + '</span>') + '</dd></dl>' +
-      '<div class="v-step-more" id="v-sm-' + n + '"' + (open ? '' : ' hidden') + '><p>Also read: ' + esc(reads.slice(shown.length).join(", ")) + '.</p><ul>' + tools + '</ul><p>' + esc(s.rule) + '</p></div>' +
-      '</div></li>';
-  }).join("");
-  el.innerHTML = head + '<ol class="v-steps" aria-label="Agent steps">' + steps + '</ol>';
+  el.innerHTML = head + '<ol class="v-steps" aria-label="Agent steps">' + v.steps.map(function(s, k){ return stepHTML(v, k, opts); }).join("") + '</ol>';
+};
+/* one step on its own, so a layout can put each step at the head of the part it produced. opts.n is the step number */
+C.step = function(el, ctx, opts){
+  opts = opts || {};
+  el.innerHTML = stepHTML(ctx.v, opts.n - 1, {readChars: opts.readChars, ret: opts.ret, tag: "div"});
+};
+/* the heading of a brief part: the question it answers and the marker of the step that made it */
+C.partHead = function(el, ctx, opts){
+  opts = opts || {};
+  el.innerHTML = '<h2 class="v-part-h" id="ph-' + opts.n + '">' + (opts.glyph ? glyph(opts.glyph, 16) : '') + '<span>' + esc(opts.title) + '</span>' + fromTag(opts.n) + '</h2>';
 };
 
 /* ---------- brief parts ---------- */
@@ -387,7 +497,9 @@ function bandChart(it, m){
 function ansWords(){ return S.q >= 0 ? "“" + S.v.questions[S.q].answers[S.a].answer + "”" : ""; }
 function underBar(it, m){ return m.t > 0.1 + 1e-9 && it.prob != null && it.prob < m.t - 1e-9; }
 function itemHTML(it, m, opts){
+  /* the band chart is evidence one level down: it opens with why, next to the score band it explains */
   var x = it.x || {}, chart = (it.lane === "offer" || it.lane === "ask") && opts.charts !== false ? bandChart(it, m) : "";
+  var cap = chart ? '<p class="v-band-cap">Bars: share of similar clients who took it up, by score band. The coloured bar is this client\u2019s band.</p>' : '';
   var from = it.lane === "offer" || it.lane === "ask" ? 2 : it.ans ? 5 : it.lane === "hold" ? (it.kind === "wait" ? 4 : 3) : it.kind === "prog" ? 3 : 2;
   var h = '<li class="v-item" data-item="i-' + esc(it.p) + '" data-p="' + esc(it.p) + '" data-lane="' + it.lane + '"' + fromAttr(from) + '><div class="txt">';
   var also = m.items.find(function(a){ return a.kind === "also" && a.with === it.p; });
@@ -395,13 +507,19 @@ function itemHTML(it, m, opts){
     var open = !!S.open["why-" + it.p];
     h += '<p class="nm">' + esc(it.label) + '</p><p class="ev">' + esc(x.line) + '. <button type="button" class="v-link" data-act="toggle" data-key="why-' + esc(it.p) + '" aria-expanded="' + open + '" aria-controls="v-why-' + esc(it.p) + '">Why</button></p>' +
       '<div class="v-why" id="v-why-' + esc(it.p) + '"' + (open ? '' : ' hidden') + '><p>Scores ' + bandWords(it.lo, it.hi) + '. ' + esc(x.bandSentence) + '</p>' +
-      (x.reasons.length ? '<p>The score leans on: ' + esc(x.reasons.join("; ")) + '.</p>' : '') + '</div>';
+      (x.reasons.length ? '<p>The score leans on: ' + esc(x.reasons.join("; ")) + '.</p>' : '') + chart + cap + '</div>';
   } else if (it.lane === "ask"){
-    h += '<p class="nm">' + esc(it.label) + '</p><p class="ev">Not with this bank yet. ' + esc(x.line) + '.' + (also ? ' ' + esc(also.label) + ' is counted with it.' : '') + '</p>';
+    var ao = !!S.open["why-" + it.p];
+    h += '<p class="nm">' + esc(it.label) + '</p><p class="ev">Not with this bank yet. ' + esc(x.line) + '.' + (also ? ' ' + esc(also.label) + ' is counted with it.' : '') +
+      (chart ? ' <button type="button" class="v-link" data-act="toggle" data-key="why-' + esc(it.p) + '" aria-expanded="' + ao + '" aria-controls="v-why-' + esc(it.p) + '">Why</button>' : '') + '</p>' +
+      (chart ? '<div class="v-why" id="v-why-' + esc(it.p) + '"' + (ao ? '' : ' hidden') + '>' + chart + cap + '</div>' : '');
   } else if (it.lane === "hold"){
     if (it.ans) h += '<p class="nm">' + esc(it.label) + '</p><p class="ev"><span class="rl">Held back by the answer ' + esc(ansWords()) + '.</span> ' + esc(it.ans.reason || "") + '</p>';
-    else if (it.kind === "blocked") h += '<p class="nm">' + esc(it.label) + '</p>' + x.rules.map(function(r, j){ return '<p class="ev"><span class="rl">' + esc(r) + '.</span> ' + esc(x.reasons[j] || "") + '</p>'; }).join("") + (underBar(it, m) ? '<p class="ev">Held by this rule whatever the bar.</p>' : '');
-    else h += '<p class="nm">' + esc(it.label) + '</p><p class="ev"><span class="rl">Waits for the overdue review.</span> Scores ' + bandWords(it.lo, it.hi) + '.</p>';
+    else if (it.kind === "blocked") h += '<p class="nm">' + esc(it.label) + '</p>' + x.rules.map(function(r, j){ return '<p class="ev"><span class="rl">' + esc(r) + '.</span> ' + esc(x.reasons[j] || "") + '</p>'; }).join("") + (underBar(it, m) ? '<p class="ev">Held back by this rule whatever the bar.</p>' : '');
+    else { var hk = "hw-" + it.p, ho = !!S.open[hk];
+      /* a held back item shows no score on its face; the band sits one click away, said to be the model's */
+      h += '<p class="nm">' + esc(it.label) + '</p><p class="ev"><span class="rl">Waits for the overdue review.</span>' + (it.lo != null ? ' <button type="button" class="v-link" data-act="toggle" data-key="' + hk + '" aria-expanded="' + ho + '" aria-controls="v-hw-' + esc(it.p) + '">Why</button>' : '') + '</p>' +
+        (it.lo != null ? '<p class="ev" id="v-hw-' + esc(it.p) + '"' + (ho ? '' : ' hidden') + '>Score band from the model: ' + bandWords(it.lo, it.hi) + '. It does not count while the review is overdue.</p>' : ''); }
   } else {
     var why = it.fell ? "Under the " + pct(m.t) + " bar. It scores " + bandWords(it.lo, it.hi) + "." :
       it.ans ? "Not raised after the answer " + ansWords() + "." :
@@ -411,7 +529,7 @@ function itemHTML(it, m, opts){
       (short ? '<p class="ev">Likely already in progress. <button type="button" class="v-link" data-act="toggle" data-key="' + wk + '" aria-expanded="' + wo + '" aria-controls="v-aw-' + esc(it.p) + '">Why</button></p><p class="ev" id="v-aw-' + esc(it.p) + '"' + (wo ? '' : ' hidden') + '>' + esc(why) + '</p>'
         : '<p class="ev">' + esc(why) + '</p>');
   }
-  return h + '</div>' + chart + '</li>';
+  return h + '</div></li>';
 }
 function laneBlock(key, title, gl, its, empty, from, opts){
   return '<section class="v-lane" data-lane-key="' + key + '" aria-label="' + esc(title) + '"' + fromAttr(from, ' data-part="' + key + '"') + '>' +
@@ -421,23 +539,20 @@ function laneBlock(key, title, gl, its, empty, from, opts){
 C.discuss = function(el, ctx, opts){
   opts = opts || {};
   /* opts.bar: "head" puts the bar control in the lane heading, "below" under the lane */
-  el.innerHTML = laneBlock("offer", "Worth discussing", "discuss", lane(ctx.m, "offer"), "Nothing the bank sells, after the checks.", 2, {charts: opts.charts, tags: opts.tags, extra: opts.bar === "head" ? '<span style="margin-left:auto">' + barHTML() + '</span>' : ''}) +
-    (opts.caption === false || !lane(ctx.m, "offer").some(function(it){ return it.lo != null; }) ? '' : '<p class="v-band-cap">Bars: share of similar clients who took it up, by score band. The coloured bar is this client’s band.</p>') +
+  el.innerHTML = laneBlock("offer", "Worth discussing", "discuss", lane(ctx.m, "offer"), "Nothing to discuss after the checks.", 2, {charts: opts.charts, tags: opts.tags, extra: opts.bar === "head" ? '<span style="margin-left:auto">' + barHTML() + '</span>' : ''}) +
     (opts.bar === "below" ? '<div class="v-bar-row">' + barHTML(true) + '</div>' : '');
 };
 C.ask = function(el, ctx, opts){
   opts = opts || {};
   var its = lane(ctx.m, "ask");
   el.hidden = !its.length && opts.hideEmpty !== false;
-  /* the chart caption sits here only when the discuss lane has no chart to carry it */
-  var cap = opts.caption !== false && opts.charts !== false && its.some(function(it){ return it.lo != null; }) && !lane(ctx.m, "offer").some(function(it){ return it.lo != null; });
-  el.innerHTML = laneBlock("ask", "Worth asking about", "discuss", its, "Nothing to ask about.", 2, {charts: opts.charts, tags: opts.tags}) +
-    (cap ? '<p class="v-band-cap">Bars: share of similar clients who took it up, by score band. The coloured bar is this client\u2019s band.</p>' : '');
+  el.innerHTML = laneBlock("ask", "Worth asking about", "discuss", its, "Nothing to ask about.", 2, {charts: opts.charts, tags: opts.tags});
 };
 C.held = function(el, ctx, opts){
   opts = opts || {};
   var n = S.v.toolLog.filter(function(e){ return e.tool === "check_suitability"; }).length;
-  el.innerHTML = laneBlock("hold", "Held back", "heldback", lane(ctx.m, "hold"), n ? "Nothing. " + plural(n, "product") + " checked against the rules." : "Nothing to check.", 3, opts);
+  var hl = lane(ctx.m, "hold");
+  el.innerHTML = laneBlock("hold", "Held back", hl.length ? "heldback" : "quiet", hl, n ? "Nothing. " + plural(n, "product") + " checked against the rules." : "Nothing to check.", 3, opts);
 };
 C.aside = function(el, ctx, opts){
   opts = opts || {};
@@ -476,7 +591,7 @@ C.questions = function(el, ctx, opts){
   var v = ctx.v;
   el.innerHTML = '<section class="v-lane" aria-label="Questions"' + fromAttr(5, ' data-part="qs"') + '><h3 class="v-lane-h">' + esc(opts.title || "Questions to open with") + (opts.tags === false ? '' : ' ' + fromTag(5)) + '</h3>' +
     '<ol class="v-qs">' + v.questions.map(function(q, j){
-      var review = q.kind === "Periodic review", care = q.key === "care", kind = review ? "Part of the periodic review." : q.kind ? q.kind + "." : "";
+      var review = q.kind === "Periodic review", care = q.key === "care", kind = review ? "Part of the periodic review." : q.kind ? (KIND_WORDS[q.kind] || q.kind) + "." : "";
       var wk = "qwhy" + j, wopen = opts.why !== "toggle" || !!S.open[wk];
       /* why: "inline" always shows the reason; "toggle" keeps it one click away to save height */
       var whyHTML = opts.why === "toggle" ?
@@ -512,6 +627,13 @@ C.footer = function(el){
     '<p class="v-foot-l"><a href="../' + F.links.model + '">How the models perform</a> <a href="' + esc(F.links.code) + '">Code</a></p>';
 };
 
+/* a skeleton: grey lines where a part will be, shown until data.json is in */
+C.skeleton = function(el, ctx, opts){
+  var n = (opts && opts.lines) || 3, h = '<div class="v-sk" aria-hidden="true">';
+  for (var k = 0; k < n; k++) h += '<i></i>';
+  el.innerHTML = h + '</div>'; el.setAttribute("aria-busy", "true");
+};
+
 /* ---------- app chrome ---------- */
 C.picker = function(el){
   var F = S.F;
@@ -536,9 +658,30 @@ var scheme = {
 };
 C.scheme = function(el){
   var cur = scheme.get();
-  el.innerHTML = '<div class="v-scheme" role="group" aria-label="Colour scheme"><span class="lbl">Scheme</span>' + SCHEMES.map(function(s){
+  el.innerHTML = '<div class="v-switch v-scheme" role="group" aria-label="Colour scheme"><span class="lbl">Scheme</span><span class="opts">' + SCHEMES.map(function(s){
     return '<button type="button" data-act="scheme" data-id="' + s.id + '" aria-pressed="' + (s.id === cur) + '" title="' + esc(s.name) + '" aria-label="' + esc(s.id + ", " + s.name) + '">' +
-      '<span class="sw" aria-hidden="true"><i style="background:' + s.sw[0] + '"></i><i style="background:' + s.sw[1] + '"></i></span>' + s.id + '</button>'; }).join("") + '</div>';
+      '<span class="sw" data-scheme="' + s.id + '" aria-hidden="true"><i></i><i></i><i></i></span>' + s.id + '</button>'; }).join("") + '</span></div>';
+};
+/* the design system switch sits next to the scheme switch and works the same way: ?ds=ibm|mercury|linear */
+var ds = {
+  list: DSS,
+  get: function(){ return document.documentElement.getAttribute("data-ds") || "ibm"; },
+  set: function(id, push){
+    if (!DSS.some(function(d){ return d.id === id; })) id = "ibm";
+    document.documentElement.setAttribute("data-ds", id);
+    /* the head script owns the font links, so the face for a layer is only fetched when that layer is picked */
+    if (window.__dsFont) window.__dsFont(id);
+    document.querySelectorAll("[data-act=ds]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.getAttribute("data-id") === id)); });
+    if (push !== false){ try { var u = new URL(location.href); u.searchParams.set("ds", id); history.replaceState(null, "", u); } catch (e) {} }
+    /* type metrics change, so whatever is drawn to its box redraws once the face is in */
+    if (S.v){ emit("render", ctxNow()); if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ emit("render", ctxNow()); emit("resize"); }); }
+  },
+  fromURL: function(){ var m = /[?&]ds=(ibm|mercury|linear)\b/i.exec(location.search); return m ? m[1].toLowerCase() : null; }
+};
+C.ds = function(el){
+  var cur = ds.get();
+  el.innerHTML = '<div class="v-switch v-ds" role="group" aria-label="Design system"><span class="lbl">Design</span><span class="opts">' + DSS.map(function(d){
+    return '<button type="button" data-act="ds" data-id="' + d.id + '" aria-pressed="' + (d.id === cur) + '" title="' + esc(d.name) + ' type, space, depth and shape">' + esc(d.name.split(" ")[0]) + '</button>'; }).join("") + '</span></div>';
 };
 
 /* ---------- linking registry ---------- */
@@ -565,12 +708,37 @@ var links = {
 
 /* ---------- rendering ---------- */
 function ctxNow(){ return {F: S.F, v: S.v, m: S.m, state: S, V: V}; }
-function renderAll(flip){
+/* what each component reads. "client" is the picked client, "model" the lanes after the bar and the answer,
+   "answer" the chosen answer, "replay" whether the agent is replaying. a change only rerenders what reads it */
+var DEPS = {identity: ["client"], mismatch: ["client"], groupNote: ["client"], chips: ["client"], facts: ["client"], meeting: ["client"],
+  timeline: ["client"], wallet: ["client", "model"], legend: ["client"], steps: ["client", "replay"], step: ["client", "replay"], partHead: ["client"],
+  headline: ["client", "model"], care: ["client"], discuss: ["client", "model"], ask: ["client", "model"], held: ["client", "model"],
+  aside: ["client", "model"], review: ["client"], bar: ["client", "model"], questions: ["client", "answer"], followup: ["client", "answer"],
+  ranked: ["client"], summary: ["client", "model"], context: ["client"]};
+function depsOf(mt){ return (mt.opts && mt.opts.deps) || (typeof mt.fn === "string" ? DEPS[mt.fn] : mt.fn.deps) || ["client"]; }
+/* why: "client", "bar", "answer" or "replay" */
+function touches(mt, why){
+  var d = depsOf(mt);
+  if (why === "client") return true;
+  if (why === "bar") return d.indexOf("model") >= 0 || (S.q >= 0 && d.indexOf("answer") >= 0);
+  if (why === "answer") return d.indexOf("model") >= 0 || d.indexOf("answer") >= 0;
+  return d.indexOf(why) >= 0;
+}
+function draw(mt, ctx){
+  [].forEach.call(document.querySelectorAll(mt.sel), function(el){
+    (typeof mt.fn === "string" ? C[mt.fn] : mt.fn)(el, ctx, mt.opts);
+    el.removeAttribute("aria-busy");
+    /* a render count per mount, so a check can see that a change left the other parts alone */
+    el.setAttribute("data-renders", String(+(el.getAttribute("data-renders") || 0) + 1));
+  });
+}
+function renderAll(flip, why){
+  why = why || "client";
   var before = {}, oldLane = {};
   if (flip && !reduce) document.querySelectorAll("[data-item]").forEach(function(el){ before[el.getAttribute("data-item")] = el.getBoundingClientRect(); oldLane[el.getAttribute("data-item")] = el.getAttribute("data-lane") || el.getAttribute("data-st"); });
-  S.m = model(S.v, S);
+  if (why !== "replay") S.m = model(S.v, S);
   var ctx = ctxNow();
-  mounts.forEach(function(mt){ var els = document.querySelectorAll(mt.sel); [].forEach.call(els, function(el){ (typeof mt.fn === "string" ? C[mt.fn] : mt.fn)(el, ctx, mt.opts); }); });
+  mounts.forEach(function(mt){ if (touches(mt, why)) draw(mt, ctx); });
   links.apply();
   if (flip) document.querySelectorAll("[data-item]").forEach(function(el){
     var k = el.getAttribute("data-item"), now = el.getAttribute("data-lane") || el.getAttribute("data-st");
@@ -578,9 +746,17 @@ function renderAll(flip){
     el.classList.add("is-moved");
     var r0 = before[k]; if (!r0 || reduce) return;
     var r1 = el.getBoundingClientRect();
-    el.animate([{transform: "translate(" + (r0.left - r1.left) + "px," + (r0.top - r1.top) + "px)", opacity: .6}, {transform: "none", opacity: 1}], {duration: 360, easing: "cubic-bezier(.22,1,.36,1)"});
+    el.animate([{transform: "translate(" + (r0.left - r1.left) + "px," + (r0.top - r1.top) + "px)", opacity: .6}, {transform: "none", opacity: 1}], {duration: motion("--dur-slow", 360), easing: motion("--ease")});
   });
   emit("render", ctx);
+}
+/* during a replay a part waits, faded, until every step it came from is done. this marks what is already on the page,
+   so a replay never has to redraw the brief */
+function readyMarks(){
+  document.querySelectorAll("[data-from]").forEach(function(el){
+    var need = el.getAttribute("data-from").split(/\s+/).map(Number);
+    if (S.replaying && !need.every(function(n){ return S.stepState[n - 1] === "done"; })) el.setAttribute("data-ready", "0"); else el.removeAttribute("data-ready");
+  });
 }
 /* the five steps replay one after another, 150ms apart; what each step produced appears when it finishes */
 function setStep(k, st){
@@ -590,14 +766,11 @@ function setStep(k, st){
     li.setAttribute("data-s", st);
     var badge = li.querySelector(".v-st"), status = li.getAttribute("data-status");
     if (badge){ badge.setAttribute("data-status", st === "done" ? status : st); badge.textContent = st === "done" ? statusWords(S.v, k, status) : st === "run" ? "Running" : "Waiting"; }
-    var ret = li.querySelector("dd.ret"); if (ret && st === "done") ret.textContent = cap(Field.clean(S.v.steps[k].result)) || "Nothing";
+    var ret = li.querySelector("dd.ret"); if (ret && st === "done") ret.textContent = retWords(S.v, k);
     else if (ret && st === "run") ret.innerHTML = '<span class="v-meta">Working</span>';
   }
   if (st === "done"){
-    document.querySelectorAll('[data-from][data-ready="0"]').forEach(function(el){
-      var need = el.getAttribute("data-from").split(/\s+/).map(Number);
-      if (need.every(function(n){ return S.stepState[n - 1] === "done"; })) el.removeAttribute("data-ready");
-    });
+    readyMarks();
     emit("step", k + 1, "done");
     if (k === S.v.steps.length - 1) endReplay();
   } else emit("step", k + 1, st);
@@ -605,14 +778,14 @@ function setStep(k, st){
 function startReplay(){
   if (!S.v) return;
   S.cancel(); S.replaying = true; S.stepState = S.v.steps.map(function(){ return "wait"; });
-  renderAll(false);
+  renderAll(false, "replay"); readyMarks();
   S.cancel = Field.play(S.v.steps.length, setStep, 150);
 }
 function endReplay(){
   if (!S.replaying) return;
   S.cancel(); S.cancel = function(){}; S.replaying = false; S.stepState = [];
   var hadSkip = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute("data-act") === "skip";
-  renderAll(false);
+  renderAll(false, "replay"); readyMarks();
   if (hadSkip){ var r = document.querySelector('[data-act="replay"]'); if (r) r.focus(); }
 }
 function show(i, animate){
@@ -621,10 +794,14 @@ function show(i, animate){
   var sel = document.getElementById("v-pick"); if (sel) sel.value = String(i);
   try { var u = new URL(location.href); u.hash = S.v.ref.replace(/\s+/g, "-").toLowerCase(); history.replaceState(null, "", u); } catch (e) {}
   emit("client", S.v);
-  if (animate && !reduce) startReplay(); else renderAll(false);
+  /* a new client is the one change that redraws the whole brief; a replay then only fades and shows what is there */
+  if (animate && !reduce){ S.replaying = true; S.stepState = S.v.steps.map(function(){ return "wait"; }); }
+  renderAll(false, "client");
+  if (S.replaying){ readyMarks(); S.cancel = Field.play(S.v.steps.length, setStep, 150); }
 }
-function setAnswer(q, a){ S.q = q; S.a = a; renderAll(true); }
-function setBar(t){ if (Math.abs(t - S.thr) < 1e-9) return; S.thr = t; renderAll(true); }
+/* a chosen answer only moves the lanes and the questions; the bar only moves the lanes */
+function setAnswer(q, a){ S.q = q; S.a = a; renderAll(true, "answer"); }
+function setBar(t){ if (Math.abs(t - S.thr) < 1e-9) return; S.thr = t; renderAll(true, "bar"); }
 
 /* ---------- one delegated listener for every component ---------- */
 document.addEventListener("click", function(e){
@@ -640,7 +817,7 @@ document.addEventListener("click", function(e){
     if (act === "toggle"){ var key = b.getAttribute("data-key"), open = !S.open[key]; S.open[key] = open; b.setAttribute("aria-expanded", String(open));
       var t = document.getElementById(b.getAttribute("aria-controls")); if (t) t.hidden = !open; emit("render", ctxNow()); return; }
     if (act === "fu"){ S.fu = !S.fu; b.setAttribute("aria-expanded", String(S.fu)); b.textContent = S.fu ? "Hide the draft" : "Show the draft";
-      var body = document.getElementById("v-fu-body"); if (body){ body.hidden = !S.fu; if (S.fu && !reduce) body.animate([{opacity: 0, transform: "translateY(4px)"}, {opacity: 1, transform: "none"}], {duration: 220, easing: "cubic-bezier(.22,1,.36,1)"}); }
+      var body = document.getElementById("v-fu-body"); if (body){ body.hidden = !S.fu; if (S.fu && !reduce) body.animate([{opacity: 0, transform: "translateY(4px)"}, {opacity: 1, transform: "none"}], {duration: motion("--dur", 220), easing: motion("--ease")}); }
       emit("render", ctxNow()); return; }
     if (act === "copy"){
       var txt = (b.closest(".v-fu").querySelector(".v-fu-t") || {}).textContent || "", st = b.parentNode.querySelector(".v-fu-st");
@@ -651,6 +828,7 @@ document.addEventListener("click", function(e){
     if (act === "replay"){ startReplay(); var sk = document.querySelector('[data-act="skip"]'); if (sk) sk.focus(); return; }
     if (act === "skip"){ endReplay(); return; }
     if (act === "scheme"){ scheme.set(b.getAttribute("data-id")); return; }
+    if (act === "ds"){ ds.set(b.getAttribute("data-id")); return; }
     if (act === "prev"){ show((S.v.index - 1 + S.F.count) % S.F.count, true); return; }
     if (act === "next"){ show((S.v.index + 1) % S.F.count, true); return; }
     return;
@@ -670,6 +848,7 @@ document.addEventListener("keydown", function(e){
 function boot(opts){
   opts = opts || {};
   scheme.set(scheme.fromURL() || opts.scheme || "S1", false);
+  ds.set(ds.fromURL() || opts.ds || "ibm", false);
   Object.keys(opts.mounts || {}).forEach(function(sel){ var m = opts.mounts[sel]; mount(sel, Array.isArray(m) ? m[0] : m, Array.isArray(m) ? m[1] : undefined); });
   return Field.load(opts.url || "../data.json").then(function(F){
     S.F = F;
@@ -686,14 +865,19 @@ function boot(opts){
     document.body.insertAdjacentHTML("afterbegin", '<p class="v-loaderr">This page reads ../data.json and could not load it. Serve the docs folder (python -m http.server inside docs) and open variants/ from there.</p>');
   });
 }
-function mount(sel, fn, o){ mounts.push({sel: sel, fn: fn, opts: o}); if (S.v) renderAll(false); }
+/* a mount draws a skeleton straight away and its real part once the data is in. opts.sk sets how many skeleton lines */
+function mount(sel, fn, o){
+  var mt = {sel: sel, fn: fn, opts: o}; mounts.push(mt);
+  if (S.v) draw(mt, ctxNow());
+  else [].forEach.call(document.querySelectorAll(sel), function(el){ C.skeleton(el, null, {lines: (o && o.sk) || 3}); });
+}
 
 var V = {
-  boot: boot, mount: mount, components: C, links: links, scheme: scheme, glyph: glyph, fromTag: fromTag,
-  show: show, setAnswer: setAnswer, setBar: setBar, replay: startReplay, skip: endReplay, render: function(){ renderAll(false); },
+  boot: boot, mount: mount, components: C, links: links, scheme: scheme, ds: ds, glyph: glyph, fromTag: fromTag,
+  show: show, setAnswer: setAnswer, setBar: setBar, replay: startReplay, skip: endReplay, render: function(why){ renderAll(false, why); },
   on: function(evt, fn){ handlers[evt].push(fn); },
   state: S, model: model, lane: lane, headline: headline, walletState: walletState, stepStatus: stepStatus, bandChart: bandChart,
-  STATE_WORDS: STATE_WORDS, STEP_OF: STEP_OF, BARS: BARS, util: {pct: pct, list: list, cap: cap, low1: low1, bandWords: bandWords, tenureWords: tenureWords}
+  STATE_WORDS: STATE_WORDS, walletCounts: walletCounts, STEP_OF: STEP_OF, BARS: BARS, util: {pct: pct, list: list, cap: cap, low1: low1, bandWords: bandWords, tenureWords: tenureWords}
 };
 window.V = V;
 })();

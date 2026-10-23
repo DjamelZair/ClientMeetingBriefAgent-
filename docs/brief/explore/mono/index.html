@@ -1,0 +1,279 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Client Brief Mono</title>
+<meta name="description" content="Direction B, Mono: the client meeting brief as a monochrome board. Each agent step is a column, with the part of the brief it produced as cards under it.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- google fonts css2 has no version parameter, so the url pins the exact families and weights instead -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="mono.css">
+</head>
+<body>
+<a class="v-skip" href="#stage">Skip to the brief</a>
+<div class="win">
+  <aside class="side" aria-label="Agent and client">
+    <div class="brand"><span class="mk" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 3.5h10M3 8h10M3 12.5h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+      <div><b>Client brief</b><span>Prepared by one agent</span></div></div>
+    <div>
+      <p class="side-h" id="snav-h">The agent's five steps</p>
+      <nav class="snav" id="snav" aria-labelledby="snav-h"></nav>
+    </div>
+    <section class="who" aria-label="Who the client is"><div id="identity"></div><div id="facts"></div></section>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <p class="crumb"><span>Clients</span><span aria-hidden="true">/</span><b id="crumb-c">Loading</b></p>
+      <div id="picker"></div>
+      <nav class="links" aria-label="Pages"><a href="../../../model.html">How the models perform</a><a id="code-l" href="https://github.com/DjamelZair/ClientMeetingBriefAgent-">Code</a></nav>
+    </header>
+
+    <main class="panel" id="main">
+      <section class="head" id="stage" tabindex="-1" aria-label="Headline">
+        <div id="headline"></div>
+        <div class="ctx" id="context"></div>
+      </section>
+      <div id="agent-h"></div>
+      <section aria-label="Client summary"><div id="summary"></div></section>
+
+      <div class="tools">
+        <div class="seg" role="group" aria-label="View"><button type="button" data-view="board" aria-pressed="true">Board</button><button type="button" data-view="log" aria-pressed="false">Tool log</button></div>
+        <div id="hbar"></div>
+      </div>
+
+      <ol class="board" id="board" aria-label="The agent's five steps, each with the part of the brief it produced">
+        <li class="col" data-n="1">
+          <div class="col-h" id="node-1"></div><div id="ph1"></div>
+          <div class="card" id="group"></div>
+          <section class="card" aria-label="Relationship timeline"><h3 class="card-h">Relationship timeline</h3><div id="timeline"></div></section>
+          <section class="card wal-card" aria-labelledby="wal-h"><div class="wal-h" id="wal-head"></div><div id="wallet"></div></section>
+        </li>
+        <li class="col" data-n="2">
+          <div class="col-h" id="node-2"></div><div id="ph2"></div>
+          <div class="card" id="discuss"></div>
+          <div class="card" id="ask"></div>
+        </li>
+        <li class="col" data-n="3">
+          <div class="col-h" id="node-3"></div><div id="ph3"></div>
+          <div class="card" id="care"></div>
+          <div class="card" id="held"></div>
+          <div class="card" id="aside"></div>
+        </li>
+        <li class="col" data-n="4">
+          <div class="col-h" id="node-4"></div><div id="ph4"></div>
+          <div class="card" id="review"></div>
+        </li>
+        <li class="col" data-n="5">
+          <div class="col-h" id="node-5"></div><div id="ph5"></div>
+          <div class="card" id="followup"></div>
+          <div class="card qs-card" id="questions"></div>
+        </li>
+      </ol>
+      <div class="log" id="log" hidden></div>
+
+      <footer class="foot"><p><b>Djamel Zair, application for Junior Data Scientist, CLUE.</b> Independent prototype for a job application. Not affiliated with or endorsed by Rabobank. Review dates and vulnerability flags are synthetic.</p>
+        <p class="fl"><a href="../../../model.html">How the models perform</a><a id="code-f" href="https://github.com/DjamelZair/ClientMeetingBriefAgent-">Code</a><a href="../../index.html">Current brief</a></p></footer>
+    </main>
+  </div>
+</div>
+
+<script src="../../../field.js"></script>
+<script src="variants.js"></script>
+<script>
+/* this page only places components and adds the mono pieces: the step sidebar, the agent banner, the stat tile icons,
+   the take up meters, the card counts in the column pills and the tool log view */
+var esc = function(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); };
+var PARTS = ["Who the client is", "What might help", "What not to offer", "What is due anyway", "Questions to ask"];
+/* four small icons for the stat tiles, drawn like the state glyphs in variants.js */
+var ICON = {
+  changed: '<path d="M1.5 8.5h3l2-5 3 9 2-4h3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>',
+  tenure: '<circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 4.6V8l2.4 1.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
+  review: '<rect x="2" y="3" width="12" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2 6.6h12M5.2 1.6v2.6M10.8 1.6v2.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
+  held: '<circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.6 8h6.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+  agent: '<path d="M8 1.8l1.5 3.9 3.9 1.5-3.9 1.5L8 12.6 6.5 8.7 2.6 7.2l3.9-1.5z" fill="currentColor"/><path d="M12.6 11.2l.6 1.5 1.5.6-1.5.6-.6 1.5-.6-1.5-1.5-.6 1.5-.6z" fill="currentColor"/>',
+  chev: '<path d="M4.5 2.5L8 6 4.5 9.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'
+};
+function icon(k, s){ return '<svg width="' + (s || 16) + '" height="' + (s || 16) + '" viewBox="0 0 ' + (k === "chev" ? 12 : 16) + ' ' + (k === "chev" ? 12 : 16) + '" aria-hidden="true">' + ICON[k] + '</svg>'; }
+
+/* the stat tiles: the shared summary, each with a black icon square, and its step tag reads as a link to that step */
+function summary(el, ctx){
+  V.components.summary(el, ctx);
+  el.querySelectorAll(".v-stat").forEach(function(li){
+    var k = li.getAttribute("data-key"), tag = li.querySelector(".v-from");
+    li.insertAdjacentHTML("afterbegin", '<span class="ic" aria-hidden="true">' + icon(k, 16) + '</span>');
+    if (tag) tag.innerHTML = 'Step ' + tag.getAttribute("data-step") + icon("chev", 12);
+  });
+}
+summary.deps = ["client", "model"];
+
+/* the agent banner: what ran, a five segment meter that fills as the steps finish, and replay */
+function agentBanner(el, ctx){
+  var S = V.state, n = ctx.v.nCalls;
+  el.innerHTML = '<div class="banner"><span class="ic" aria-hidden="true">' + icon("agent", 14) + '</span>' +
+    '<p><b>One agent ran five tool steps</b><span class="meter-s" id="meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>' + n + ' logged ' + (n === 1 ? 'call' : 'calls') + '. It prepares the brief; the advisor decides.</p>' +
+    (S.replaying ? '<button type="button" class="v-btn" data-act="skip">Skip</button>'
+      : '<button type="button" class="v-btn" data-act="replay" aria-label="Replay the one agent, ' + n + ' logged ' + (n === 1 ? 'call' : 'calls') + '">' + V.glyph("replay", 14) + 'Replay</button>') + '</div>';
+  meter();
+}
+agentBanner.deps = ["client", "replay"];
+function meter(){
+  var S = V.state, m = document.getElementById("meter"); if (!m || !S.v) return;
+  [].forEach.call(m.children, function(i, k){
+    var done = !S.replaying || S.stepState[k] === "done";
+    if (done) i.setAttribute("data-on", V.stepStatus(S.v, k) === "blocked" ? "blocked" : "1"); else i.removeAttribute("data-on");
+  });
+}
+
+/* the bar decides which scores step 2 keeps */
+function scoreBar(el, ctx){ V.components.bar(el, ctx); var l = el.querySelector("#v-bar-l"); if (l) l.textContent = "Only include scores above"; }
+scoreBar.deps = ["client", "model"];
+
+/* step 1 produced the segment and the group */
+function groupCard(el, ctx){
+  var v = ctx.v;
+  el.innerHTML = '<div class="grp" data-from="1"><h3 class="card-h">' + V.glyph("group", 14) + 'Segment and group</h3>' +
+    '<p class="nm">' + esc(v.who.name) + '</p><p class="v-meta">' + esc(V.util.cap(v.who.description)) + '.</p></div>';
+}
+
+/* the products the agent did not raise stay one click away */
+function wallet(el, ctx){
+  V.components.wallet(el, ctx, {split: true});
+  var q = el.querySelector(".v-wcat-quiet"); if (!q) return;
+  var h = q.querySelector(".v-wcat-h"), open = !!V.state.open.wq, n = 0;
+  q.querySelectorAll(".v-wquiet").forEach(function(p){ var t = p.textContent.split(":").slice(1).join(":"); n += t.split(",").length; });
+  q.id = "l2-wq"; q.hidden = !open; h.remove();
+  var line = el.querySelector(".v-wnone");
+  (line || q).insertAdjacentHTML(line ? "beforeend" : "beforebegin", '<button type="button" class="v-link v-wq-tog" data-act="toggle" data-key="wq" aria-expanded="' + open + '" aria-controls="l2-wq">' + esc(h.textContent) + ' (' + n + ')</button>');
+}
+wallet.deps = ["client", "model"];
+/* on a phone the products fold behind a button whose label counts what is inside, so nothing held back hides unseen */
+function walletHead(el, ctx){
+  var c = V.walletCounts(ctx.v), W = V.STATE_WORDS, open = !!V.state.open.wal, parts = [W.held + " " + c.held];
+  if (c.heldback) parts.push(W.heldback + " " + c.heldback);
+  if (c.discuss) parts.push(W.discuss + " " + c.discuss);
+  if (c.progress) parts.push(W.progress + " " + c.progress);
+  el.innerHTML = '<h3 class="card-h" id="wal-h">Products</h3>' +
+    '<button type="button" class="v-link wal-tog" data-act="wal" aria-expanded="' + open + '" aria-controls="wallet">' + (open ? 'Hide' : 'Show') + ': ' + esc(parts.join(", ")) + '</button>';
+  el.closest(".wal-card").toggleAttribute("data-open", open);
+}
+walletHead.deps = ["client", "model"];
+document.addEventListener("click", function(e){
+  if (!e.target.closest('[data-act="wal"]')) return;
+  V.state.open.wal = !V.state.open.wal; walletHead(document.getElementById("wal-head"), {v: V.state.v, m: V.state.m});
+  document.querySelector('[data-act="wal"]').focus();
+});
+
+/* worth discussing and worth asking about, each with a ten segment meter of how many similar clients took it up.
+   that is the observed take up in the client's score band from data.json, never the client's own score */
+function takeup(el, ctx){
+  el.querySelectorAll('.v-item[data-lane="offer"], .v-item[data-lane="ask"]').forEach(function(li){
+    var it = V.state.m.items.find(function(x){ return x.p === li.getAttribute("data-p"); }), x = it && it.x;
+    if (!x || x.observed == null) return;
+    var on = Math.round(x.observed * 10), segs = "";
+    for (var k = 0; k < 10; k++) segs += '<i' + (k < on ? ' data-on' : '') + '></i>';
+    li.querySelector(".txt").insertAdjacentHTML("beforeend", '<div class="takeup" role="img" aria-label="' + esc(x.line) + '"><span class="tl"><span>Similar clients who took it up</span><b>' + V.util.pct(x.observed) + '</b></span><span class="segs">' + segs + '</span></div>');
+  });
+}
+function discuss(el, ctx){ V.components.discuss(el, ctx, {tags: false}); takeup(el, ctx); }
+discuss.deps = ["client", "model"];
+function ask(el, ctx){ V.components.ask(el, ctx, {tags: false}); takeup(el, ctx); }
+ask.deps = ["client", "model"];
+
+/* the tool log view: every logged call under the step that made it, with the rule or model the step follows.
+   the propensity call keeps only its count, as the step line does: naming the highest scored product here
+   would put it, maybe a held back one, above the brief as if it were the pick */
+function said(e){
+  var t = Field.clean(e.summary);
+  if (e.tool === "get_propensities"){ var m = /^\d+ products? scored/.exec(t); if (m) return m[0]; }
+  return t;
+}
+function toolLog(el, ctx){
+  el.innerHTML = ctx.v.steps.map(function(s, k){
+    return '<section aria-label="Step ' + (k + 1) + ', ' + esc(s.name) + '"><h3><span class="n">' + (k + 1) + '</span>' + esc(s.name) + '</h3><ul>' +
+      (s.calls.length ? s.calls.map(function(e){ return '<li><span class="v-tool">' + esc(e.tool) + '</span><span>' + esc(said(e)) + '</span></li>'; }).join("") : '<li>No calls logged.</li>') +
+      '</ul><p class="rule">' + esc(s.rule) + '</p></section>';
+  }).join("");
+}
+
+/* the part title under each step, with its tag written as a step link like the stat tiles */
+function partHead(el, ctx, opts){
+  V.components.partHead(el, ctx, opts);
+  var t = el.querySelector(".v-from"); if (t) t.innerHTML = 'Step ' + opts.n + icon("chev", 12);
+}
+
+var mounts = {
+  "#identity": ["identity", {mismatch: "inline", sk: 2}], "#facts": ["facts", {sk: 2}], "#summary": [summary, {sk: 3}],
+  "#headline": ["headline", {kicker: false, sk: 2}], "#hbar": scoreBar, "#agent-h": [agentBanner, {sk: 1}],
+  "#group": [groupCard, {sk: 4}], "#wal-head": [walletHead, {sk: 1}], "#timeline": ["timeline", {sk: 2}], "#wallet": [wallet, {sk: 5}],
+  "#discuss": [discuss, {sk: 4}], "#ask": [ask, {sk: 2}],
+  "#care": "care", "#held": ["held", {tags: false, sk: 3}], "#aside": ["aside", {asideWhy: "toggle", tags: false, sk: 2}],
+  "#review": ["review", {tags: false, sk: 3}],
+  "#questions": ["questions", {why: "toggle", tags: false, sk: 6}], "#followup": ["followup", {tags: false, sk: 1}],
+  "#log": [toolLog, {sk: 4}]
+};
+/* steps 1 and 4 drop their returned line: the cards right under them say the same words */
+for (var n = 1; n <= 5; n++){
+  mounts["#node-" + n] = ["step", {n: n, readChars: 22, ret: [2, 3, 5], sk: 3}];
+  mounts["#ph" + n] = [partHead, {n: n, title: PARTS[n - 1], sk: 1}];
+}
+V.boot({url: "../../../data.json", chrome: [["#picker", "picker"], ["#context", "context"]], mounts: mounts})
+  .then(function(F){ if (F && F.links.code){ document.getElementById("code-l").href = F.links.code; document.getElementById("code-f").href = F.links.code; } });
+
+/* the sidebar: the five steps as navigation. each item names the step, the part it made, and its state.
+   it is not a mount, so it redraws on any render, step or link without counting as a rerender of the brief */
+function snav(){
+  var S = V.state, v = S.v, el = document.getElementById("snav"); if (!v) return;
+  var hold = S.m ? V.lane(S.m, "hold").length : 0;
+  el.innerHTML = v.steps.map(function(s, k){
+    var n = k + 1, st = S.replaying && S.stepState[k] !== "done" ? (S.stepState[k] || "wait") : V.stepStatus(v, k);
+    var extra = n === 3 && hold ? ', <span class="hb">' + hold + ' held back</span>' : '';
+    return '<button type="button" data-act="link" data-step="' + n + '" data-s="' + st + '" aria-pressed="' + (S.link === n) + '" aria-label="Step ' + n + ', ' + esc(s.name) + ', made ' + esc(PARTS[k].toLowerCase()) + '. Show it">' +
+      '<span class="n">' + n + '</span><span class="nm">' + esc(s.name) + '</span><span class="pt">' + esc(PARTS[k]) + extra + '</span></button>';
+  }).join("");
+}
+
+/* each column: lit when its step is picked, done when its step is done, and its status pill carries the card count */
+function cols(){
+  var S = V.state, cur = V.links.current();
+  document.querySelectorAll(".col").forEach(function(c){
+    var k = +c.getAttribute("data-n");
+    c.toggleAttribute("data-on", k === cur);
+    c.toggleAttribute("data-done", !S.replaying || S.stepState[k - 1] === "done");
+    var cards = c.querySelectorAll(":scope > .card:not([hidden]):not(.qs-card)").length + c.querySelectorAll(".v-q").length;
+    var pill = c.querySelector(".v-st"); if (!pill) return;
+    var cnt = pill.querySelector(".cnt"); if (cnt) cnt.remove();
+    pill.insertAdjacentHTML("beforeend", '<span class="cnt" title="' + cards + (cards === 1 ? ' card' : ' cards') + ' in this column"><span class="v-sr">, </span>' + cards + '<span class="v-sr">' + (cards === 1 ? ' card' : ' cards') + '</span></span>');
+  });
+  var hold = S.m ? V.lane(S.m, "hold").length : 0;
+  document.getElementById("held").toggleAttribute("data-hold", hold > 0);
+  if (S.v) document.getElementById("crumb-c").textContent = S.v.ref;
+  snav(); meter();
+}
+V.on("render", cols);
+V.on("link", cols);
+V.on("step", cols);
+
+/* a step picked from the sidebar or a stat tile brings its column into view */
+document.addEventListener("click", function(e){
+  var b = e.target.closest('.snav [data-act="link"], .v-stat .v-from'); if (!b) return;
+  var col = document.querySelector('.col[data-n="' + b.getAttribute("data-step") + '"]');
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (col && !document.getElementById("board").hidden) col.scrollIntoView({block: "nearest", inline: "nearest", behavior: reduce ? "auto" : "smooth"});
+});
+
+/* the view switch: the board, or the raw tool log. both are real views of the same data */
+document.addEventListener("click", function(e){
+  var b = e.target.closest("[data-view]"); if (!b) return;
+  var view = b.getAttribute("data-view");
+  document.querySelectorAll("[data-view]").forEach(function(x){ x.setAttribute("aria-pressed", String(x === b)); });
+  document.getElementById("board").hidden = view !== "board";
+  document.getElementById("log").hidden = view !== "log";
+  /* the bar only moves cards on the board, so it steps aside in the log */
+  document.getElementById("hbar").hidden = view !== "board";
+});
+
+/* the timeline is drawn to its box, so it redraws when the box or the face changes */
+var tlw = 0, tl = document.getElementById("timeline");
+function redrawTimeline(force){ var w = tl.clientWidth; if (w && (force || Math.abs(w - tlw) > 2) && V.state.v){ tlw = w; V.components.timeline(tl, {v: V.state.v, m: V.state.m}, {}); V.links.apply(); } }
+new ResizeObserver(function(){ redrawTimeline(false); }).observe(tl);
+V.on("resize", function(){ redrawTimeline(true); });
+</script>
+</body></html>
