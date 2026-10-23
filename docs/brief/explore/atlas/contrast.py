@@ -5,6 +5,10 @@ uses, and prints the report. modelled on docs/brief/contrast.py.
 
 text pairs need 4.5:1 (aa, normal text); large text (24px and up) and marks that are not text need 3:1.
 it also fails when a raw colour turns up outside the token block, in atlas.css or index.html. exit code 1 on any failure.
+
+the model page (docs/model.html with model.css) uses the same tokens, so its pairs are checked here too, in all three
+palettes, and model.css and model.html are scanned for raw colours as well. a background written mix:a:p:b is
+color-mix(in srgb, a p%, b), the way the heat table shades its cells.
 """
 import re
 import sys
@@ -52,6 +56,32 @@ PAIRS = [
 ]
 
 
+# the model page's own pairs, on top of the ones above that it shares (body text, labels, figures, held back)
+MODEL_PAIRS = [
+    ("ink", "mix:second:40:paper", "text", "model: heat cell at its darkest shade"),
+    ("ink", "mix:second:20:paper", "text", "model: heat cell at a middle shade"),
+    ("hold", "paper", "ui", "model: flagged heat cell outline, the cell drops its shade"),
+    ("ink-3", "paper", "text", "model: chart ticks, captions, too few cells"),
+    ("ink", "paper", "text", "model: chart labels and values"),
+    ("prime", "paper", "text", "model: chart titles, part titles, big figures"),
+    ("second-ink", "paper", "text", "model: step line lead, attribute on a phone"),
+    ("ink-2", "paper", "text", "model: leads, key, labels under figures"),
+    ("hold", "paper", "text", "model: flags, ratios out of range, held back figures"),
+    ("prime", "paper-2", "text", "model: example question in a tree root"),
+    ("ink-2", "paper-2", "text", "model: branch effects in a tree root"),
+    ("ink-3", "paper-2", "text", "model: question count in a tree root"),
+    ("second-ink", "paper-2", "text", "model: kind label in a tree root"),
+    ("on-prime", "prime", "text", "model: step markers and pressed metric switch"),
+    ("on-prime", "hold", "text", "model: step 3 marker and node"),
+    ("prime", "paper", "ui", "model: LightGBM marks, test month, chosen k"),
+    ("ink-3", "paper", "ui", "model: baseline marks"),
+    ("hold", "paper", "ui", "model: interval includes zero, overdue and held back bars"),
+    ("second", "paper", "ui", "model: bars, train months"),
+    ("mist-ink", "paper", "ui", "model: trials, diagonal, tree connectors, brief month"),
+    ("ink-2", "stone", "text", "model: tie band label on the stone band"),
+]
+MODEL_FILES = [HERE / "model.css", HERE.parent.parent.parent / "model.html"]
+
 PALETTES = ["fabric", "calm", "graphite"]
 
 
@@ -88,6 +118,13 @@ def lum(h):
     return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
 
 
+def mix(T, spec):
+    """mix:a:p:b is p% of a over b, per channel in srgb, as color-mix does"""
+    _, a, p, b = spec.split(":")
+    ca, cb, w = T[a].lstrip("#"), T[b].lstrip("#"), float(p) / 100
+    return "#" + "".join(f"{round(int(ca[i:i + 2], 16) * w + int(cb[i:i + 2], 16) * (1 - w)):02x}" for i in (0, 2, 4))
+
+
 def ratio(a, b):
     a, b = lum(a), lum(b)
     return (max(a, b) + 0.05) / (min(a, b) + 0.05)
@@ -98,8 +135,8 @@ def main():
     for pal in PALETTES:
         T = tokens(CSS, pal)
         print(f"\n{pal}\n{'pair':44} {'ratio':>6}  need  where")
-        for fg, bg, kind, where in PAIRS:
-            r = ratio(T[fg], T[bg])
+        for fg, bg, kind, where in PAIRS + MODEL_PAIRS:
+            r = ratio(T[fg], mix(T, bg) if bg.startswith("mix:") else T[bg])
             need = 4.5 if kind == "text" else 3.0
             ok = r >= need
             fails += not ok
@@ -109,12 +146,13 @@ def main():
     for body in blocks(CSS)[1]:
         rest = rest.replace(body, "")
     rest += (HERE / "index.html").read_text()
+    rest += "".join(f.read_text() for f in MODEL_FILES)
     raw = re.findall(r"#[0-9a-fA-F]{3,8}\b(?![\w-])", re.sub(r"<!--.*?-->|/\*.*?\*/", "", rest, flags=re.S))
     raw = [x for x in raw if not re.fullmatch(r"#(report|part|v|find|ident|add|ace|bad|bed|dad|fade|face)", x)]
     if raw:
         fails += 1
         print("FAIL raw colours outside the token blocks:", sorted(set(raw)))
-    print(f"\n{len(PAIRS)} pairs in {len(PALETTES)} palettes, {fails} failures")
+    print(f"\n{len(PAIRS)} brief pairs and {len(MODEL_PAIRS)} model page pairs in {len(PALETTES)} palettes, {fails} failures")
     return 1 if fails else 0
 
 

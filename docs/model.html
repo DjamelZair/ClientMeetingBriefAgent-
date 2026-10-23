@@ -1,192 +1,75 @@
 <!doctype html>
-<html lang="en-GB">
+<html lang="en-GB" data-pal="fabric">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How the models perform</title>
-<meta name="description" content="How the take up models, the client groups and the fairness audit behind the client meeting brief perform, all read from data.json.">
+<meta name="description" content="How the client groups, the take up models, the suitability rules, the synthetic review layer and the question rules behind the client meeting brief perform, step by step, all read from data.json.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=Gelasio:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="field.css">
-<style>
-/* the model page has no novelty strip, so the two fields take the whole first screen */
-:root{--strip-h:0px;--lg:var(--petrol);--lr:var(--ink-soft)}
-.code{font-family:var(--mono);font-size:.86em}
-
-/* ---------- left field ---------- */
-.field{padding:22px 32px 22px 48px}
-.back{align-self:flex-start;display:inline-flex;align-items:center;gap:9px;margin-top:14px;color:var(--on);text-decoration:none;font-size:14px;font-weight:600;
-  border:1px solid var(--on-soft);border-radius:2px;padding:7px 12px;transition:background-color .2s ease,color .2s ease}
-.back::before{content:"";width:7px;height:7px;border-left:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg)}
-.back:hover{background:var(--on);color:var(--petrol)}
-.field .group{font-size:44px;margin-top:22px}
-.field .desc{font-size:14px;max-width:44ch;margin-top:12px;line-height:1.4}
-.split{margin-top:18px}
-.months{display:flex;gap:3px}
-.mends{display:flex;justify-content:space-between;font-size:11.5px;color:var(--on-faint);margin:4px 0 8px}
-.months i{flex:1;height:14px;border:1px solid var(--petrol-line)}
-.months .m-train{background:var(--on-soft);border-color:var(--on-soft)}
-.months .m-val{background:transparent;border:2px solid var(--on)}
-.months .m-test{background:var(--on);border-color:var(--on)}
-.months .m-brief{border:1px dashed var(--on-faint)}
-.split dl{display:grid;grid-template-columns:16px 82px 1fr;column-gap:8px;font-size:13px}
-.split dt,.split dd{padding:4px 0;border-top:1px solid var(--petrol-line)}
-.split dt.k{display:flex;align-items:center}
-.split dt.k i{width:12px;height:12px;display:block}
-.split dt.n{font-weight:600}
-.split dd{color:var(--on-soft)}
-.split dd b{color:var(--on);font-weight:600}
-.field .facts{margin-top:16px}
-.field .facts li{font-size:13.5px;font-weight:400;color:var(--on-soft);padding:5px 0}
-.field .facts li b{display:block;font-size:20px;font-weight:700;color:var(--on);letter-spacing:-0.01em;line-height:1.1}
-.field .facts li.warn b{color:var(--verm-on)}
-.src{margin-top:auto;padding-top:14px;font-size:12px;color:var(--on-faint);line-height:1.35}
-
-/* ---------- tabs ---------- */
-.paper{display:flex;flex-direction:column;min-height:0}
-.tabs{display:flex;gap:28px;padding:0 40px;border-bottom:1px solid var(--rule);overflow-x:auto;scrollbar-width:thin;flex:none}
-.tab{background:none;border:0;cursor:pointer;padding:20px 0 13px;font-size:14.5px;font-weight:600;color:var(--ink-soft);white-space:nowrap;
-  box-shadow:inset 0 -2px 0 transparent;transition:color .2s ease,box-shadow .2s ease}
-.tab span{font-weight:400;margin-right:6px}
-.tab:hover{color:var(--ink)}
-.tab[aria-selected="true"]{color:var(--ink);box-shadow:inset 0 -2px 0 var(--ink)}
-.tab:focus-visible{outline-offset:-2px}
-#panels{flex:1;min-height:0;display:flex;flex-direction:column}
-.panel{padding:20px 40px 20px;flex:1;min-height:0;overflow:auto}
-.panel[hidden]{display:none}
-.panel.in{animation:fadein .28s ease both}
-@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-.panel h2{font-size:26px;font-weight:700;letter-spacing:-0.02em;line-height:1.1}
-.lead{font-family:var(--serif);font-size:14.5px;line-height:1.45;color:var(--ink-soft);margin-top:8px;max-width:96ch;text-wrap:pretty}
-.lead b{color:var(--ink);font-weight:500}
-.lead .flag{color:var(--verm-ink);font-weight:500}
-.key{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:12px;color:var(--ink-soft);margin-top:14px}
-.key span{display:inline-flex;align-items:center;gap:6px}
-.key svg{width:22px;height:12px;overflow:visible}
-.blk{margin-top:14px}
-.blk h3{font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:4px}
-.cap{font-size:12px;color:var(--ink-soft);margin-top:4px}
-svg.chart{display:block;width:100%;height:auto;overflow:visible}
-svg text{font-family:var(--sans);fill:var(--ink-soft);font-size:11px}
-svg .lab{fill:var(--ink);font-size:12.5px}
-svg .grid{stroke:var(--rule);stroke-width:1}
-svg .axis{stroke:var(--ink-soft);stroke-width:1}
-.wrapx{overflow-x:auto;max-width:100%;position:relative}
-
-/* compact tables: rules, not boxes */
-.t{border-collapse:collapse;font-size:12.5px;width:100%;font-variant-numeric:tabular-nums lining-nums}
-.t th{font-weight:600;color:var(--ink-soft);text-align:right;padding:4px 8px;border-bottom:1.5px solid var(--ink);vertical-align:bottom;font-size:12px}
-.t td{text-align:right;padding:3px 8px;border-bottom:1px solid var(--rule);white-space:nowrap;vertical-align:top}
-.t th:first-child,.t td:first-child{text-align:left;padding-left:0}
-.t td.l,.t th.l{text-align:left}
-.t .v{color:var(--verm-ink);font-weight:600}
-.t .muted{color:var(--ink-soft)}
-.t tr.sum td{border-bottom:0}
-
-/* evaluation */
-.t.ev td,.t.ev th{padding-left:6px;padding-right:6px}
-.t.ev td:first-child,.t.ev th:first-child{padding-left:0}
-
-/* calibration */
-.cal{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 22px;margin-top:10px}
-.cal h3{font-size:13px;font-weight:600;color:var(--ink)}
-.cal h3 span{font-weight:400;color:var(--ink-soft)}
-
-/* tuning */
-.none{font-size:22px;font-weight:600;letter-spacing:-0.01em;margin-top:18px;max-width:44ch;line-height:1.2}
-.two{display:grid;grid-template-columns:minmax(0,0.9fr) minmax(0,1.1fr);gap:40px;margin-top:16px;align-items:start}
-.params{display:grid;grid-template-columns:auto 1fr;column-gap:24px;font-size:13.5px}
-.params dt,.params dd{padding:5px 0;border-bottom:1px solid var(--rule)}
-.params dt{font-family:var(--mono);font-size:12px;color:var(--ink-soft);padding-top:7px}
-.params dd{font-weight:600;font-variant-numeric:tabular-nums}
-.trials{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px 22px;margin-top:8px}
-.trials h3{font-size:12.5px;font-weight:600;color:var(--ink)}
-.trials h3 span{font-weight:400;color:var(--ink-soft)}
-.fixed{font-size:12px;color:var(--ink-soft);margin-top:6px}
-.t th.wr{white-space:normal;max-width:84px;line-height:1.2}
-.tune td,.tune th{padding-left:6px;padding-right:6px}
-
-/* segmentation */
-.seg{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:40px;margin-top:12px;align-items:start}
-.sizes{list-style:none}
-.sizes li{display:grid;grid-template-columns:1fr auto;column-gap:10px;padding:6px 0 7px;border-top:1px solid var(--rule);font-size:13.5px}
-.sizes li b{font-weight:600}
-.sizes li span{color:var(--ink-soft);font-variant-numeric:tabular-nums;font-size:12.5px}
-.sizes .bar{grid-column:1 / -1;height:7px;margin-top:5px;position:relative}
-.sizes .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--petrol);transform-origin:left;}
-.ari{display:flex;align-items:baseline;gap:12px;margin-top:16px;padding-top:10px;border-top:1.5px solid var(--ink)}
-.ari b{font-size:34px;font-weight:700;letter-spacing:-0.03em;line-height:1}
-.ari span{font-size:13px;color:var(--ink-soft);max-width:40ch}
-
-/* fairness */
-.fr{font-size:12px}
-.fr td,.fr th{padding:1px 6px}
-.t.fr td.l{padding-left:6px}
-.fr th:first-child{padding-left:0}
-.fr td.flags{white-space:normal;text-align:left;color:var(--verm-ink);font-weight:500;min-width:250px;line-height:1.25;padding-top:2px}
-.fr td.flags span{display:block}
-.fr td.att{color:var(--ink-soft);white-space:normal;max-width:84px;padding-left:0}
-.fr tr.first td{border-top:1px solid var(--ink-soft)}
-.heat{font-size:11.5px;table-layout:fixed}
-.heat th{font-size:10.5px;font-weight:500;text-align:center;white-space:normal;line-height:1.15;padding:3px 2px;border-bottom:1px solid var(--ink)}
-.heat th.att{font-size:11px;font-weight:600;color:var(--ink);border-bottom:1px solid var(--rule);text-align:left;padding-left:4px}
-.heat th:first-child{width:112px;text-align:left}
-.heat td{text-align:center;padding:1px 1px;line-height:1.3;border-bottom:2px solid var(--paper);border-right:2px solid var(--paper);color:var(--ink)}
-.heat td:first-child{text-align:left;color:var(--ink);font-size:12px;padding-left:0}
-.heat td.all{font-weight:600}
-.heat td.fl{color:var(--verm-ink);font-weight:700;box-shadow:inset 0 0 0 1.5px var(--verm)}
-.heat td.na{color:var(--ink-soft)}
-.seg-btns{display:inline-flex;gap:0;margin-left:10px;vertical-align:1px}
-.seg-btns button{background:transparent;border:1px solid var(--ink-soft);padding:1px 9px;font-size:12px;cursor:pointer;color:var(--ink-soft)}
-.seg-btns button + button{border-left:0}
-.seg-btns button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.blk h3.row{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
-
-/* limits */
-.limits{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:22px 44px;margin-top:20px;counter-reset:lim}
-.limits li{border-top:1.5px solid var(--ink);padding-top:10px;counter-increment:lim}
-.limits h3{font-size:18px;font-weight:600;letter-spacing:-0.01em;line-height:1.2}
-.limits h3::before{content:counter(lim);font-weight:400;color:var(--ink-soft);margin-right:10px}
-.limits p{font-family:var(--serif);font-size:14.5px;line-height:1.45;color:var(--ink-soft);margin-top:6px;max-width:58ch}
-
-/* ---------- smaller screens ---------- */
-@media (max-width:999px){
-  .field{padding:18px 18px 22px}
-  .field .group{font-size:36px}
-  .tabs{padding:0 18px;gap:22px}
-  .panel{padding:18px 18px 26px;overflow:visible}
-  .cal,.trials{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .two,.seg,.limits{grid-template-columns:minmax(0,1fr)}
-  svg.chart.wide{min-width:760px}
-  .t.heat{min-width:860px}.t.fr{min-width:820px}.t.ev,.t.tune{min-width:760px}
-}
-</style>
+<!-- google fonts css2 has no version parameter, so the url pins the exact families and weight axes instead -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<script>
+/* sets the palette before the first paint: ?pal= wins, then this viewer's last choice (shared with the brief), then fabric */
+(function(){
+  var P = ["fabric", "calm", "graphite"], m = /[?&]pal=(fabric|calm|graphite)\b/i.exec(location.search), p = m ? m[1].toLowerCase() : null;
+  if (!p){ try { p = localStorage.getItem("atlas-pal"); } catch (e) {} }
+  document.documentElement.setAttribute("data-pal", P.indexOf(p) >= 0 ? p : "fabric");
+})();
+</script>
+<!-- the brief's own tokens and components, so both pages share one palette; model.css only adds this page's pieces -->
+<link rel="stylesheet" href="brief/explore/atlas/atlas.css">
+<link rel="stylesheet" href="brief/explore/atlas/model.css">
 </head>
 <body>
-<div class="page" data-fold-end>
-  <aside class="field" id="side" aria-label="What is modelled"></aside>
-  <main class="paper" id="main">
-    <div class="tabs" role="tablist" aria-label="Model sections" id="tabs"></div>
-    <div id="panels"></div>
-  </main>
+<a class="v-skip" href="#report">Skip to the steps</a>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><b>Client brief</b><span>Djamel Zair, application for Junior Data Scientist, CLUE</span></div>
+    <div class="pals" role="group" aria-label="Colour palette">
+      <button type="button" class="pal" data-pal="fabric" data-palbtn aria-pressed="false" title="Fabric: navy, steel, stone, burgundy"><span class="sw" aria-hidden="true"><i></i><i></i><i></i></span><span class="pl">Fabric</span></button>
+      <button type="button" class="pal" data-pal="calm" data-palbtn aria-pressed="false" title="Calm: sage, moss, ivory, sand, rust"><span class="sw" aria-hidden="true"><i></i><i></i><i></i></span><span class="pl">Calm</span></button>
+      <button type="button" class="pal" data-pal="graphite" data-palbtn aria-pressed="false" title="Graphite: near black, slate, greys, orange"><span class="sw" aria-hidden="true"><i></i><i></i><i></i></span><span class="pl">Graphite</span></button>
+    </div>
+    <nav class="mp-nav" aria-label="Pages"><a class="v-btn" id="back" href="brief/explore/atlas/">Back to the brief</a><a id="code-l" href="https://github.com/DjamelZair/ClientMeetingBriefAgent-">Code</a></nav>
+  </header>
+  <p class="ctx">Every number on this page is read from data.json, which the Python pipeline writes. The page follows the agent's five steps; each section says how well the model or rule behind that step holds up, and where it does not.</p>
+  <section class="mp-mast" aria-label="What is modelled" id="mast"></section>
 </div>
-<footer id="foot"></footer>
+
+<nav class="stepper" id="stepper-w" aria-label="The agent's five steps, each with one figure on how well it holds up">
+  <div class="wrap"><div id="stepper"></div></div>
+</nav>
+
+<div class="wrap">
+  <main id="report" tabindex="-1" aria-label="The five steps, one section each">
+    <section class="mp-sec" id="step-1" data-n="1" aria-labelledby="sh-1"></section>
+    <section class="mp-sec" id="step-2" data-n="2" aria-labelledby="sh-2"></section>
+    <section class="mp-sec" id="step-3" data-n="3" aria-labelledby="sh-3"></section>
+    <section class="mp-sec" id="step-4" data-n="4" aria-labelledby="sh-4"></section>
+    <section class="mp-sec" id="step-5" data-n="5" aria-labelledby="sh-5"></section>
+    <section class="mp-sec" id="limits" aria-labelledby="sh-l"></section>
+  </main>
+  <footer class="foot" id="foot"></footer>
+</div>
+
 <script src="field.js"></script>
 <script>
 (function(){
 "use strict";
 /* the one place to change where "back to the brief" goes */
-var BRIEF_URL = "brief/";
+var BRIEF_URL = "brief/explore/atlas/";
 
-var esc = Field.esc, SVGNS = 'xmlns="http://www.w3.org/2000/svg"';
-var MINUS = "−";
+var esc = Field.esc, MINUS = "−";
 function f3(v){ return v == null ? "" : (v < 0 ? MINUS : "") + Math.abs(v).toFixed(3); }
 function f4(v){ return v == null ? "" : Number(v).toFixed(4); }
 function s3(v){ return (v < 0 ? MINUS : "+") + Math.abs(v).toFixed(3); }
 function pct(v, d){ return (v * 100).toFixed(d == null ? 1 : d) + "%"; }
 function int(v){ return Math.round(v).toLocaleString("en-GB"); }
 function num(v){ return typeof v === "number" ? (Number.isInteger(v) ? int(v) : String(+v.toPrecision(4))) : esc(String(v)); }
-function rx(d, r){ return Math.round(d * r) / r; }
+function min(a){ return Math.min.apply(null, a); }
+function max(a){ return Math.max.apply(null, a); }
+function plural(n, w){ return n + " " + w + (n === 1 ? "" : "s"); }
+function code(x){ return '<span class="code">' + esc(x) + '</span>'; }
 
 /* nice ticks for a small domain */
 function ticks(lo, hi, n){
@@ -197,419 +80,505 @@ function ticks(lo, hi, n){
   return out;
 }
 function scale(d0, d1, r0, r1){ return function(v){ return r0 + (v - d0) / (d1 - d0) * (r1 - r0); }; }
+function svg(w, h, label, body){ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" role="img" aria-label="' + esc(label) + '">' + body + '</svg>'; }
+function sym(cls, kind){
+  var s = kind === "dot" ? '<circle class="' + cls + '" cx="11" cy="6" r="4"/>' : kind === "sq" ? '<rect class="' + cls + '" x="7" y="2" width="8" height="8"/>' : '<circle class="' + cls + '" cx="11" cy="6" r="2.4"/>';
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 12" aria-hidden="true">' + s + '</svg>';
+}
+function keyLine(cls){ return '<line class="' + cls + '" x1="1" x2="21" y1="6" y2="6"/>'; }
 
-/* ---------- the left field ---------- */
-function sideHTML(D, F){
-  var mo = D.meta.months, df = D.data_facts, M = D.propensity.metrics, fa = D.model_card.fairness, tu = D.model_card.tuning;
+/* every chart is drawn to the width of its box, so text keeps its real size on a phone; a box redraws when it resizes */
+var charts = [];
+function chart(id, draw){ charts.push({id: id, draw: draw, w: 0}); return '<div class="mp-chart" id="' + id + '"></div>'; }
+function drawCharts(force){
+  charts.forEach(function(c){
+    var el = document.getElementById(c.id); if (!el) return;
+    var w = Math.floor(el.clientWidth); if (!w || (!force && Math.abs(w - c.w) < 3)) return;
+    c.w = w; el.innerHTML = c.draw(w);
+  });
+}
+
+/* the head of every section: the same numbered circle as its node, and the step's own words from data.json */
+function head(n, title, step, tone){
+  return '<header class="part-h"><span class="mk" aria-hidden="true">' + n + '</span><h2 id="sh-' + n + '">' + esc(title) + '</h2>' +
+    '<p class="mp-sl"><b>Step ' + n + ', ' + esc(step.name) + '.</b> Tools ' + step.tools.map(code).join(", ") + '. ' + esc(step.rule_or_model) + '</p></header>';
+}
+function fig(n, l, s, tone){ return '<div class="mp-fig"' + (tone ? ' data-tone="' + tone + '"' : '') + '><span class="n">' + n + '</span><span class="l">' + esc(l) + '</span>' + (s ? '<span class="s">' + s + '</span>' : '') + '</div>'; }
+
+/* ---------- the masthead ---------- */
+function mast(D){
+  var mo = D.meta.months, df = D.data_facts, nt = mo.train_targets.length;
   /* every month from the first in the data to the brief month, coloured by what it is used for */
   var all = [], y = +df.first_month.slice(0, 4), m = +df.first_month.slice(5, 7), last = mo.brief_target;
   for (var g = 0; g < 60; g++){ var s = y + "-" + (m < 10 ? "0" : "") + m; all.push(s); if (s === last) break; m++; if (m > 12){ m = 1; y++; } }
   var cls = function(s){ return mo.train_targets.indexOf(s) >= 0 ? "m-train" : s === mo.val_target ? "m-val" : s === mo.test_target ? "m-test" : s === mo.brief_target ? "m-brief" : ""; };
-  var roc = M.map(function(r){ return r.lgbm_roc_auc; }), pr = M.map(function(r){ return r.lgbm_pr_auc; });
-  var nt = mo.train_targets.length;
-  return '<p class="lock"><b>Djamel Zair</b>, application for Junior Data Scientist, CLUE</p>' +
-    '<a class="back" href="' + esc(BRIEF_URL) + '">Back to the brief</a>' +
-    '<h1 class="group">How the models perform</h1>' +
-    '<p class="desc">One take up model per product: will a client who does not hold it yet have it next month. ' +
-      'LightGBM against a logistic regression baseline, for ' + df.n_products_modelled + ' of ' + df.n_products_raw + ' products, on ' +
-      int(df.sample_clients) + ' sampled clients. Then k means client groups and a fairness audit of the brief.</p>' +
-    '<div class="split"><div class="months" aria-hidden="true">' + all.map(function(s){ return '<i class="' + cls(s) + '" title="' + s + '"></i>'; }).join("") + '</div>' +
-      '<p class="mends" aria-hidden="true"><span>' + all[0] + '</span><span>' + (all.length - 1) + ' months of data, then the brief month</span><span>' + all[all.length - 1] + '</span></p>' +
+  return '<div><h1>How the models perform</h1>' +
+    '<p class="desc">One take up model per product: will a client who does not hold it yet have it next month. LightGBM against a logistic regression baseline, for <b>' +
+      df.n_products_modelled + ' of ' + df.n_products_raw + ' products</b>, on <b>' + int(df.sample_clients) + ' sampled clients</b> and ' + df.n_model_features + ' features, without ' +
+      df.excluded_features.map(code).join(" or ") + '. Around the models sit k means client groups, ' + D.guardrail.rules.length + ' suitability rules, a synthetic review layer and fixed question rules, each checked below under the step that uses it.</p></div>' +
+    '<div class="mp-split"><div class="mp-months" aria-hidden="true">' + all.map(function(s){ return '<i class="' + cls(s) + '" title="' + s + '"></i>'; }).join("") + '</div>' +
+      '<p class="mp-mends" aria-hidden="true"><span>' + all[0] + '</span><span>' + (all.length - 1) + ' months of data, then the brief month</span><span>' + all[all.length - 1] + '</span></p>' +
       '<dl>' +
-      '<dt class="k"><i style="background:var(--on-soft)"></i></dt><dt class="n">Train</dt>' +
-        '<dd><b>' + mo.train_targets[0] + ' to ' + mo.train_targets[nt - 1] + '</b>, ' + nt + ' target months, ' + int(df.train_rows) + ' rows</dd>' +
-      '<dt class="k"><i style="border:2px solid var(--on)"></i></dt><dt class="n">Validation</dt>' +
-        '<dd><b>' + mo.val_target + '</b>, ' + int(df.val_rows) + ' rows, early stopping</dd>' +
-      '<dt class="k"><i style="background:var(--on)"></i></dt><dt class="n">Test</dt>' +
-        '<dd><b>' + mo.test_target + '</b>, ' + int(df.test_rows) + ' rows, never seen in training</dd>' +
-      '<dt class="k"><i style="border:1px dashed var(--on-faint)"></i></dt><dt class="n">Brief</dt>' +
-        '<dd><b>' + mo.brief_target + '</b>, scored for the meetings, no labels</dd>' +
-      '</dl></div>' +
-    '<ul class="facts">' +
-      '<li><b>' + f3(Math.min.apply(null, roc)) + ' to ' + f3(Math.max.apply(null, roc)) + '</b>ROC AUC, LightGBM, test month</li>' +
-      '<li><b>' + f3(Math.min.apply(null, pr)) + ' to ' + f3(Math.max.apply(null, pr)) + '</b>PR AUC, LightGBM, test month</li>' +
-      '<li><b>' + df.n_model_features + ' features</b>without ' + df.excluded_features.map(function(x){ return '<span class="code">' + esc(x) + '</span>'; }).join(" or ") + '</li>' +
-      '<li><b>' + D.segmentation.k + ' client groups</b>k means, k from ' + D.segmentation.k_range[0] + ' to ' + D.segmentation.k_range[1] + '</li>' +
-      '<li class="warn"><b>' + fa.n_flags + ' fairness flags</b>on suggestion rates and ranking quality, all shown under Fairness</li>' +
-      '<li' + (tu.run ? '' : ' class="warn"') + '><b>' + (tu.run ? esc(tu.method) : 'No tuning yet') + '</b>' +
-        (tu.run ? 'hyperparameter search, ' + tu.n_trials + ' trials' : 'no search run, the same fixed parameters for every product') + '</li>' +
-    '</ul>' +
-    '<p class="src">' + esc(D.meta.source) + ', ' + df.first_month + ' to ' + df.last_month + ', ' + int(df.raw_rows) + ' rows of ' +
-      int(df.raw_clients) + ' clients. Seed ' + D.meta.seed + '.</p>';
+      '<dt class="k"><i class="m-k-train"></i></dt><dt class="n">Train</dt><dd><b>' + mo.train_targets[0] + ' to ' + mo.train_targets[nt - 1] + '</b>, ' + nt + ' target months, ' + int(df.train_rows) + ' rows</dd>' +
+      '<dt class="k"><i class="m-k-val"></i></dt><dt class="n">Validation</dt><dd><b>' + mo.val_target + '</b>, ' + int(df.val_rows) + ' rows, early stopping and tuning</dd>' +
+      '<dt class="k"><i class="m-k-test"></i></dt><dt class="n">Test</dt><dd><b>' + mo.test_target + '</b>, ' + int(df.test_rows) + ' rows, never seen in training</dd>' +
+      '<dt class="k"><i class="m-k-brief"></i></dt><dt class="n">Brief</dt><dd><b>' + mo.brief_target + '</b>, scored for the meetings, no labels</dd>' +
+      '</dl><p class="mp-src">' + esc(D.meta.source) + ', ' + df.first_month + ' to ' + df.last_month + ', ' + int(df.raw_rows) + ' rows of ' + int(df.raw_clients) + ' clients. Seed ' + D.meta.seed + '.</p></div>';
 }
 
-/* ---------- 1. evaluation ---------- */
-function dotKey(){
-  return '<div class="key">' +
-    '<span><svg ' + SVGNS + ' viewBox="0 0 22 12"><line x1="1" x2="21" y1="6" y2="6" stroke="var(--lg)" stroke-width="1.5"/><circle cx="11" cy="6" r="4" fill="var(--lg)"/></svg>LightGBM, with its 95% interval</span>' +
-    '<span><svg ' + SVGNS + ' viewBox="0 0 22 12"><line x1="1" x2="21" y1="6" y2="6" stroke="var(--lr)" stroke-width="1.5"/><circle cx="11" cy="6" r="3.6" fill="var(--paper)" stroke="var(--lr)" stroke-width="1.5"/></svg>Logistic regression baseline</span>' +
-    '<span><svg ' + SVGNS + ' viewBox="0 0 22 12"><line x1="1" x2="21" y1="6" y2="6" stroke="var(--verm)" stroke-width="1.5"/><rect x="7.5" y="2.5" width="7" height="7" fill="var(--verm)"/></svg>Lift interval includes zero</span>' +
-    '<span>Intervals from a paired bootstrap of the test month</span></div>';
-}
-
-function evalChart(M, F){
-  var W = 900, LW = 122, GAP = 30, FW = (W - LW - GAP * 2) / 3, RH = 25, TOP = 40, H = TOP + M.length * RH + 4;
-  var minOf = function(keys){ return Math.min.apply(null, M.map(function(r){ return Math.min.apply(null, keys.map(function(k){ return r[k]; })); })); };
-  var maxOf = function(keys){ return Math.max.apply(null, M.map(function(r){ return Math.max.apply(null, keys.map(function(k){ return r[k]; })); })); };
-  var facets = [
-    {title: "ROC AUC", lo: Math.floor(minOf(["lgbm_roc_auc_lo", "logreg_roc_auc_lo"]) * 50) / 50, hi: 1, pair: "roc_auc"},
-    {title: "PR AUC", lo: 0, hi: Math.ceil(maxOf(["lgbm_pr_auc_hi", "logreg_pr_auc_hi"]) * 10) / 10, pair: "pr_auc"},
-    {title: "PR AUC lift, LightGBM minus baseline", lo: Math.min(0, Math.floor(minOf(["lift_pr_auc_lo"]) * 20) / 20), hi: Math.ceil(maxOf(["lift_pr_auc_hi"]) * 20) / 20, lift: "pr_auc"}
+/* ---------- the stepper: one honest figure per step ---------- */
+function facts(D){
+  var S = D.segmentation, M = D.propensity.metrics, fa = D.model_card.fairness, g = D.guardrail, R = D.reviews;
+  var clear = M.filter(function(r){ return r.lift_pr_auc_lo > 0 && r.lift_roc_auc_lo > 0; }).length;
+  var kinds = {}, branches = {};
+  D.showcase.forEach(function(s){ (s.brief.question_cards || []).forEach(function(q){ kinds[q.kind] = 1; q.answers.forEach(function(a){ branches[q.kind + "|" + a.answer] = 1; }); }); });
+  return [
+    {n: f3(S.silhouette[S.k]), l: "silhouette at k " + S.k, s: "Adjusted Rand " + f3(S.ari_gmm) + " against a Gaussian mixture", st: "Segmentation quality"},
+    {n: clear, l: "of " + M.length + " products beat the baseline", s: "Both lift intervals above zero, test month", st: "Models, calibration, tuning"},
+    {n: fa.n_flags, l: "fairness flags", s: int(g.at_default.n_blocked) + " suggestions held back by " + g.rules.length + " rules", st: "Rules and fairness", tone: "hold"},
+    {n: (R.share_due * 100).toFixed(1) + '<span class="u">%</span>', l: "reviews due in " + R.window_days + " days", s: "Synthetic dates, not real reviews", st: "Synthetic data"},
+    {n: Object.keys(kinds).length, l: "question kinds", s: Object.keys(branches).length + " answer branches, fixed rules", st: "Templates and branches"}
   ];
-  var s = '<svg class="chart wide" ' + SVGNS + ' viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="ROC AUC, PR AUC and PR AUC lift per product with 95% intervals">';
-  facets.forEach(function(fc, i){
-    var x0 = LW + i * (FW + GAP), x = scale(fc.lo, fc.hi, x0, x0 + FW);
-    s += '<text x="' + x0 + '" y="12" class="lab" style="font-weight:600;font-size:12.5px">' + fc.title + '</text>';
-    ticks(fc.lo, fc.hi, 4).forEach(function(t){
-      s += '<line class="grid" x1="' + x(t) + '" x2="' + x(t) + '" y1="' + (TOP - 6) + '" y2="' + (H - 2) + '"' + (fc.lift && t === 0 ? ' style="stroke:var(--ink);stroke-width:1.2"' : '') + '/>' +
-           '<text x="' + x(t) + '" y="' + (TOP - 10) + '" text-anchor="middle">' + (fc.lift && t > 0 ? "+" : "") + (t < 0 ? MINUS + Math.abs(t) : t) + '</text>';
-    });
-    M.forEach(function(r, j){
-      var yc = TOP + j * RH + RH / 2;
-      if (fc.pair){
-        var k = fc.pair, yl = yc + 4, yg = yc - 4;
-        s += '<line x1="' + x(r["logreg_" + k + "_lo"]) + '" x2="' + x(r["logreg_" + k + "_hi"]) + '" y1="' + yl + '" y2="' + yl + '" stroke="var(--lr)" stroke-width="1.5"/>' +
-             '<circle cx="' + x(r["logreg_" + k]) + '" cy="' + yl + '" r="3.6" fill="var(--paper)" stroke="var(--lr)" stroke-width="1.5"><title>' + esc(F.plabel(r.product)) + ' baseline ' + f3(r["logreg_" + k]) + ' (' + f3(r["logreg_" + k + "_lo"]) + ' to ' + f3(r["logreg_" + k + "_hi"]) + ')</title></circle>' +
-             '<line x1="' + x(r["lgbm_" + k + "_lo"]) + '" x2="' + x(r["lgbm_" + k + "_hi"]) + '" y1="' + yg + '" y2="' + yg + '" stroke="var(--lg)" stroke-width="1.5"/>' +
-             '<circle cx="' + x(r["lgbm_" + k]) + '" cy="' + yg + '" r="4" fill="var(--lg)"><title>' + esc(F.plabel(r.product)) + ' LightGBM ' + f3(r["lgbm_" + k]) + ' (' + f3(r["lgbm_" + k + "_lo"]) + ' to ' + f3(r["lgbm_" + k + "_hi"]) + ')</title></circle>';
-      } else {
-        var lo = r["lift_" + fc.lift + "_lo"], hi = r["lift_" + fc.lift + "_hi"], v = r["lift_" + fc.lift], z = lo <= 0;
-        var c = z ? "var(--verm)" : "var(--lg)";
-        s += '<line x1="' + x(lo) + '" x2="' + x(hi) + '" y1="' + yc + '" y2="' + yc + '" stroke="' + c + '" stroke-width="1.5"/>' +
-             (z ? '<rect x="' + (x(v) - 3.5) + '" y="' + (yc - 3.5) + '" width="7" height="7" fill="' + c + '"/>' : '<circle cx="' + x(v) + '" cy="' + yc + '" r="4" fill="' + c + '"/>') +
-             '<title>' + esc(F.plabel(r.product)) + ' PR AUC lift ' + s3(v) + ' (' + s3(lo) + ' to ' + s3(hi) + ')</title>';
-      }
-    });
+}
+function stepper(D){
+  var fs = facts(D);
+  return '<ol class="at-steps">' + D.meta.agent_steps.map(function(s, k){
+    var n = k + 1, f = fs[k];
+    return '<li class="at-node" id="v-step-' + n + '" data-step-n="' + n + '" data-s="done" data-status="' + (f.tone ? "blocked" : "done") + '">' +
+      '<div class="at-fig"' + (f.tone ? ' data-tone="' + f.tone + '"' : '') + '><span class="n">' + f.n + '</span><span class="l">' + esc(f.l) + '</span><span class="s">' + esc(f.s) + '</span></div>' +
+      '<span class="v-step-n" aria-hidden="true">' + n + '</span>' +
+      '<div class="at-cap"><a class="v-step-btn" href="#step-' + n + '">' + esc(s.name) + '</a><span class="v-st">' + esc(f.st) + '</span></div></li>';
+  }).join("") + '</ol>';
+}
+
+/* ---------- step 1: get segment ---------- */
+function segChart(S, W){
+  var ks = Object.keys(S.silhouette).map(Number).sort(function(a, b){ return a - b; });
+  var L = 50, R = W - 10, H1T = 30, H1B = 140, H2T = 196, H2B = 306, H = 336;
+  var x = scale(ks[0], ks[ks.length - 1], L, R);
+  var sv = ks.map(function(k){ return S.silhouette[k]; }), iv = ks.map(function(k){ return S.inertia[k]; });
+  var best = max(sv), slo = Math.floor((min(sv) - 0.01) * 50) / 50, shi = Math.ceil((best + 0.005) * 50) / 50;
+  var ys = scale(slo, shi, H1B, H1T), ihi = Math.ceil(max(iv) / 100000) * 100000, yi = scale(0, ihi, H2B, H2T);
+  var s = '<text x="0" y="13" class="ttl">Silhouette, higher is better</text><text x="0" y="' + (H2T - 22) + '" class="ttl">Inertia, the elbow is where gains flatten</text>';
+  /* the tie band: every k within tie_margin of the best silhouette counts as tied */
+  s += '<rect class="band" x="' + L + '" width="' + (R - L) + '" y="' + ys(best) + '" height="' + (ys(best - S.tie_margin) - ys(best)) + '"/>' +
+       '<text class="band-t" x="' + (L + 4) + '" y="' + (ys(best - S.tie_margin) - 3) + '">within ' + S.tie_margin + ' of the best</text>';
+  ticks(slo, shi, 3).forEach(function(t){ s += '<line class="grid" x1="' + L + '" x2="' + R + '" y1="' + ys(t) + '" y2="' + ys(t) + '"/><text x="' + (L - 6) + '" y="' + (ys(t) + 4) + '" text-anchor="end">' + t.toFixed(2) + '</text>'; });
+  ticks(0, ihi, 3).forEach(function(t){ s += '<line class="grid" x1="' + L + '" x2="' + R + '" y1="' + yi(t) + '" y2="' + yi(t) + '"/><text x="' + (L - 6) + '" y="' + (yi(t) + 4) + '" text-anchor="end">' + (t ? Math.round(t / 1000) + 'k' : '0') + '</text>'; });
+  s += '<line class="pick" x1="' + x(S.k) + '" x2="' + x(S.k) + '" y1="' + (H1T - 8) + '" y2="' + H2B + '"/><text class="pick-t" x="' + (x(S.k) + 5) + '" y="' + (H1T - 2) + '">chosen k ' + S.k + '</text>' +
+       '<line class="elbow" x1="' + x(S.elbow_k) + '" x2="' + x(S.elbow_k) + '" y1="' + (H2T - 6) + '" y2="' + H2B + '"/><text x="' + (x(S.elbow_k) - 5) + '" y="' + (H2T + 4) + '" text-anchor="end">elbow k ' + S.elbow_k + '</text>';
+  var line = function(vals, y){ return '<polyline class="lg-l" points="' + ks.map(function(k, i){ return x(k).toFixed(1) + "," + y(vals[i]).toFixed(1); }).join(" ") + '"/>'; };
+  s += line(sv, ys) + line(iv, yi);
+  ks.forEach(function(k, i){
+    var on = k === S.k;
+    s += '<circle class="' + (on ? "lg" : "lr") + '" cx="' + x(k) + '" cy="' + ys(sv[i]) + '" r="' + (on ? 5 : 3.5) + '"><title>k ' + k + ': silhouette ' + f3(sv[i]) + '</title></circle>' +
+         '<circle class="' + (on ? "lg" : "lr") + '" cx="' + x(k) + '" cy="' + yi(iv[i]) + '" r="' + (on ? 5 : 3.5) + '"><title>k ' + k + ': inertia ' + int(iv[i]) + '</title></circle>' +
+         '<text x="' + x(k) + '" y="' + (H2B + 17) + '" text-anchor="middle">' + k + '</text>';
+  });
+  return svg(W, H, "Silhouette and inertia for k from " + ks[0] + " to " + ks[ks.length - 1], s + '<text x="' + R + '" y="' + (H - 1) + '" text-anchor="end">k</text>');
+}
+function step1(D){
+  var S = D.segmentation, ks = Object.keys(S.silhouette).map(Number);
+  var best = max(ks.map(function(k){ return S.silhouette[k]; })), bestK = ks.find(function(k){ return S.silhouette[k] === best; });
+  var tied = ks.filter(function(k){ return S.silhouette[k] >= best - S.tie_margin; }).sort(function(a, b){ return a - b; });
+  var lead = 'k means on standardised client features, without ' + D.data_facts.excluded_features.map(code).join(" or ") + ', for k from ' + S.k_range[0] + ' to ' + S.k_range[1] + '. ' +
+    'Silhouette decides: k ' + bestK + ' scores highest (' + f3(best) + ') and every k within ' + S.tie_margin + ' of it counts as tied (' + tied.map(function(k){ return "k " + k; }).join(", ") + '); ' +
+    (tied.length > 1 ? 'the tie goes to the k nearest the elbow of the inertia curve (k ' + S.elbow_k + '), so <b>k ' + S.k + '</b>.' : 'so <b>k ' + S.k + '</b>.') +
+    ' A silhouette of ' + f3(S.silhouette[S.k]) + ' means the groups overlap: they describe the client base, they are not sharp types. A Gaussian mixture with the same k mostly finds the same groups.';
+  var mx = max(S.clusters.map(function(c){ return c.share; })), total = S.clusters.reduce(function(a, c){ return a + c.size; }, 0);
+  var sizes = S.clusters.map(function(c){
+    return '<li><span class="nm">' + esc(c.name) + '</span><span class="v">' + pct(c.share, 1) + '</span><span class="b" style="width:' + (c.share / mx * 100).toFixed(2) + '%"></span>' +
+      '<span class="meta">' + int(c.size) + ' clients. ' + esc(c.description) + '.</span></li>';
+  }).join("");
+  return head(1, "How well the client groups separate", D.meta.agent_steps[0]) + '<p class="mp-lead">' + lead + '</p>' +
+    '<div class="mp-cols"><div>' + chart("c-seg", function(w){ return segChart(S, w); }) + '</div>' +
+    '<div><h3 class="mp-h4">Group sizes <span>' + int(total) + ' clients</span></h3><ul class="mp-bars">' + sizes + '</ul>' +
+      '<div class="mp-figs">' + fig(f3(S.ari_gmm), "adjusted Rand index", "Between k means and a Gaussian mixture with k " + S.k + ". 1 is the same partition, 0 is chance.") +
+      fig(f3(S.silhouette[S.k]), "silhouette at k " + S.k, "The best k in the range scores " + f3(best) + ".") + '</div></div></div>';
+}
+
+/* ---------- step 2: get propensities ---------- */
+var FACETS = [
+  {id: "roc", title: "ROC AUC", pair: "roc_auc"},
+  {id: "pr", title: "PR AUC", pair: "pr_auc"},
+  {id: "lift", title: "PR AUC lift, LightGBM minus baseline", lift: "pr_auc"}
+];
+function facetChart(M, F, fc, W){
+  var LW = Math.min(190, Math.round(W * 0.42)), RH = 28, TOP = 42, H = TOP + M.length * RH + 4, x0 = LW + 6, x1 = W - 14;
+  var minOf = function(keys){ return min(M.map(function(r){ return min(keys.map(function(k){ return r[k]; })); })); };
+  var maxOf = function(keys){ return max(M.map(function(r){ return max(keys.map(function(k){ return r[k]; })); })); };
+  var lo = fc.pair === "roc_auc" ? Math.floor(minOf(["lgbm_roc_auc_lo", "logreg_roc_auc_lo"]) * 50) / 50 : fc.pair ? 0 : Math.min(0, Math.floor(minOf(["lift_pr_auc_lo"]) * 20) / 20);
+  var hi = fc.pair === "roc_auc" ? 1 : fc.pair ? Math.ceil(maxOf(["lgbm_pr_auc_hi", "logreg_pr_auc_hi"]) * 10) / 10 : Math.ceil(maxOf(["lift_pr_auc_hi"]) * 20) / 20;
+  var x = scale(lo, hi, x0, x1), s = '<text class="ttl" x="0" y="14">' + esc(fc.title) + '</text>';
+  ticks(lo, hi, W < 360 ? 3 : 4).forEach(function(t){
+    s += '<line class="' + (fc.lift && t === 0 ? "zero" : "grid") + '" x1="' + x(t) + '" x2="' + x(t) + '" y1="' + (TOP - 6) + '" y2="' + (H - 2) + '"/>' +
+         '<text x="' + x(t) + '" y="' + (TOP - 11) + '" text-anchor="middle">' + (fc.lift && t > 0 ? "+" : "") + (t < 0 ? MINUS + Math.abs(t) : t) + '</text>';
   });
   M.forEach(function(r, j){
-    s += '<text class="lab" x="0" y="' + (TOP + j * RH + RH / 2 + 4) + '">' + esc(F.plabel(r.product)) + '</text>';
-    if (j) s += '<line class="grid" x1="0" x2="' + W + '" y1="' + (TOP + j * RH) + '" y2="' + (TOP + j * RH) + '" style="stroke-dasharray:1 3"/>';
+    var yc = TOP + j * RH + RH / 2, nm = esc(F.plabel(r.product));
+    if (j) s += '<line class="row" x1="0" x2="' + W + '" y1="' + (TOP + j * RH) + '" y2="' + (TOP + j * RH) + '"/>';
+    s += '<text class="lab" x="0" y="' + (yc + 4) + '">' + nm + '</text>';
+    if (fc.pair){
+      var k = fc.pair, yl = yc + 4, yg = yc - 4;
+      s += '<line class="lr-l" x1="' + x(r["logreg_" + k + "_lo"]) + '" x2="' + x(r["logreg_" + k + "_hi"]) + '" y1="' + yl + '" y2="' + yl + '"/>' +
+           '<circle class="lr" cx="' + x(r["logreg_" + k]) + '" cy="' + yl + '" r="3.6"><title>' + nm + ' baseline ' + f3(r["logreg_" + k]) + ' (' + f3(r["logreg_" + k + "_lo"]) + ' to ' + f3(r["logreg_" + k + "_hi"]) + ')</title></circle>' +
+           '<line class="lg-l" x1="' + x(r["lgbm_" + k + "_lo"]) + '" x2="' + x(r["lgbm_" + k + "_hi"]) + '" y1="' + yg + '" y2="' + yg + '"/>' +
+           '<circle class="lg" cx="' + x(r["lgbm_" + k]) + '" cy="' + yg + '" r="4"><title>' + nm + ' LightGBM ' + f3(r["lgbm_" + k]) + ' (' + f3(r["lgbm_" + k + "_lo"]) + ' to ' + f3(r["lgbm_" + k + "_hi"]) + ')</title></circle>';
+    } else {
+      var a = r["lift_" + fc.lift + "_lo"], b = r["lift_" + fc.lift + "_hi"], v = r["lift_" + fc.lift], z = a <= 0;
+      s += '<line class="' + (z ? "z-l" : "lg-l") + '" x1="' + x(a) + '" x2="' + x(b) + '" y1="' + yc + '" y2="' + yc + '"/>' +
+           (z ? '<rect class="z" x="' + (x(v) - 4) + '" y="' + (yc - 4) + '" width="8" height="8"/>' : '<circle class="lg" cx="' + x(v) + '" cy="' + yc + '" r="4"/>') +
+           '<title>' + nm + ' PR AUC lift ' + s3(v) + ' (' + s3(a) + ' to ' + s3(b) + ')</title>';
+    }
   });
-  return s + '</svg>';
+  return svg(W, H, fc.title + " per product with 95% intervals", s);
+}
+function calChart(pts, product, F, W){
+  var H = Math.round(W * 0.72), L = 36, R = W - 8, T = 8, B = H - 18;
+  var mx = max(pts.map(function(p){ return Math.max(p.mean_pred, p.observed); }));
+  var top = [0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5, 0.75, 1].find(function(s){ return s >= mx; }) || 1;
+  /* square root axes: most bins sit near zero and one bin carries most of the take up */
+  var sx = function(v){ return L + Math.sqrt(v / top) * (R - L); }, sy = function(v){ return B - Math.sqrt(v / top) * (B - T); };
+  var tk = [0].concat([0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1].filter(function(t){ return t <= top && t >= top / 30; }));
+  if (tk[tk.length - 1] !== top) tk.push(top);
+  tk = tk.filter(function(t, i){ return i === 0 || i === tk.length - 1 ? true : sx(t) - sx(tk[i - 1]) >= 22 && sx(top) - sx(t) >= 22; });
+  var lbl = function(t){ return t === 0 ? "0" : (t * 100 < 1 ? (t * 100).toFixed(1) : Math.round(t * 100)) + "%"; };
+  var s = "";
+  tk.forEach(function(t){
+    s += '<line class="grid" x1="' + sx(t) + '" x2="' + sx(t) + '" y1="' + T + '" y2="' + B + '"/><line class="grid" x1="' + L + '" x2="' + R + '" y1="' + sy(t) + '" y2="' + sy(t) + '"/>' +
+         '<text x="' + sx(t) + '" y="' + (B + 13) + '" text-anchor="middle" style="font-size:10px">' + lbl(t) + '</text>' +
+         '<text x="' + (L - 4) + '" y="' + (sy(t) + 3.5) + '" text-anchor="end" style="font-size:10px">' + lbl(t) + '</text>';
+  });
+  s += '<line class="diag" x1="' + sx(0) + '" y1="' + sy(0) + '" x2="' + sx(top) + '" y2="' + sy(top) + '"/>' +
+       '<polyline class="lg-l" points="' + pts.map(function(p){ return sx(p.mean_pred).toFixed(1) + "," + sy(p.observed).toFixed(1); }).join(" ") + '"/>';
+  pts.forEach(function(p){
+    s += '<circle class="lg" cx="' + sx(p.mean_pred).toFixed(1) + '" cy="' + sy(p.observed).toFixed(1) + '" r="2.8"><title>bin ' + p.bin + ': predicted ' + pct(p.mean_pred, 2) + ', observed ' + pct(p.observed, 2) + ', ' + int(p.n) + ' clients</title></circle>';
+  });
+  return svg(W, H, "Reliability of " + F.plabel(product) + " scores", s);
+}
+function trialsChart(list, info, F, product, W){
+  var H = Math.round(W * 0.56), L = 40, R = W - 6, T = 8, B = H - 20;
+  var vals = list.map(function(t){ return t.val_pr_auc; }), lo = min(vals), hi = max(vals), pad = (hi - lo) * 0.12 || 0.005;
+  lo -= pad; hi += pad;
+  var nT = list.length, sx = scale(0, Math.max(1, nT - 1), L + 4, R - 4), sy = scale(lo, hi, B, T), best = info.best_trial, s = "";
+  ticks(lo, hi, 3).forEach(function(t){
+    s += '<line class="grid" x1="' + L + '" x2="' + R + '" y1="' + sy(t) + '" y2="' + sy(t) + '"/><text x="' + (L - 4) + '" y="' + (sy(t) + 3.5) + '" text-anchor="end" style="font-size:10px">' + t.toFixed(3) + '</text>';
+  });
+  s += '<line class="diag" x1="' + L + '" x2="' + R + '" y1="' + sy(info.val_pr_auc_default) + '" y2="' + sy(info.val_pr_auc_default) + '"/>';
+  list.forEach(function(t, i){
+    var cx = sx(i), cy = sy(t.val_pr_auc), tip = '<title>trial ' + t.trial + ': ' + f4(t.val_pr_auc) + '</title>';
+    if (t.trial === 0) s += '<circle class="def" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="4.5">' + tip + '</circle>';
+    else if (t.trial === best) s += '<rect class="best" x="' + (cx - 4.5).toFixed(1) + '" y="' + (cy - 4.5).toFixed(1) + '" width="9" height="9">' + tip + '</rect>';
+    else s += '<circle class="trial" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="2.4">' + tip + '</circle>';
+  });
+  s += '<text x="' + L + '" y="' + (H - 4) + '" style="font-size:10px">trial 0</text><text x="' + R + '" y="' + (H - 4) + '" text-anchor="end" style="font-size:10px">trial ' + list[nT - 1].trial + '</text>';
+  return svg(W, H, "Validation PR AUC per trial for " + F.plabel(product), s);
+}
+function itersChart(M, ceiling, F, W){
+  /* on a narrow box each name sits above its bar, so a long name never runs into it */
+  var narrow = W < 520, LW = narrow ? 0 : Math.min(190, Math.round(W * 0.36)), RH = narrow ? 40 : 26, TOP = 24, H = TOP + M.length * RH + 4, x = scale(0, ceiling, LW + 1, W - 44), s = "";
+  ticks(0, ceiling, 4).forEach(function(t){ s += '<line class="grid" x1="' + x(t) + '" x2="' + x(t) + '" y1="' + (TOP - 4) + '" y2="' + H + '"/><text x="' + x(t) + '" y="' + (TOP - 9) + '" text-anchor="middle">' + int(t) + '</text>'; });
+  M.forEach(function(r, j){
+    var yc = TOP + j * RH + RH / 2;
+    var yb = narrow ? yc + 8 : yc;
+    s += '<text class="lab" x="0" y="' + (narrow ? yc - 6 : yc + 4) + '">' + esc(F.plabel(r.product)) + '</text><rect class="bar" x="' + (LW + 1) + '" y="' + (yb - 4) + '" width="' + (x(r.lgbm_best_iteration) - LW - 1) + '" height="8"/>' +
+         '<text class="val" x="' + (x(r.lgbm_best_iteration) + 6) + '" y="' + (yb + 4) + '">' + int(r.lgbm_best_iteration) + '</text>';
+  });
+  return svg(W, H, "Boosting rounds kept per product", s);
 }
 
-function evalPanel(D, F){
-  var M = D.propensity.metrics, mo = D.meta.months, n = M.length;
-  var rocBetter = M.filter(function(r){ return r.lgbm_roc_auc > r.logreg_roc_auc; }).length;
-  var prBetter = M.filter(function(r){ return r.lgbm_pr_auc > r.logreg_pr_auc; }).length;
-  var zero = M.filter(function(r){ return r.lift_pr_auc_lo <= 0 || r.lift_roc_auc_lo <= 0; });
-  var clear = M.filter(function(r){ return r.lift_pr_auc_lo > 0 && r.lift_roc_auc_lo > 0; }).length;
+function step2(D, F){
+  var M = D.propensity.metrics, mo = D.meta.months, n = M.length, T = D.model_card.tuning;
+  /* models against the baseline */
+  var rocBetter = M.filter(function(r){ return r.lgbm_roc_auc > r.logreg_roc_auc; }).length, prBetter = M.filter(function(r){ return r.lgbm_pr_auc > r.logreg_pr_auc; }).length;
+  var zero = M.filter(function(r){ return r.lift_pr_auc_lo <= 0 || r.lift_roc_auc_lo <= 0; }), clear = n - zero.length;
   var zeroText = zero.map(function(r){
     var parts = [];
     if (r.lift_pr_auc_lo <= 0) parts.push("the PR AUC lift interval runs from " + s3(r.lift_pr_auc_lo) + " to " + s3(r.lift_pr_auc_hi));
     if (r.lift_roc_auc_lo <= 0) parts.push("the ROC AUC lift interval starts at " + f3(r.lift_roc_auc_lo));
     return '<span class="flag">' + esc(F.plabel(r.product)) + '</span>, with ' + int(r.n_test_pos) + ' take ups in the test month: ' + parts.join(" and ");
   });
-  /* take up is rare, which is why PR AUC is the number to watch, so the lead says so first */
-  var rates = M.map(function(r){ return r.base_rate; });
-  var lead = 'Take up is rare: between ' + pct(Math.min.apply(null, rates), 2) + ' and ' + pct(Math.max.apply(null, rates), 2) +
-    ' of clients take up a product in a month, so PR AUC, which ignores the many easy negatives, is the stricter test. ' +
-    'Scored on ' + mo.test_target + ', a month no model saw while training. LightGBM has the higher ROC AUC on ' + rocBetter + ' of ' + n +
-    ' products and the higher PR AUC on ' + prBetter + ' of ' + n + '; both lift intervals stay above zero for ' + clear + ' of ' + n + '. ' +
+  var rates = M.map(function(r){ return r.base_rate; }), roc = M.map(function(r){ return r.lgbm_roc_auc; }), pr = M.map(function(r){ return r.lgbm_pr_auc; });
+  var lead = 'Take up is rare: between ' + pct(min(rates), 2) + ' and ' + pct(max(rates), 2) + ' of clients take up a product in a month, so PR AUC, which ignores the many easy negatives, is the stricter test. ' +
+    'Scored on ' + mo.test_target + ', a month no model saw while training. LightGBM has the higher ROC AUC on ' + rocBetter + ' of ' + n + ' products and the higher PR AUC on ' + prBetter + ' of ' + n +
+    '; both lift intervals stay above zero for <b>' + clear + ' of ' + n + '</b>. ' +
     (zero.length ? 'The intervals include zero for ' + zeroText.join("; ") + ', so there LightGBM is not clearly better than the baseline.' : 'No lift interval includes zero.');
+  var key = '<div class="mp-key"><span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 12" aria-hidden="true">' + keyLine("lg-l") + '<circle class="lg" cx="11" cy="6" r="4"/></svg>LightGBM, with its 95% interval</span>' +
+    '<span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 12" aria-hidden="true">' + keyLine("lr-l") + '<circle class="lr" cx="11" cy="6" r="3.6"/></svg>Logistic regression baseline</span>' +
+    '<span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 12" aria-hidden="true">' + keyLine("z-l") + '<rect class="z" x="7" y="2" width="8" height="8"/></svg>Lift interval includes zero</span>' +
+    '<span>Intervals from a paired bootstrap of the test month</span></div>';
   var rows = M.map(function(r){
     var zp = r.lift_pr_auc_lo <= 0, zr = r.lift_roc_auc_lo <= 0;
-    return '<tr><td>' + esc(F.plabel(r.product)) + '</td><td>' + int(r.n_test_pos) + '</td><td class="muted">' + int(r.n_test) + '</td><td class="muted">' + pct(r.base_rate, 2) + '</td>' +
-      '<td>' + f3(r.lgbm_roc_auc) + '</td><td class="muted">' + f3(r.logreg_roc_auc) + '</td><td' + (zr ? ' class="v"' : '') + '>' + s3(r.lift_roc_auc) + ' <span class="muted">(' + s3(r.lift_roc_auc_lo) + ' to ' + s3(r.lift_roc_auc_hi) + ')</span>' + (zr ? ' includes 0' : '') + '</td>' +
-      '<td>' + f3(r.lgbm_pr_auc) + '</td><td class="muted">' + f3(r.logreg_pr_auc) + '</td><td' + (zp ? ' class="v"' : '') + '>' + s3(r.lift_pr_auc) + ' <span class="muted">(' + s3(r.lift_pr_auc_lo) + ' to ' + s3(r.lift_pr_auc_hi) + ')</span>' + (zp ? ' includes 0' : '') + '</td></tr>';
+    return '<tr><td class="h">' + esc(F.plabel(r.product)) + '</td><td data-l="Take ups">' + int(r.n_test_pos) + '</td><td class="q" data-l="Clients">' + int(r.n_test) + '</td><td class="q" data-l="Base rate">' + pct(r.base_rate, 2) + '</td>' +
+      '<td data-l="ROC AUC">' + f3(r.lgbm_roc_auc) + '</td><td class="q" data-l="Baseline">' + f3(r.logreg_roc_auc) + '</td><td' + (zr ? ' class="v"' : '') + ' data-l="ROC lift (95%)"><span>' + s3(r.lift_roc_auc) + ' <span class="q">(' + s3(r.lift_roc_auc_lo) + ' to ' + s3(r.lift_roc_auc_hi) + ')</span>' + (zr ? ' includes 0' : '') + '</span></td>' +
+      '<td data-l="PR AUC">' + f3(r.lgbm_pr_auc) + '</td><td class="q" data-l="Baseline">' + f3(r.logreg_pr_auc) + '</td><td' + (zp ? ' class="v"' : '') + ' data-l="PR lift (95%)"><span>' + s3(r.lift_pr_auc) + ' <span class="q">(' + s3(r.lift_pr_auc_lo) + ' to ' + s3(r.lift_pr_auc_hi) + ')</span>' + (zp ? ' includes 0' : '') + '</span></td></tr>';
   }).join("");
-  return '<h2>LightGBM against the baseline</h2><p class="lead">' + lead + '</p>' + dotKey() +
-    '<div class="blk wrapx">' + evalChart(M, F) + '</div>' +
-    '<div class="blk wrapx"><table class="t ev"><thead><tr><th>Product</th><th>Take ups</th><th>Clients</th><th>Base rate</th>' +
-    '<th>ROC AUC</th><th>Baseline</th><th>ROC lift (95%)</th><th>PR AUC</th><th>Baseline</th><th>PR lift (95%)</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
-}
+  var a = '<div class="mp-sub"><h3>LightGBM against the baseline</h3><p class="mp-lead">' + lead + '</p>' +
+    '<div class="mp-figs">' + fig(f3(min(roc)) + ' to ' + f3(max(roc)), "ROC AUC, LightGBM", "Test month " + mo.test_target) + fig(f3(min(pr)) + ' to ' + f3(max(pr)), "PR AUC, LightGBM", "Against base rates of " + pct(min(rates), 2) + " to " + pct(max(rates), 2)) +
+      fig(clear + ' of ' + n, "clearly above the baseline", "Both lift intervals above zero") + fig(zero.length, zero.length === 1 ? "product not clearly better" : "products not clearly better", zero.map(function(r){ return esc(F.plabel(r.product)); }).join(", ") || "None", zero.length ? "hold" : "") + '</div>' +
+    key + '<div class="mp-facets">' + FACETS.map(function(fc){ return chart("c-" + fc.id, function(w){ return facetChart(M, F, fc, w); }); }).join("") + '</div>' +
+    '<table class="mp-t rt"><thead><tr><th>Product</th><th>Take ups</th><th>Clients</th><th>Base rate</th><th>ROC AUC</th><th>Baseline</th><th>ROC lift (95%)</th><th>PR AUC</th><th>Baseline</th><th>PR lift (95%)</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
 
-/* ---------- 2. calibration ---------- */
-function calChart(pts, product, F){
-  var W = 200, H = 140, L = 34, R = 194, T = 8, B = 124;
-  var mx = Math.max.apply(null, pts.map(function(p){ return Math.max(p.mean_pred, p.observed); }));
-  var stops = [0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5, 0.75, 1], top = stops.find(function(s){ return s >= mx; }) || 1;
-  /* square root axes: most bins sit near zero and one bin carries most of the take up */
-  var sx = function(v){ return L + Math.sqrt(v / top) * (R - L); }, sy = function(v){ return B - Math.sqrt(v / top) * (B - T); };
-  var tk = [0].concat([0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1].filter(function(t){ return t <= top && t >= top / 30; }));
-  if (tk[tk.length - 1] !== top) tk.push(top);
-  /* drop ticks that would sit on top of each other near zero */
-  tk = tk.filter(function(t, i){ return i === 0 || i === tk.length - 1 ? true : sx(t) - sx(tk[i - 1]) >= 20 && sx(top) - sx(t) >= 20; });
-  var lbl = function(t){ return t === 0 ? "0" : (t * 100 < 1 ? (t * 100).toFixed(1) : Math.round(t * 100)) + "%"; };
-  var s = '<svg class="chart" ' + SVGNS + ' viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Reliability of ' + esc(F.plabel(product)) + ' scores">';
-  tk.forEach(function(t){
-    s += '<line class="grid" x1="' + sx(t) + '" x2="' + sx(t) + '" y1="' + T + '" y2="' + B + '"/><line class="grid" x1="' + L + '" x2="' + R + '" y1="' + sy(t) + '" y2="' + sy(t) + '"/>' +
-         '<text x="' + sx(t) + '" y="' + (B + 13) + '" text-anchor="middle" style="font-size:10px">' + lbl(t) + '</text>' +
-         '<text x="' + (L - 4) + '" y="' + (sy(t) + 3.5) + '" text-anchor="end" style="font-size:10px">' + lbl(t) + '</text>';
-  });
-  s += '<line x1="' + sx(0) + '" y1="' + sy(0) + '" x2="' + sx(top) + '" y2="' + sy(top) + '" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3 3"/>';
-  s += '<polyline fill="none" stroke="var(--lg)" stroke-width="1.5" points="' + pts.map(function(p){ return sx(p.mean_pred).toFixed(1) + "," + sy(p.observed).toFixed(1); }).join(" ") + '"/>';
-  pts.forEach(function(p){
-    s += '<circle cx="' + sx(p.mean_pred).toFixed(1) + '" cy="' + sy(p.observed).toFixed(1) + '" r="2.8" fill="var(--lg)"><title>bin ' + p.bin + ': predicted ' + pct(p.mean_pred, 2) + ', observed ' + pct(p.observed, 2) + ', ' + int(p.n) + ' clients</title></circle>';
-  });
-  return s + '</svg>';
-}
-
-function calPanel(D, F){
-  var M = D.propensity.metrics, Q = D.propensity.calibration.quantile, n = M.length;
-  var byP = function(p){ return Q.filter(function(q){ return q.model === "lgbm" && q.product === p; }).sort(function(a, b){ return a.bin - b.bin; }); };
-  var over = M.filter(function(r){ var b = byP(r.product); var t = b[b.length - 1]; return t && t.mean_pred > t.observed; });
-  var dBrier = Math.max.apply(null, M.map(function(r){ return Math.abs(r.lgbm_isotonic_brier - r.lgbm_brier); }));
-  var isoPr = M.filter(function(r){ return r.lgbm_isotonic_pr_auc < r.lgbm_pr_auc; }).length;
-  var beatLr = M.filter(function(r){ return r.lgbm_brier < r.logreg_brier; }).length;
+  /* calibration */
+  var Q = D.propensity.calibration.quantile;
+  var byP = function(p){ return Q.filter(function(q){ return q.model === "lgbm" && q.product === p; }).sort(function(x, y){ return x.bin - y.bin; }); };
+  var over = M.filter(function(r){ var b = byP(r.product), t = b[b.length - 1]; return t && t.mean_pred > t.observed; });
+  var dBrier = max(M.map(function(r){ return Math.abs(r.lgbm_isotonic_brier - r.lgbm_brier); }));
+  var isoPr = M.filter(function(r){ return r.lgbm_isotonic_pr_auc < r.lgbm_pr_auc; }).length, beatLr = M.filter(function(r){ return r.lgbm_brier < r.logreg_brier; }).length;
   var bins = byP(M[0].product).length;
-  var lead = 'Each dot is one of ' + bins + ' equal sized bins of the ' + D.meta.months.test_target + ' scores; on the dashed diagonal the predicted take up is what happened. ' +
-    'In the top bin LightGBM predicts more take up than it sees for ' + over.length + ' of ' + n + ' products; the brief quotes the observed take up of a score band, never the raw score. ' +
+  var calLead = 'Each dot is one of ' + bins + ' equal sized bins of the ' + mo.test_target + ' scores; on the dashed diagonal the predicted take up is what happened. ' +
+    'In the top bin LightGBM predicts more take up than it sees for <b>' + over.length + ' of ' + n + '</b> products, so the brief quotes the observed take up of a score band, never the raw score. ' +
     'Isotonic calibration on the validation month was tried and rejected: it moves the Brier score by at most ' + f4(dBrier) + ' and lowers PR AUC on ' + isoPr + ' of ' + n + ' products.';
-  var grid = M.map(function(r){
-    return '<div><h3>' + esc(F.plabel(r.product)) + ' <span>Brier ' + f4(r.lgbm_brier) + '</span></h3>' + calChart(byP(r.product), r.product, F) + '</div>';
+  var cal = M.map(function(r){ return '<div><h4>' + esc(F.plabel(r.product)) + ' <span>Brier ' + f4(r.lgbm_brier) + '</span></h4>' + chart("c-cal-" + r.product, function(w){ return calChart(byP(r.product), r.product, F, w); }) + '</div>'; }).join("");
+  var brier = M.map(function(r){
+    return '<tr><td class="h">' + esc(F.plabel(r.product)) + '</td><td data-l="LightGBM, used">' + f4(r.lgbm_brier) + '</td><td class="q" data-l="Baseline">' + f4(r.logreg_brier) + '</td><td class="q" data-l="Isotonic, rejected">' + f4(r.lgbm_isotonic_brier) + '</td></tr>';
   }).join("");
-  var row = function(name, key, cls){
-    return '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td class="l">' + name + '</td>' + M.map(function(r){ return '<td>' + f4(r[key]) + '</td>'; }).join("") + '</tr>';
-  };
-  return '<h2>Calibration</h2><p class="lead">' + lead + '</p>' +
-    '<div class="cal">' + grid + '</div><p class="cap">Across: predicted take up. Up: observed take up. Both axes on a square root scale so the low bins stay readable.</p>' +
-    '<div class="blk wrapx"><h3>Brier score per product, test month (lower is better; LightGBM is lower than the baseline on ' + beatLr + ' of ' + n + ')</h3>' +
-    '<table class="t"><thead><tr><th class="l">Model</th>' + M.map(function(r){ return '<th>' + esc(F.plabel(r.product)) + '</th>'; }).join("") + '</tr></thead><tbody>' +
-    row("LightGBM, used", "lgbm_brier") + row("Logistic regression baseline", "logreg_brier") +
-    '<tr class="sum"><td class="l muted">LightGBM with isotonic, <span class="code">lgbm_isotonic</span>, rejected</td>' + M.map(function(r){ return '<td class="muted">' + f4(r.lgbm_isotonic_brier) + '</td>'; }).join("") + '</tr>' +
-    '</tbody></table></div>';
-}
+  var b = '<div class="mp-sub"><h3>Calibration</h3><p class="mp-lead">' + calLead + '</p>' +
+    '<div class="mp-cols"><div><div class="mp-small">' + cal + '</div><p class="mp-cap">Across: predicted take up. Up: observed take up. Both axes on a square root scale so the low bins stay readable.</p></div>' +
+    '<div><h4 class="mp-h4">Brier score, test month <span>lower is better; LightGBM is lower than the baseline on ' + beatLr + ' of ' + n + '</span></h4>' +
+      '<table class="mp-t rt"><thead><tr><th>Product</th><th>LightGBM, used</th><th>Baseline</th><th>Isotonic, ' + code("lgbm_isotonic") + ', rejected</th></tr></thead><tbody>' + brier + '</tbody></table></div></div></div>';
 
-/* ---------- 3. tuning ---------- */
-function itersChart(M, ceiling, F){
-  var W = 470, LW = 118, RH = 24, TOP = 22, H = TOP + M.length * RH + 6, x = scale(0, ceiling, LW, W - 14);
-  var s = '<svg class="chart" ' + SVGNS + ' viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Boosting rounds kept per product">';
-  ticks(0, ceiling, 4).forEach(function(t){
-    s += '<line class="grid" x1="' + x(t) + '" x2="' + x(t) + '" y1="' + (TOP - 4) + '" y2="' + H + '"/><text x="' + x(t) + '" y="' + (TOP - 8) + '" text-anchor="middle">' + int(t) + '</text>';
-  });
-  M.forEach(function(r, j){
-    var yc = TOP + j * RH + RH / 2;
-    s += '<text class="lab" x="0" y="' + (yc + 4) + '">' + esc(F.plabel(r.product)) + '</text>' +
-         '<rect x="' + LW + '" y="' + (yc - 4) + '" width="' + (x(r.lgbm_best_iteration) - LW) + '" height="8" fill="var(--lg)"/>' +
-         '<text x="' + (x(r.lgbm_best_iteration) + 6) + '" y="' + (yc + 4) + '" style="fill:var(--ink)">' + int(r.lgbm_best_iteration) + '</text>';
-  });
-  return s + '</svg>';
-}
-
-function trialsChart(list, info, F, product){
-  var W = 200, H = 112, L = 36, R = 194, T = 8, B = 92;
-  var vals = list.map(function(t){ return t.val_pr_auc; }), lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), pad = (hi - lo) * 0.12 || 0.005;
-  lo -= pad; hi += pad;
-  var nT = list.length, sx = scale(0, Math.max(1, nT - 1), L, R), sy = scale(lo, hi, B, T);
-  var best = info.best_trial, s = '<svg class="chart" ' + SVGNS + ' viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Validation PR AUC per trial for ' + esc(F.plabel(product)) + '">';
-  ticks(lo, hi, 3).forEach(function(t){
-    s += '<line class="grid" x1="' + L + '" x2="' + R + '" y1="' + sy(t) + '" y2="' + sy(t) + '"/><text x="' + (L - 4) + '" y="' + (sy(t) + 3.5) + '" text-anchor="end" style="font-size:10px">' + t.toFixed(3) + '</text>';
-  });
-  s += '<line class="grid" x1="' + L + '" x2="' + R + '" y1="' + sy(info.val_pr_auc_default) + '" y2="' + sy(info.val_pr_auc_default) + '" style="stroke:var(--ink-soft);stroke-dasharray:2 3"/>';
-  list.forEach(function(t, i){
-    var cx = sx(i).toFixed(1), cy = sy(t.val_pr_auc).toFixed(1), tip = '<title>trial ' + t.trial + ': ' + f4(t.val_pr_auc) + '</title>';
-    if (t.trial === 0) s += '<circle cx="' + cx + '" cy="' + cy + '" r="4.5" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.5">' + tip + '</circle>';
-    else if (t.trial === best) s += '<rect x="' + (cx - 4.5) + '" y="' + (cy - 4.5) + '" width="9" height="9" fill="var(--ink)">' + tip + '</rect>';
-    else s += '<circle cx="' + cx + '" cy="' + cy + '" r="2.4" fill="var(--petrol-line)">' + tip + '</circle>';
-  });
-  s += '<text x="' + L + '" y="' + (H - 4) + '" style="font-size:10px">trial 0</text><text x="' + R + '" y="' + (H - 4) + '" text-anchor="end" style="font-size:10px">trial ' + list[nT - 1].trial + '</text>';
-  return s + '</svg>';
-}
-
-function tunePanel(D, F){
-  var T = D.model_card.tuning, M = D.propensity.metrics, mo = D.meta.months;
+  /* tuning */
+  var c;
   if (!T.run){
     var P = T.default_params || {}, its = M.map(function(r){ return r.lgbm_best_iteration; });
-    return '<h2>Tuning</h2><p class="none">No hyperparameter search has been run yet.</p>' +
-      '<p class="lead">Every product uses the same fixed LightGBM parameters below; none of them was searched. ' +
-      'The only thing fitted per product is the number of boosting rounds: <span class="code">n_estimators</span> is a ceiling of ' + int(P.n_estimators) +
-      ', and early stopping on the validation month (' + mo.val_target + ') kept between ' + int(Math.min.apply(null, its)) + ' and ' + int(Math.max.apply(null, its)) + ' rounds. ' +
-      'The test month (' + mo.test_target + ') played no part in any of these choices.</p>' +
-      '<div class="two"><div class="blk"><h3>Current fixed parameters</h3><dl class="params">' +
-      Object.keys(P).map(function(k){ return '<dt>' + esc(k) + '</dt><dd>' + num(P[k]) + '</dd>'; }).join("") + '</dl></div>' +
-      '<div class="blk"><h3>Boosting rounds kept by early stopping, out of ' + int(P.n_estimators) + '</h3>' + itersChart(M, P.n_estimators, F) + '</div></div>';
+    c = '<div class="mp-sub"><h3>Tuning</h3><p class="mp-lead"><b>No hyperparameter search has been run yet.</b> Every product uses the same fixed LightGBM parameters; none of them was searched. ' +
+      'The only thing fitted per product is the number of boosting rounds: ' + code("n_estimators") + ' is a ceiling of ' + int(P.n_estimators) + ', and early stopping on the validation month (' + mo.val_target + ') kept between ' +
+      int(min(its)) + ' and ' + int(max(its)) + ' rounds. The test month (' + mo.test_target + ') played no part in any of these choices.</p>' +
+      '<div class="mp-cols"><div>' + chart("c-iters", function(w){ return itersChart(M, P.n_estimators, F, w); }) + '</div><div><table class="mp-t"><tbody>' +
+      Object.keys(P).map(function(k){ return '<tr><td>' + code(k) + '</td><td>' + num(P[k]) + '</td></tr>'; }).join("") + '</tbody></table></div></div></div>';
+  } else {
+    var prods = M.map(function(r){ return r.product; }).filter(function(p){ return T.products && T.products[p]; });
+    var tuned = prods.filter(function(p){ return T.products[p].chosen === "tuned"; });
+    var gains = prods.map(function(p){ var x = T.products[p]; return x.val_pr_auc_best - x.val_pr_auc_default; });
+    var searched = T.searched || [], fixed = T.fixed || {}, its2 = M.map(function(r){ return r.lgbm_best_iteration; });
+    var tLead = esc(T.method.charAt(0).toUpperCase() + T.method.slice(1)) + ' search, ' + T.n_trials + ' trials per product with seed ' + T.seed + ', maximising ' + esc(T.objective) + ' on the validation month (' + esc(T.validation_month) +
+      ') with ' + int(T.train_rows_per_trial) + ' training rows per trial; trial 0 is the default. Validation PR AUC gains over the default run from ' + s3(min(gains)) + ' to ' + s3(max(gains)) + '. ' +
+      'The tuned parameters are kept for <b>' + tuned.length + ' of ' + prods.length + '</b> products; the others stay on the default, and the test month played no part in the choice. ' +
+      'Early stopping on the validation month then kept between ' + int(min(its2)) + ' and ' + int(max(its2)) + ' boosting rounds' + (fixed.n_estimators ? ', out of a ceiling of ' + int(fixed.n_estimators) : '') + '.';
+    var tkey = '<div class="mp-key"><span>' + sym("def", "dot") + 'Default, trial 0 (dashed line)</span><span>' + sym("best", "sq") + 'Best trial</span><span>' + sym("trial", "small") + 'Other trials, in trial order</span></div>';
+    var grid = prods.map(function(p){
+      var list = ((T.trials || {})[p] || []).slice().sort(function(x, y){ return x.trial - y.trial; });
+      return '<div><h4>' + esc(F.plabel(p)) + ' <span>' + (T.products[p].chosen === "tuned" ? "tuned" : "default kept") + '</span></h4>' +
+        (list.length ? chart("c-tr-" + p, function(w){ return trialsChart(list, T.products[p], F, p, w); }) : '<p class="mp-cap">No trials logged.</p>') + '</div>';
+    }).join("");
+    var trows = prods.map(function(p){
+      var x = T.products[p], g = x.val_pr_auc_best - x.val_pr_auc_default, pr2 = x.params || {}, on = x.chosen === "tuned";
+      return '<tr><td class="h">' + esc(F.plabel(p)) + '</td><td data-l="Trials">' + x.n_trials + '</td><td class="q" data-l="Default">' + f4(x.val_pr_auc_default) + '</td><td data-l="Best"><span>' + f4(x.val_pr_auc_best) + ' <span class="q">(trial ' + x.best_trial + ')</span></span></td>' +
+        '<td data-l="Gain">' + s3(g) + '</td><td class="l" data-l="Kept">' + (on ? "tuned" : "default") + '</td>' +
+        searched.map(function(k){ return '<td' + (on ? '' : ' class="q"') + ' data-l="' + esc(k) + '">' + (pr2[k] == null ? "" : num(pr2[k])) + '</td>'; }).join("") +
+        '<td class="q" data-l="Time">' + Math.round(x.seconds) + ' s</td></tr>';
+    }).join("");
+    c = '<div class="mp-sub"><h3>Tuning</h3><p class="mp-lead">' + tLead + '</p>' + tkey + '<div class="mp-small">' + grid + '</div>' +
+      '<table class="mp-t rt"><thead><tr><th>Product</th><th>Trials</th><th>Default</th><th>Best</th><th>Gain</th><th class="l">Kept</th>' +
+      searched.map(function(k){ return '<th class="wr">' + code(k).replace(/_/g, "_<wbr>") + '</th>'; }).join("") + '<th>Time</th></tr></thead><tbody>' + trows + '</tbody></table>' +
+      '<p class="mp-cap">Validation PR AUC. Parameters shown are the best trial’s. Held fixed: ' + Object.keys(fixed).map(function(k){ return code(k) + ' ' + num(fixed[k]); }).join(", ") + '.</p>' +
+      '<div class="mp-half"><h4 class="mp-h4">Boosting rounds kept by early stopping' + (fixed.n_estimators ? ' <span>out of ' + int(fixed.n_estimators) + '</span>' : '') + '</h4>' +
+      chart("c-iters", function(w){ return itersChart(M, fixed.n_estimators || max(its2), F, w); }) + '</div></div>';
   }
-  var prods = M.map(function(r){ return r.product; }).filter(function(p){ return T.products && T.products[p]; });
-  var tuned = prods.filter(function(p){ return T.products[p].chosen === "tuned"; });
-  var gains = prods.map(function(p){ var x = T.products[p]; return x.val_pr_auc_best - x.val_pr_auc_default; });
-  var searched = T.searched || [];
-  var lead = esc(T.method) + ' search, ' + T.n_trials + ' trials per product with seed ' + T.seed + ', maximising ' + esc(T.objective) + ' on the validation month (' + esc(T.validation_month) +
-    ') with ' + int(T.train_rows_per_trial) + ' training rows per trial; trial 0 is the default. ' +
-    'Validation PR AUC gains over the default run from ' + s3(Math.min.apply(null, gains)) + ' to ' + s3(Math.max.apply(null, gains)) + '. ' +
-    'The tuned parameters are kept for ' + tuned.length + ' of ' + prods.length + ' products; the others stay on the default, and the test month played no part in the choice.';
-  var key = '<div class="key"><span><svg ' + SVGNS + ' viewBox="0 0 22 12"><circle cx="11" cy="6" r="4.5" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.5"/></svg>Default, trial 0 (dashed line)</span>' +
-    '<span><svg ' + SVGNS + ' viewBox="0 0 22 12"><rect x="6.5" y="1.5" width="9" height="9" fill="var(--ink)"/></svg>Best trial</span>' +
-    '<span><svg ' + SVGNS + ' viewBox="0 0 22 12"><circle cx="11" cy="6" r="2.4" fill="var(--petrol-line)"/></svg>Other trials, in trial order</span></div>';
-  var grid = prods.map(function(p){
-    var list = ((T.trials || {})[p] || []).slice().sort(function(a, b){ return a.trial - b.trial; });
-    return '<div><h3>' + esc(F.plabel(p)) + ' <span>' + (T.products[p].chosen === "tuned" ? "tuned" : "default kept") + '</span></h3>' + (list.length ? trialsChart(list, T.products[p], F, p) : '<p class="cap">No trials logged.</p>') + '</div>';
-  }).join("");
-  var rows = prods.map(function(p){
-    var x = T.products[p], g = x.val_pr_auc_best - x.val_pr_auc_default, pr = x.params || {};
-    return '<tr><td>' + esc(F.plabel(p)) + '</td><td>' + x.n_trials + '</td><td class="muted">' + f4(x.val_pr_auc_default) + '</td><td>' + f4(x.val_pr_auc_best) + ' <span class="muted">(trial ' + x.best_trial + ')</span></td>' +
-      '<td>' + s3(g) + '</td><td class="l">' + (x.chosen === "tuned" ? "tuned" : "default") + '</td>' +
-      searched.map(function(k){ return '<td' + (x.chosen === "tuned" ? '' : ' class="muted"') + '>' + (pr[k] == null ? "" : num(pr[k])) + '</td>'; }).join("") +
-      '<td class="muted">' + Math.round(x.seconds) + ' s</td></tr>';
-  }).join("");
-  var fixed = T.fixed || {};
-  return '<h2>Tuning</h2><p class="lead">' + lead + '</p>' + key +
-    '<div class="trials">' + grid + '</div>' +
-    '<div class="blk wrapx"><table class="t tune"><thead><tr><th>Product</th><th>Trials</th><th>Default</th><th>Best</th><th>Gain</th><th class="l">Kept</th>' +
-    searched.map(function(k){ return '<th class="wr"><span class="code">' + esc(k).replace(/_/g, "_<wbr>") + '</span></th>'; }).join("") + '<th>Time</th></tr></thead><tbody>' + rows + '</tbody></table>' +
-    '<p class="fixed">Validation PR AUC. Parameters shown are the best trial’s. Held fixed: ' + Object.keys(fixed).map(function(k){ return '<span class="code">' + esc(k) + '</span> ' + num(fixed[k]); }).join(", ") + '.</p></div>';
+  return head(2, "How well the take up models rank, and how far to trust a score", D.meta.agent_steps[1]) + a + b + c;
 }
 
-/* ---------- 4. segmentation ---------- */
-function segChart(S){
-  var ks = Object.keys(S.silhouette).map(Number).sort(function(a, b){ return a - b; });
-  var W = 480, L = 58, R = 466, H1T = 26, H1B = 140, H2T = 186, H2B = 300, H = 330;
-  var x = scale(ks[0], ks[ks.length - 1], L, R);
-  var sv = ks.map(function(k){ return S.silhouette[k]; }), iv = ks.map(function(k){ return S.inertia[k]; });
-  var best = Math.max.apply(null, sv), slo = Math.floor((Math.min.apply(null, sv) - 0.01) * 50) / 50, shi = Math.ceil((best + 0.005) * 50) / 50;
-  var ys = scale(slo, shi, H1B, H1T), ilo = 0, ihi = Math.ceil(Math.max.apply(null, iv) / 100000) * 100000, yi = scale(ilo, ihi, H2B, H2T);
-  var s = '<svg class="chart" ' + SVGNS + ' viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Silhouette and inertia for k from ' + ks[0] + ' to ' + ks[ks.length - 1] + '">';
-  s += '<text x="0" y="12" class="lab" style="font-weight:600">Silhouette, higher is better</text>' +
-       '<text x="0" y="' + (H2T - 18) + '" class="lab" style="font-weight:600">Inertia, the elbow is where gains flatten</text>';
-  /* the tie band: every k within tie_margin of the best silhouette counts as tied */
-  s += '<rect x="' + L + '" width="' + (R - L) + '" y="' + ys(best) + '" height="' + (ys(best - S.tie_margin) - ys(best)) + '" fill="var(--band)" opacity=".6"/>' +
-       '<text x="' + (L + 4) + '" y="' + (ys(best - S.tie_margin) - 3) + '" style="font-size:10px">within ' + S.tie_margin + ' of the best</text>';
-  ticks(slo, shi, 3).forEach(function(t){ s += '<line class="grid" x1="' + L + '" x2="' + R + '" y1="' + ys(t) + '" y2="' + ys(t) + '"/><text x="' + (L - 6) + '" y="' + (ys(t) + 3.5) + '" text-anchor="end">' + t.toFixed(2) + '</text>'; });
-  ticks(ilo, ihi, 3).forEach(function(t){ s += '<line class="grid" x1="' + L + '" x2="' + R + '" y1="' + yi(t) + '" y2="' + yi(t) + '"/><text x="' + (L - 6) + '" y="' + (yi(t) + 3.5) + '" text-anchor="end">' + (t ? Math.round(t / 1000) + 'k' : '0') + '</text>'; });
-  /* chosen k across both facets, elbow on the inertia facet */
-  s += '<line x1="' + x(S.k) + '" x2="' + x(S.k) + '" y1="' + (H1T - 6) + '" y2="' + H2B + '" stroke="var(--ink)" stroke-width="1.5"/>' +
-       '<text x="' + (x(S.k) + 5) + '" y="' + (H1T - 2) + '" style="fill:var(--ink);font-weight:600">chosen k ' + S.k + '</text>' +
-       '<line x1="' + x(S.elbow_k) + '" x2="' + x(S.elbow_k) + '" y1="' + (H2T - 4) + '" y2="' + H2B + '" stroke="var(--ink-soft)" stroke-width="1.2" stroke-dasharray="3 3"/>' +
-       '<text x="' + (x(S.elbow_k) + 5) + '" y="' + (H2T + 6) + '">elbow k ' + S.elbow_k + '</text>';
-  var line = function(vals, y){ return '<polyline fill="none" stroke="var(--lg)" stroke-width="1.5" points="' + ks.map(function(k, i){ return x(k).toFixed(1) + "," + y(vals[i]).toFixed(1); }).join(" ") + '"/>'; };
-  s += line(sv, ys) + line(iv, yi);
-  ks.forEach(function(k, i){
-    var on = k === S.k;
-    s += '<circle cx="' + x(k) + '" cy="' + ys(sv[i]) + '" r="' + (on ? 4.5 : 3) + '" fill="' + (on ? "var(--ink)" : "var(--lg)") + '"><title>k ' + k + ': silhouette ' + f3(sv[i]) + '</title></circle>' +
-         '<circle cx="' + x(k) + '" cy="' + yi(iv[i]) + '" r="' + (on ? 4.5 : 3) + '" fill="' + (on ? "var(--ink)" : "var(--lg)") + '"><title>k ' + k + ': inertia ' + int(iv[i]) + '</title></circle>' +
-         '<text x="' + x(k) + '" y="' + (H2B + 16) + '" text-anchor="middle">' + k + '</text>' +
-         '';
-  });
-  return s + '<text x="' + R + '" y="' + (H - 2) + '" text-anchor="end">k</text></svg>';
-}
-
-function segPanel(D, F){
-  var S = D.segmentation, ks = Object.keys(S.silhouette).map(Number);
-  var best = Math.max.apply(null, ks.map(function(k){ return S.silhouette[k]; })), bestK = ks.find(function(k){ return S.silhouette[k] === best; });
-  var tied = ks.filter(function(k){ return S.silhouette[k] >= best - S.tie_margin; }).sort(function(a, b){ return a - b; });
-  var lead = 'k means on standardised client features, without ' + D.data_facts.excluded_features.map(function(x){ return '<span class="code">' + esc(x) + '</span>'; }).join(" or ") + '. ' +
-    'Silhouette decides: k ' + bestK + ' scores highest (' + f3(best) + ') and every k within ' + S.tie_margin + ' of it counts as tied (' + tied.map(function(k){ return "k " + k; }).join(", ") + '); ' +
-    (tied.length > 1 ? 'the tie goes to the k nearest the elbow of the inertia curve (k ' + S.elbow_k + '), so k ' + S.k + '.' : 'so k ' + S.k + '.') +
-    ' A Gaussian mixture with the same k mostly finds the same groups.';
-  var mx = Math.max.apply(null, S.clusters.map(function(c){ return c.share; }));
-  var sizes = S.clusters.map(function(c){
-    return '<li><b>' + esc(c.name) + '</b><span>' + int(c.size) + ', ' + pct(c.share, 1) + '</span><span class="bar"><i style="right:' + (100 - c.share / mx * 100).toFixed(2) + '%"></i></span></li>';
+/* ---------- step 3: check suitability ---------- */
+var fairMetric = "roc";
+function fairHeat(D, F){
+  var Fa = D.model_card.fairness, M = D.propensity.metrics, key = fairMetric === "pr" ? "pr_auc" : "roc_auc";
+  var groups = Fa.rates, atts = [];
+  groups.forEach(function(r){ if (atts.indexOf(r.attribute) < 0) atts.push(r.attribute); });
+  var vals = Fa.auc.filter(function(x){ return x[key] != null; }).map(function(x){ return x[key]; });
+  M.forEach(function(r){ vals.push(r["lgbm_" + key]); });
+  var vlo = min(vals), vhi = max(vals);
+  /* shaded from paper towards steel; the strongest shade is checked for contrast in contrast.py */
+  var h = function(v){ return "--h:" + Math.round((v - vlo) / (vhi - vlo || 1) * 40) + "%"; };
+  var aucFlags = Fa.auc.filter(function(x){ return x.flag; }), blanks = Fa.auc.filter(function(x){ return x[key] == null; }).length;
+  var head1 = '<tr><th rowspan="2">Product</th><th rowspan="2">All</th>' + atts.map(function(a){
+    var gs = groups.filter(function(g){ return g.attribute === a; }); return '<th class="att" colspan="' + gs.length + '">' + esc(gs[0].attribute_words) + '</th>'; }).join("") + '</tr>';
+  var head2 = '<tr>' + groups.map(function(g){ return '<th>' + esc(g.group) + '</th>'; }).join("") + '</tr>';
+  var body = M.map(function(r){
+    return '<tr><td class="h">' + esc(F.plabel(r.product)) + '</td><td class="all" data-l="All clients" style="' + h(r["lgbm_" + key]) + '">' + r["lgbm_" + key].toFixed(2) + '</td>' +
+      groups.map(function(g){
+        var c = Fa.auc.find(function(x){ return x.product === r.product && x.attribute === g.attribute && x.group === g.group; }), l = esc(g.attribute_words + ", " + g.group);
+        if (!c || c[key] == null) return '<td class="na" data-l="' + l + '" title="' + (c ? int(c.positives) + ' take ups, fewer than ' + Fa.min_positives : 'not measured') + '">too few</td>';
+        var fl = key === "roc_auc" && c.flag;
+        return '<td' + (fl ? ' class="fl"' : '') + ' data-l="' + l + '" style="' + h(c[key]) + '" title="' + esc(c.flag || (int(c.positives) + ' take ups, ' + f3(c[key]))) + '">' + c[key].toFixed(2) + '</td>';
+      }).join("") + '</tr>';
   }).join("");
-  var total = S.clusters.reduce(function(a, c){ return a + c.size; }, 0);
-  return '<h2>Client groups</h2><p class="lead">' + lead + '</p>' +
-    '<div class="seg"><div class="blk">' + segChart(S) + '</div>' +
-    '<div class="blk"><h3>Group sizes, ' + int(total) + ' clients</h3><ul class="sizes">' + sizes + '</ul>' +
-    '<div class="ari"><b>' + f3(S.ari_gmm) + '</b><span>adjusted Rand index between k means and a Gaussian mixture with k ' + S.k + ' (1 is the same partition, 0 is chance)</span></div></div></div>';
+  return '<div class="mp-heat-h"><h4 class="mp-h4">Ranking quality per audit group, test month</h4>' +
+    '<span class="v-segs" role="group" aria-label="Metric"><button type="button" data-m="roc" aria-pressed="' + (key === "roc_auc") + '">ROC AUC</button><button type="button" data-m="pr" aria-pressed="' + (key === "pr_auc") + '">PR AUC</button></span></div>' +
+    '<p class="mp-cap">' + (key === "roc_auc" ? 'Outlined in the held back colour: ' + aucFlags.length + ' flags, more than ' + Fa.auc_gap + ' below All.' : 'PR AUC follows each group’s base rate, so it carries no flags.') +
+      ' Too few (' + blanks + ' cells): fewer than ' + Fa.min_positives + ' take ups. Darker means higher.</p>' +
+    '<table class="mp-t mp-heat rt"><thead>' + head1 + head2 + '</thead><tbody>' + body + '</tbody></table>';
 }
-
-/* ---------- 5. fairness ---------- */
-function fairPanel(D, F, metric){
-  var Fa = D.model_card.fairness, M = D.propensity.metrics, lo = Fa.rate_ratio[0], hi = Fa.rate_ratio[1];
-  var atts = [], groups = [];
+function step3(D, F){
+  var G = D.guardrail, ad = G.at_default, Fa = D.model_card.fairness, lo = Fa.rate_ratio[0], hi = Fa.rate_ratio[1];
+  var byRule = {}; G.blocked_by_rule_at_default.forEach(function(r){ byRule[r.rule] = r.n; });
+  var mx = max(G.blocked_by_rule_at_default.map(function(r){ return r.n; })) || 1;
+  var rules = G.rules.slice().sort(function(a, b){ return (byRule[b.rule] || 0) - (byRule[a.rule] || 0); }).map(function(r){
+    var n = byRule[r.rule] || 0, cov = r.scored_products_covered.length;
+    return '<li' + (n ? ' data-hold' : '') + '><span class="nm">' + esc(F.rlabel(r.rule)) + ' ' + code(r.rule) + '</span><span class="v">' + int(n) + '</span>' +
+      '<span class="b' + (n ? ' hold' : ' zero') + '"' + (n ? ' style="width:' + (n / mx * 100).toFixed(2) + '%"' : '') + '></span>' +
+      '<span class="why">' + esc(r.reason) + '</span><span class="meta">Condition true for ' + int(r.n_clients_condition_true) + ' clients. ' +
+      (cov ? 'Covers ' + plural(cov, "scored product") + '.' : 'Covers no scored product, so it cannot fire in this data.') + '</span></li>';
+  }).join("");
+  var ruleLead = 'A rule is checked for every product scoring ' + Math.round(G.default_threshold * 100) + '% or more, before the top ' + G.max_suggestions + ' are shown; a high score never overrides a rule. ' +
+    'At that bar the agent makes <b>' + int(ad.n_suggestions) + '</b> suggestions, marks ' + int(ad.n_in_progress) + ' as likely already in progress, and holds back <b>' + int(ad.n_blocked) + '</b> for ' + int(ad.n_clients_with_blocked) +
+    ' clients, out of ' + int(ad.n_clients) + ' briefed. Each bar below counts the suggestions a rule held back; one suggestion can be held back by more than one rule.';
+  /* fairness rates table */
+  var atts = [], rows = "";
   Fa.rates.forEach(function(r){ if (atts.indexOf(r.attribute) < 0) atts.push(r.attribute); });
   var out = function(v){ return v < lo || v > hi; };
-  var rows = "";
   atts.forEach(function(a){
     var rs = Fa.rates.filter(function(r){ return r.attribute === a; });
     rs.forEach(function(r, i){
-      groups.push(r);
       rows += '<tr' + (i === 0 ? ' class="first"' : '') + '>' + (i === 0 ? '<td class="att" rowspan="' + rs.length + '">' + esc(r.attribute_words) + '</td>' : '') +
-        '<td class="l">' + esc(r.group) + '</td><td>' + int(r.n_clients) + '</td>' +
-        '<td>' + pct(r.suggestion_rate, 1) + '</td><td' + (out(r.suggestion_ratio) ? ' class="v"' : '') + '>' + r.suggestion_ratio.toFixed(2) + '</td>' +
-        '<td>' + pct(r.held_back_rate, 2) + '</td><td' + (out(r.held_back_ratio) ? ' class="v"' : '') + '>' + r.held_back_ratio.toFixed(2) + '</td>' +
-        '<td class="flags">' + (r.flags.length ? r.flags.map(function(f){ return '<span>' + esc(f) + '</span>'; }).join("") : '<span class="muted" style="color:var(--ink-soft);font-weight:400">none</span>') + '</td></tr>';
+        '<td class="g h">' + esc(r.group) + '</td><td data-l="Briefed clients">' + int(r.n_clients) + '</td>' +
+        '<td data-l="Suggested">' + pct(r.suggestion_rate, 1) + '</td><td' + (out(r.suggestion_ratio) ? ' class="v"' : '') + ' data-l="× overall">' + r.suggestion_ratio.toFixed(2) + '</td>' +
+        '<td data-l="Held back">' + pct(r.held_back_rate, 2) + '</td><td' + (out(r.held_back_ratio) ? ' class="v"' : '') + ' data-l="× overall">' + r.held_back_ratio.toFixed(2) + '</td>' +
+        '<td class="flags">' + (r.flags.length ? r.flags.map(function(f){ return '<span>' + esc(f) + '</span>'; }).join("") : '<span class="none">No flag</span>') + '</td></tr>';
     });
   });
-  var rateFlags = Fa.rates.reduce(function(a, r){ return a + r.flags.length; }, 0), aucFlags = Fa.auc.filter(function(x){ return x.flag; });
-  var ov = Fa.overall;
-  var lead = 'A group is flagged when its suggestion or held back rate is below ' + lo + ' or above ' + hi + ' times the overall (' + pct(ov.suggestion_rate, 1) + ', ' + pct(ov.held_back_rate, 2) +
-    '), or its ROC AUC for a product is more than ' + Fa.auc_gap + ' below that product’s overall. ' +
-    'Sex is excluded from the features and only used to audit; it is coded as recorded (H, V) and the coding is undocumented. ' +
-    'All <span class="flag">' + Fa.n_flags + ' flags</span> are shown as computed: ' + rateFlags + ' on rates, ' + aucFlags.length + ' on ranking quality.';
-  /* heat table: products down, groups across, cells shaded by value */
-  var key = metric === "pr" ? "pr_auc" : "roc_auc", vals = Fa.auc.filter(function(x){ return x[key] != null; }).map(function(x){ return x[key]; });
-  M.forEach(function(r){ vals.push(r["lgbm_" + key]); });
-  var vlo = Math.min.apply(null, vals), vhi = Math.max.apply(null, vals);
-  var shade = function(v){ var t = (v - vlo) / (vhi - vlo || 1); return "oklch(" + (97 - t * 17).toFixed(1) + "% " + (0.006 + t * 0.05).toFixed(3) + " 195)"; };
-  var head1 = '<tr><th rowspan="2" style="vertical-align:bottom">Product</th><th rowspan="2" style="vertical-align:bottom">All</th>' +
-    atts.map(function(a){ var n = groups.filter(function(g){ return g.attribute === a; }).length; return '<th class="att" colspan="' + n + '">' + esc(groups.find(function(g){ return g.attribute === a; }).attribute_words) + '</th>'; }).join("") + '</tr>';
-  var head2 = '<tr>' + groups.map(function(g){ return '<th>' + esc(g.group) + '</th>'; }).join("") + '</tr>';
-  var body = M.map(function(r){
-    return '<tr><td>' + esc(F.plabel(r.product)) + '</td><td class="all" style="background:' + shade(r["lgbm_" + key]) + '">' + r["lgbm_" + key].toFixed(2) + '</td>' +
-      groups.map(function(g){
-        var c = Fa.auc.find(function(x){ return x.product === r.product && x.attribute === g.attribute && x.group === g.group; });
-        if (!c || c[key] == null) return '<td class="na" title="' + (c ? int(c.positives) + ' take ups, fewer than ' + Fa.min_positives : 'not measured') + '"><span class="sr">blank</span></td>';
-        var fl = key === "roc_auc" && c.flag;
-        return '<td' + (fl ? ' class="fl"' : '') + ' style="background:' + shade(c[key]) + '" title="' + esc(c.flag || (int(c.positives) + ' take ups, ' + f3(c[key]))) + '">' + c[key].toFixed(2) + '</td>';
-      }).join("") + '</tr>';
+  var rateFlags = Fa.rates.reduce(function(s, r){ return s + r.flags.length; }, 0), aucFlags = Fa.auc.filter(function(x){ return x.flag; }).length, ov = Fa.overall;
+  var fLead = 'A group is flagged when its suggestion or held back rate is below ' + lo + ' or above ' + hi + ' times the overall (' + pct(ov.suggestion_rate, 1) + ', ' + pct(ov.held_back_rate, 2) +
+    '), or its ROC AUC for a product is more than ' + Fa.auc_gap + ' below that product’s overall. Sex is excluded from the features and only used to audit; it is coded as recorded (H, V) and the coding is undocumented. ' +
+    'All <span class="flag">' + Fa.n_flags + ' flags</span> are shown as computed: ' + rateFlags + ' on rates, ' + aucFlags + ' on ranking quality. ' + esc(Fa.note);
+  return head(3, "What the rules hold back, and who the output treats differently", D.meta.agent_steps[2]) +
+    '<div class="mp-sub"><h3>The suitability rules</h3><div class="mp-cols"><div><p class="mp-lead">' + ruleLead + '</p><ul class="mp-bars">' + rules + '</ul></div>' +
+    '<div class="stick"><div class="mp-figs">' + fig(int(ad.n_blocked), "held back", "At the " + Math.round(ad.threshold * 100) + "% bar, for " + int(ad.n_clients_with_blocked) + " clients", "hold") +
+      fig(int(ad.n_suggestions), "suggestions", "Out of " + int(ad.n_allowed_pairs) + " allowed pairs") + fig(int(ad.n_in_progress), "likely in progress", "Linked income rule: shown, not suggested") +
+      fig(G.rules.length, "rules", "Each with one plain reason") + '</div></div></div></div>' +
+    '<div class="mp-sub"><h3>Fairness audit</h3><p class="mp-lead">' + fLead + '</p>' +
+    '<table class="mp-t rt"><thead><tr><th class="l">Audit attribute</th><th class="l">Group</th><th>Briefed clients</th><th>Suggested</th><th>× overall</th><th>Held back</th><th>× overall</th><th class="l">Flags</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+    '<div id="heat">' + fairHeat(D, F) + '</div></div>';
+}
+
+/* ---------- step 4: check review due, all synthetic ---------- */
+function step4(D){
+  var R = D.reviews, iv = D.meta.rules.kyc_interval_years, order = ["low", "medium", "high"];
+  var cls = R.by_risk_class.slice().sort(function(a, b){ return order.indexOf(a.risk_class) - order.indexOf(b.risk_class); });
+  var mx = max(cls.map(function(c){ return Math.max(c.n_due / c.n, c.n_overdue / c.n); }));
+  var bars = cls.map(function(c){
+    var d = c.n_due / c.n, o = c.n_overdue / c.n;
+    return '<li><span class="nm">' + esc(c.risk_class.charAt(0).toUpperCase() + c.risk_class.slice(1)) + ' risk <span class="code">every ' + plural(iv[c.risk_class], "year") + '</span></span><span class="v">' + int(c.n) + ' clients</span>' +
+      '<span class="meta">Due within ' + R.window_days + ' days: ' + int(c.n_due) + ', ' + pct(d, 1) + '</span><span class="b" style="width:' + (d / mx * 100).toFixed(2) + '%"></span>' +
+      '<span class="meta">Overdue: ' + int(c.n_overdue) + ', ' + pct(o, 1) + '</span><span class="b hold" style="width:' + (o / mx * 100).toFixed(2) + '%"></span></li>';
   }).join("");
-  var blanks = Fa.auc.filter(function(x){ return x.roc_auc == null; }).length;
-  return '<h2>Fairness and ethics</h2><p class="lead" style="max-width:none">' + lead + '</p>' +
-    '<div class="blk wrapx"><table class="t fr"><thead><tr><th class="l">Audit attribute</th><th class="l">Group</th><th>Briefed clients</th><th>Suggested</th><th>× overall</th><th>Held back</th><th>× overall</th><th class="l">Flags</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
-    '<div class="blk wrapx"><h3 class="row">Ranking quality, test month' +
-      '<span class="seg-btns" role="group" aria-label="Metric"><button type="button" data-m="roc" aria-pressed="' + (key === "roc_auc") + '">ROC AUC</button><button type="button" data-m="pr" aria-pressed="' + (key === "pr_auc") + '">PR AUC</button></span>' +
-      '<span style="font-weight:400">' + (key === "roc_auc" ? 'Outlined in vermilion: ' + aucFlags.length + ' flags, more than ' + Fa.auc_gap + ' below All.' : 'Follows each group’s base rate, so no flags here.') + ' Blank (' + blanks + ' cells): fewer than ' + Fa.min_positives + ' take ups.</span></h3>' +
-    '<table class="t heat"><thead>' + head1 + head2 + '</thead><tbody>' + body + '</tbody></table></div>';
+  return head(4, "How often a review is due, on synthetic data", D.meta.agent_steps[3]) +
+    '<span class="mp-syn">Synthetic data: none of these dates or risk classes is real</span>' +
+    '<div class="mp-cols"><div><p class="mp-lead">' + esc(D.meta.synthetic_note) + ' So this step checks the logic, not the bank: the counts below show how the rule behaves on the synthetic layer, ' +
+      'and say nothing about how often real reviews fall due. A brief with an overdue review holds back every new product until the review is done.</p>' +
+      '<h3 class="mp-h4">By synthetic risk class <span>share of each class</span></h3><ul class="mp-bars">' + bars + '</ul></div>' +
+    '<div class="stick"><div class="mp-figs">' + fig(pct(R.share_due, 1), "due within " + R.window_days + " days", int(R.n_due_within_window) + " of " + int(R.n_clients) + " briefed clients, synthetic") +
+      fig(int(R.n_overdue), "overdue", "Synthetic. Overdue holds back new products", "hold") +
+      fig(int(R.n_meetings_covering_review), "reviews covered", "Clients with a suggestion whose review is also due, so one meeting covers both") + '</div></div></div>';
 }
 
-/* ---------- 6. limits ---------- */
-function limitsPanel(D){
-  var L = (D.model_card.limits || []).slice(0, 5);
-  return '<h2>Limits</h2><p class="lead">What these numbers cannot tell you, from the model card.</p>' +
-    '<ol class="limits">' + L.map(function(l){ return '<li><h3>' + esc(l.title) + '</h3><p>' + esc(l.text) + '</p></li>'; }).join("") + '</ol>';
+/* ---------- step 5: draft questions ---------- */
+function step5(D){
+  var K = {}, order = [];
+  /* what the 40 showcase briefs actually drew: each kind of question, its answers, and how often a branch changes the brief */
+  D.showcase.forEach(function(s){
+    (s.brief.question_cards || []).forEach(function(q, i){
+      var k = K[q.kind]; if (!k){ k = K[q.kind] = {kind: q.kind, n: 0, pos: 0, ex: q.text, ans: {}, aorder: [], fx: {}}; order.push(q.kind); }
+      k.n++; k.pos += i;
+      q.answers.forEach(function(a){
+        var x = k.ans[a.answer]; if (!x){ x = k.ans[a.answer] = {answer: a.answer, n: 0, ch: 0}; k.aorder.push(a.answer); }
+        x.n++; if (a.outcome && a.outcome.changes_brief) x.ch++;
+        (a.effects || []).forEach(function(e){ k.fx[e[0]] = 1; });
+      });
+    });
+  });
+  var kinds = order.map(function(o){ return K[o]; }).sort(function(a, b){ return a.pos / a.n - b.pos / b.n; });
+  var nQ = kinds.reduce(function(s, k){ return s + k.n; }, 0), nA = kinds.reduce(function(s, k){ return s + k.aorder.length; }, 0);
+  var trees = kinds.map(function(k){
+    return '<div class="mp-tree"><div class="at-q"><span class="at-qk">' + esc(k.kind) + '<span>' + plural(k.n, "question") + '</span></span><span class="qt">' + esc(k.ex) + '</span>' +
+      '<span class="pos">Branch effects: ' + Object.keys(k.fx).map(code).join(", ") + '</span></div><div class="mp-stem" aria-hidden="true"></div>' +
+      '<ul class="mp-ans">' + k.aorder.map(function(a){ var x = k.ans[a];
+        return '<li><span class="a">' + esc(a) + '</span><span class="c"><b>' + x.ch + '</b> of ' + x.n + '</span></li>'; }).join("") + '</ul></div>';
+  }).join("");
+  var lead = esc(D.meta.agent_steps[4].returns) + ' No model writes or picks a question: the templates and the answer rules are fixed code, so the same data always gives the same questions. ' +
+    'Across the ' + D.showcase.length + ' showcase briefs the agent drew <b>' + nQ + ' questions</b> of ' + kinds.length + ' kinds with ' + nA + ' distinct answer branches. ' +
+    'Each tree shows one example question and the effects its branches can have. Beside each answer: how often picking it changes the brief, out of the times it was offered. A branch that keeps the brief still changes the follow up draft, which is never sent.';
+  return head(5, "What decides the questions", D.meta.agent_steps[4]) + '<p class="mp-lead">' + lead + '</p>' +
+    '<div class="mp-trees">' + trees + '</div><p class="mp-cap">Kinds ordered by their average place in the showcase briefs. The example question is the first one drawn for that kind; its wording can name a product or a change for that client.</p>';
 }
 
-/* ---------- tabs ---------- */
-var TABS = [
-  {id: "evaluation", name: "Evaluation"}, {id: "calibration", name: "Calibration"}, {id: "tuning", name: "Tuning"},
-  {id: "segmentation", name: "Segmentation"}, {id: "fairness", name: "Fairness and ethics"}, {id: "limits", name: "Limits"}
-];
+/* ---------- limits ---------- */
+function limits(D){
+  var L = D.model_card.limits || [];
+  return '<header class="mp-lh"><h2 id="sh-l">What these numbers cannot tell you</h2><p class="mp-sl">From the model card, all ' + L.length + ' limits. They hold for every step above.</p></header>' +
+    '<ol class="mp-limits">' + L.map(function(l){ return '<li><h3>' + esc(l.title) + '</h3><p>' + esc(l.text) + '</p></li>'; }).join("") + '</ol>';
+}
+
+/* ---------- render ---------- */
+var stepW = document.getElementById("stepper-w");
+function fitStepper(){
+  var figs = stepW.querySelectorAll(".at-fig"); if (!figs.length) return;
+  stepW.style.setProperty("--fig-row", "auto");
+  var h = 0; figs.forEach(function(f){ h = Math.max(h, f.offsetHeight); });
+  var pad = parseFloat(getComputedStyle(stepW.querySelector(".at-steps")).paddingTop) || 0;
+  stepW.style.setProperty("--fig-row", h + "px");
+  stepW.style.setProperty("--fig-h", (h + pad) + "px");
+  document.documentElement.style.setProperty("--stick-h", (stepW.offsetHeight - h - pad) + "px");
+  spy();
+}
+/* the section under the stepper's lower edge marks its step as the one in view: an intersection observer, never a scroll listener */
+var io = null;
+function spy(){
+  if (io) io.disconnect();
+  if (!("IntersectionObserver" in window) || innerWidth <= 760){ document.querySelectorAll(".at-node[data-view]").forEach(function(x){ x.removeAttribute("data-view"); }); return; }
+  var top = Math.round(stepW.getBoundingClientRect().height - (parseFloat(stepW.style.getPropertyValue("--fig-h")) || 0) + 24);
+  io = new IntersectionObserver(function(es){
+    es.forEach(function(en){ var node = document.getElementById("v-step-" + en.target.getAttribute("data-n")); if (node) node.toggleAttribute("data-view", en.isIntersecting); });
+  }, {rootMargin: (-top) + "px 0px " + (-(innerHeight - top - 2)) + "px 0px"});
+  document.querySelectorAll(".mp-sec[data-n]").forEach(function(p){ io.observe(p); });
+}
 
 function render(F){
-  var D = F.data, fairMetric = "roc";
-  document.getElementById("side").innerHTML = sideHTML(D, F);
-  var tabs = document.getElementById("tabs"), panels = document.getElementById("panels");
-  tabs.innerHTML = TABS.map(function(t, i){
-    return '<button type="button" role="tab" class="tab" id="tab-' + t.id + '" aria-controls="p-' + t.id + '" aria-selected="false" tabindex="-1"><span>' + (i + 1) + '</span>' + t.name + '</button>';
-  }).join("");
-  var build = {
-    evaluation: function(){ return evalPanel(D, F); }, calibration: function(){ return calPanel(D, F); }, tuning: function(){ return tunePanel(D, F); },
-    segmentation: function(){ return segPanel(D, F); }, fairness: function(){ return fairPanel(D, F, fairMetric); }, limits: function(){ return limitsPanel(D); }
-  };
-  panels.innerHTML = TABS.map(function(t){
-    return '<section class="panel" role="tabpanel" id="p-' + t.id + '" aria-labelledby="tab-' + t.id + '" tabindex="0" hidden>' + build[t.id]() + '</section>';
-  }).join("");
-  /* the metric switch on the fairness panel redraws only that panel */
-  panels.addEventListener("click", function(e){
+  var D = F.data;
+  document.getElementById("mast").innerHTML = mast(D);
+  document.getElementById("stepper").innerHTML = stepper(D);
+  document.getElementById("step-1").innerHTML = step1(D, F);
+  document.getElementById("step-2").innerHTML = step2(D, F);
+  document.getElementById("step-3").innerHTML = step3(D, F);
+  document.getElementById("step-3").setAttribute("data-tone", "hold");
+  document.getElementById("step-4").innerHTML = step4(D, F);
+  document.getElementById("step-5").innerHTML = step5(D, F);
+  document.getElementById("limits").innerHTML = limits(D);
+  if (F.links.code) document.getElementById("code-l").href = F.links.code;
+  drawCharts(true);
+  fitStepper();
+  /* the metric switch on the heat table redraws only that table */
+  document.getElementById("step-3").addEventListener("click", function(e){
     var b = e.target.closest("[data-m]"); if (!b) return;
     fairMetric = b.getAttribute("data-m");
-    var p = document.getElementById("p-fairness"); p.innerHTML = build.fairness();
-    var nb = p.querySelector('[data-m="' + fairMetric + '"]'); if (nb) nb.focus();
+    document.getElementById("heat").innerHTML = fairHeat(D, F);
+    var nb = document.querySelector('#heat [data-m="' + fairMetric + '"]'); if (nb) nb.focus();
   });
-  var btns = Array.prototype.slice.call(tabs.querySelectorAll('[role="tab"]'));
-  function select(i, focus, animate){
-    btns.forEach(function(b, j){
-      var on = j === i; b.setAttribute("aria-selected", String(on)); b.tabIndex = on ? 0 : -1;
-      var p = document.getElementById(b.getAttribute("aria-controls")); p.hidden = !on;
-      p.classList.toggle("in", on && animate !== false);
-    });
-    if (focus){ btns[i].focus(); btns[i].scrollIntoView({block: "nearest", inline: "nearest"}); }
-    try { history.replaceState(null, "", "#" + TABS[i].id); } catch (e) {}
-  }
-  btns.forEach(function(b, i){
-    b.addEventListener("click", function(){ select(i, false); });
-    b.addEventListener("keydown", function(e){
-      var n = btns.length, k = e.key, j = k === "ArrowRight" ? (i + 1) % n : k === "ArrowLeft" ? (i - 1 + n) % n : k === "Home" ? 0 : k === "End" ? n - 1 : -1;
-      if (j < 0) return; e.preventDefault(); select(j, true);
-    });
-  });
-  var start = TABS.findIndex(function(t){ return "#" + t.id === location.hash; });
-  select(start < 0 ? 0 : start, false, false);
-  window.__model = {select: select, count: TABS.length};
-  /* the shared footer links to this page; here it should lead back to the brief instead */
+  /* the shared footer links to this page; here it leads back to the brief instead */
   var self = document.querySelector('#foot a[href="' + F.links.model + '"]');
   if (self){ self.href = BRIEF_URL; self.textContent = "Back to the brief"; }
+  window.__model = {ready: true, steps: D.meta.agent_steps.length};
 }
+
+/* the palette switch, shared with the brief through the same stored choice */
+function palSet(p, save){
+  document.documentElement.setAttribute("data-pal", p);
+  document.querySelectorAll("[data-palbtn]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.getAttribute("data-pal") === p)); });
+  if (!save) return;
+  try { localStorage.setItem("atlas-pal", p); } catch (e) {}
+  try { var u = new URL(location.href); u.searchParams.set("pal", p); history.replaceState(null, "", u); } catch (e) {}
+  backHref();
+}
+/* the way back keeps the palette in the url, so the brief opens in the same one */
+function backHref(){ var p = document.documentElement.getAttribute("data-pal"); document.getElementById("back").href = BRIEF_URL + (p === "fabric" ? "" : "?pal=" + p); }
+palSet(document.documentElement.getAttribute("data-pal"), false); backHref();
+document.querySelectorAll("[data-palbtn]").forEach(function(b){ b.addEventListener("click", function(){ palSet(b.getAttribute("data-pal"), true); }); });
+
+/* the stepper casts its shadow only while it rides at the top */
+if ("IntersectionObserver" in window) new IntersectionObserver(function(es){ stepW.toggleAttribute("data-stuck", !es[0].isIntersecting); }).observe(document.getElementById("mast"));
+var stepWW = 0;
+new ResizeObserver(function(){ var w = stepW.clientWidth; if (Math.abs(w - stepWW) > 1){ stepWW = w; requestAnimationFrame(function(){ fitStepper(); drawCharts(false); }); } }).observe(stepW);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ fitStepper(); drawCharts(true); });
 
 Field.boot({onReady: render});
 })();

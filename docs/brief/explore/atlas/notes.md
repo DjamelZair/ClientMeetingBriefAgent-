@@ -137,3 +137,11 @@ The dialog is a native modal `<dialog>`, so the page behind it is inert and Esc 
 - **Part titles.** They are now prime and semibold, so they no longer look like links.
 - **Figures.** They are slightly smaller (52px), so the headline is the clear first read.
 - **Author line.** It sits under "Client brief". Below 1600px the palette names move to a tooltip and to text that only screen readers read.
+
+## The model page in the Atlas style
+`docs/model.html` now loads `atlas.css` and `model.css` (in this folder), so it shares the tokens, the three palettes and the stored palette choice with the brief. `model.css` writes no colour of its own.
+
+- The same stepper sits at the top, with one figure per step from data.json: the silhouette at the chosen k, the products that clearly beat the baseline, the 27 fairness flags, the synthetic share of reviews due, and the question kinds.
+- One section per step: segmentation; the models, baseline, calibration and tuning; the rules and the fairness audit; the synthetic review layer (labelled synthetic); the question templates and branch rules. Then all seven limits and the footer.
+- Charts are inline SVG drawn to the width of their box. On a phone every wide table becomes one block per row.
+- `contrast.py` now also checks the model page's pairs in all three palettes and scans `model.css` and `model.html` for raw colours. `checks/mcheck.py` covers the page at 1440x900 and 390 in each palette, the links both ways, and takes the `model_*.png` shots.
