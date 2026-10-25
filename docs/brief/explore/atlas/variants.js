@@ -117,11 +117,18 @@ function headline(m){
     h.lead = "Worth asking about: "; h.main = list(asks.map(function(it){ return FLOW_ASK[it.p] || "the " + low1(it.label); }));
   } else if (view.nextStep){
     h.lead = "Worth discussing: "; h.main = "the overdue periodic review"; h.sub = "New products wait until the review is complete.";
+  } else if (view.care){
+    /* care leads when the data shows signs of difficulty and there is nothing else to raise */
+    h.lead = "Care first: "; h.main = "ask how the client is managing before any product";
+    h.sub = view.care.signals.join(" ") + (rule.length ? " Held back: " + list(rule.map(function(it){ return low1(it.label); })) + "." : "");
   } else if (byAns.length){ h.main = "Nothing new worth discussing after that answer";
-  } else if (rule.length){ h.main = "Nothing worth discussing after the checks"; h.sub = "Held back: " + list(rule.map(function(it){ return low1(it.label); })) + ".";
+  } else if (rule.length){
+    /* say why there is nothing: what cleared the bar is held back, and the rule's own reason */
+    h.main = rule.length === 1 ? "Nothing to raise: the only product above the bar is held back" : "Nothing to raise: the products above the bar are held back";
+    h.sub = rule.map(function(it){ return cap(low1(it.label)) + ": " + low1((it.x && it.x.reasons && it.x.reasons[0]) || "held back by a suitability rule."); }).join(" ");
   } else if (prog.length){ h.main = "Nothing new worth discussing"; h.sub = cap(list(prog.map(function(it){ return "the " + low1(it.label); }))) + (prog.length > 1 ? " are" : " is") + " likely already in progress.";
-  } else if (aside.some(function(it){ return it.fell; })){ h.main = "Nothing worth discussing above the " + pct(m.t) + " bar";
-  } else h.main = "Nothing worth discussing at this meeting";
+  } else if (aside.some(function(it){ return it.fell; })){ h.main = "Nothing to raise: no product scores above the " + pct(m.t) + " bar";
+  } else h.main = "Nothing to raise: no product scores above the " + pct(m.t) + " bar";
   if (offers.length && rule.length) h.sub = (h.sub ? h.sub + " " : "") + "Held back: " + list(rule.map(function(it){ return low1(it.label); })) + ".";
   h.text = h.lead + h.main;
   return h;

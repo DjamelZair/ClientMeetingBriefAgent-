@@ -164,7 +164,7 @@ function stepLine(el, ctx, o){
   for (var r = 0; r < reads.length; r++){ if (shown.length && shown.concat([reads[r]]).join(", ").length > 46) break; shown.push(reads[r]); }
   var done = V.stepDone(n), ret = [2, 3, 5].indexOf(n) >= 0;
   el.innerHTML = '<p class="at-sl"><button type="button" class="from" data-act="link" data-step="' + n + '" aria-pressed="' + (S.link === n) + '" aria-label="Made by step ' + n + ', ' + esc(s.name) + '. Show the step">From step ' + n + ', ' + esc(s.name) + '</button>. ' +
-    'Read ' + esc(U.low1(shown.join(", "))) + (reads.length > shown.length ? ' <button type="button" class="v-link" data-act="toggle" data-key="sl' + n + '" aria-expanded="' + open + '" aria-controls="at-sl-' + n + '">and ' + (reads.length - shown.length) + ' more</button>' : '') + '.' +
+    'Read ' + esc(/^[A-Z]{2}/.test(shown[0] || "") ? shown.join(", ") : U.low1(shown.join(", "))) + (reads.length > shown.length ? ' <button type="button" class="v-link" data-act="toggle" data-key="sl' + n + '" aria-expanded="' + open + '" aria-controls="at-sl-' + n + '">and ' + (reads.length - shown.length) + ' more</button>' : '') + '.' +
     (ret ? ' Returned <span class="ret">' + (done ? esc(U.low1(V.retWords(v, k))) : "nothing yet") + '</span>.' : '') + '</p>' +
     '<div class="at-sl-more at-sl" id="at-sl-' + n + '"' + (open ? '' : ' hidden') + '><p>Also read: ' + esc(reads.slice(shown.length).join(", ")) + '.</p><ul>' +
     s.calls.map(function(e){ return '<li><span class="v-tool">' + esc(e.tool) + '</span> ' + esc(Field.clean(e.summary)) + '</li>'; }).join("") + '</ul><p>' + esc(s.rule) + '</p></div>';
