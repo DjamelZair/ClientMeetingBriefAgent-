@@ -1,0 +1,303 @@
+<!doctype html><html lang="en-GB" data-scheme="S1" data-ds="ibm"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Client Meeting Brief</title>
+<meta name="description" content="One agent prepares a client meeting brief for an advisor: a summary of the client, then the agent's five tool steps, each with the part of the brief it produced directly under it.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script>
+/* sets the design system before the first paint and loads only that layer's face from google fonts.
+   google fonts css2 has no version parameter, so each url pins the exact family and weight axis instead */
+(function(){
+  var F = {ibm: "IBM+Plex+Sans:wght@400;600", mercury: "Inter:wght@360..500", linear: "Roboto:wght@400;500;600"};
+  window.__dsFont = function(id){
+    if (!F[id] || document.getElementById("font-" + id)) return;
+    var l = document.createElement("link"); l.id = "font-" + id; l.rel = "stylesheet";
+    l.href = "https://fonts.googleapis.com/css2?family=" + F[id] + "&display=swap"; document.head.appendChild(l);
+  };
+  var m = /[?&]ds=(ibm|mercury|linear)\b/i.exec(location.search), id = m ? m[1].toLowerCase() : "ibm";
+  document.documentElement.setAttribute("data-ds", id); window.__dsFont(id);
+})();
+</script>
+<link rel="stylesheet" href="tokens.css">
+<style>
+/* the page is one grid with named areas: a slim header, the client summary, the headline, then the agent spine.
+   the spine is the five agent steps in order, and each part of the brief sits directly under the step that made it */
+body { display: grid; grid-template-areas: "top" "ctx" "main" "foot"; grid-template-rows: auto auto 1fr auto; min-height: 100vh; }
+/* one quiet line that says what the page is, for anyone who opens it cold */
+.ctx { grid-area: ctx; padding: var(--sp-2) var(--sp-5) 0; font-size: var(--t-caption); line-height: var(--lh-caption); letter-spacing: var(--ls-caption); color: var(--ink-2); }
+.app { grid-area: top; display: flex; align-items: center; gap: var(--sp-4); min-height: var(--hdr-h); padding: 0 var(--sp-5); border-bottom: 1px solid var(--line); background: var(--surface); }
+.brand { display: flex; align-items: center; gap: var(--sp-3); min-width: 0; margin-right: auto; }
+.brand .mk { display: grid; place-items: center; width: 26px; height: 26px; border-radius: var(--r-s); background: var(--accent); color: var(--on-accent); }
+.brand b { font: var(--w-strong) var(--t-body)/1.2 var(--f-sans); white-space: nowrap; }
+.brand span { font-size: var(--t-body-sm); color: var(--ink-3); white-space: nowrap; }
+@media (max-width: 1599px) { .brand span { display: none; } }
+@media (max-width: 1399px) { .v-switch .lbl { display: none; } .v-picker select { width: 240px; } }
+.app .links { display: flex; gap: var(--sp-4); font-size: var(--t-body-sm); white-space: nowrap; }
+.app .links a { color: var(--ink-2); }
+.app .links a:hover { color: var(--accent-text); }
+.v-picker select { width: 300px; }
+
+.page { grid-area: main; display: grid; grid-template-areas: "sum" "head" "spine"; gap: var(--sp-4); padding: var(--sp-3) var(--sp-5) var(--sp-6); min-width: 0; }
+
+/* summary: who the client is in one line of facts, then four stat cards */
+.sum { grid-area: sum; display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 4fr); gap: var(--sp-5); align-items: start; }
+.who { display: grid; gap: var(--sp-2); min-width: 0; }
+.who .v-group { overflow-wrap: anywhere; }
+
+/* headline and the controls that change it */
+.head { grid-area: head; display: flex; align-items: flex-end; justify-content: space-between; gap: var(--sp-5); }
+.head #headline { flex: 1; min-width: 0; max-width: 62rem; }
+.head-r { flex: none; display: flex; align-items: center; gap: var(--sp-5); }
+.ag { display: flex; align-items: center; gap: var(--sp-3); }
+.ag p { font-size: var(--t-caption); line-height: var(--lh-caption); color: var(--ink-3); text-align: right; }
+
+/* the spine. nodes sit on one row and parts on the next, so every part starts at the same height under its step */
+/* the products and timeline from step 1 take their own row under parts 1 to 4, so no lane leaves a hole under it.
+   the questions are the widest lane and run down beside that row */
+.spine { grid-area: spine; --cg: var(--sp-5); --rg: var(--sp-3);
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr) minmax(0, 0.95fr) minmax(0, 1.05fr) minmax(0, 1.65fr);
+  grid-template-areas: "n1 n2 n3 n4 n5" "p1 p2 p3 p4 p5" "w w w w p5"; grid-template-rows: auto auto 1fr;
+  column-gap: var(--cg); row-gap: var(--rg); align-items: stretch; }
+.lane { display: contents; }
+.lane[data-n="1"] > .node { grid-area: n1; } .lane[data-n="1"] > .part { grid-area: p1; }
+.lane[data-n="2"] > .node { grid-area: n2; } .lane[data-n="2"] > .part { grid-area: p2; }
+.lane[data-n="3"] > .node { grid-area: n3; } .lane[data-n="3"] > .part { grid-area: p3; }
+.lane[data-n="4"] > .node { grid-area: n4; } .lane[data-n="4"] > .part { grid-area: p4; }
+.lane[data-n="5"] > .node { grid-area: n5; } .lane[data-n="5"] > .part { grid-area: p5; }
+.lane[data-n="1"] > .part.wallet-part { grid-area: w; }
+.node { display: flex; flex-direction: column; min-width: 0; }
+/* a step: the numbered marker on the rail, the status on the rail beside it, the name and what it read underneath */
+.node .v-step { flex: 1; grid-template-columns: var(--size-marker) minmax(0, 1fr); grid-template-rows: var(--size-marker) auto; gap: var(--sp-1) var(--sp-3); isolation: isolate; }
+.node .v-step-n { grid-row: 1; grid-column: 1; }
+.node .v-step-body { grid-row: 2; grid-column: 2; }
+.node .v-st { position: absolute; top: calc((var(--size-marker) - var(--size-tag)) / 2); left: calc(var(--size-marker) + var(--sp-2)); z-index: var(--z-raise); box-shadow: 0 0 0 4px var(--bg); }
+.node .v-st[data-status="run"], .node .v-st[data-status="wait"] { background: var(--bg); }
+/* the rail from this marker to the next one; it fills in with the accent once the step is done */
+.node .v-step::before, .node .v-step::after { content: ""; position: absolute; z-index: -1; left: calc(var(--size-marker) + var(--bw-rail) * 4); right: calc(-1 * var(--cg) + var(--sp-1)); top: calc(var(--size-marker) / 2 - var(--bw-rail) / 2); height: var(--bw-rail); background: var(--line-2); }
+.node .v-step::after { background: var(--accent); transform: scaleX(0); transform-origin: left center; transition: transform var(--dur-fast) var(--ease); }
+.node .v-step[data-s="done"]::after { transform: scaleX(1); }
+.lane[data-n="5"] .v-step::before, .lane[data-n="5"] .v-step::after { display: none; }
+/* the stem from the marker down into the part this step produced */
+.node .stem { position: absolute; left: calc(var(--size-marker) / 2 - var(--bw-rail) / 2); top: var(--size-marker); bottom: calc(-1 * var(--rg)); width: var(--bw-rail); background: var(--line-2); z-index: -1; transition: background-color var(--dur) var(--ease); }
+
+/* a part: the card under its step. fewer borders inside, the hierarchy comes from type and space */
+.part { position: relative; align-self: stretch; display: grid; align-content: start; gap: var(--sp-4); padding: var(--card-pad); min-width: 0; transition: box-shadow var(--dur) var(--ease), background-color var(--dur) var(--ease); }
+.part > [hidden] { display: none; }
+/* the products and timeline row: still step 1's, so it carries step 1's tag and a short stem up into part 1 */
+.wallet-part { gap: var(--sp-3); }
+.wallet-part::before { content: ""; position: absolute; left: calc(var(--size-marker) / 2 - var(--bw-rail) / 2); top: calc(-1 * var(--rg) - var(--card-bw)); height: var(--rg); width: var(--bw-rail); background: var(--line-2); transition: background-color var(--dur) var(--ease); }
+.lane[data-n="1"]:is(:hover, :focus-within) > .wallet-part::before, .lane[data-n="1"][data-on] > .wallet-part::before { background: var(--lit-line); }
+.wal-h { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--sp-2); }
+.wal-h .wal-from { font-size: var(--t-caption); line-height: var(--lh-caption); font-weight: var(--w-body); color: var(--ink-3); }
+.wal-h .wal-tog { display: none; font-size: var(--t-body-sm); text-align: left; }
+.wal-body { display: grid; grid-template-columns: minmax(240px, 1fr) minmax(0, 2.6fr); gap: var(--sp-5); align-items: start; }
+.wal-body #timeline { min-width: 0; }
+
+/* hover or focus anywhere in a lane lights its step and its part together; a click pins it, as before */
+.lane:is(:hover, :focus-within) .v-step-n, .lane[data-on] .v-step-n { box-shadow: 0 0 0 3px var(--lit-bg), 0 0 0 4px var(--lit-line); }
+.lane:is(:hover, :focus-within) .stem, .lane[data-on] .stem { background: var(--lit-line); }
+.lane:is(:hover, :focus-within) > .part, .lane[data-on] > .part { box-shadow: 0 0 0 1px var(--lit-line); }
+.lane[data-on] .v-step-btn { background: var(--lit-bg); }
+
+/* what not to offer must be impossible to miss when it holds something, and calm when it does not */
+.part[data-hold] { box-shadow: var(--rule-hold); }
+.lane:is(:hover, :focus-within) > .part[data-hold], .lane[data-on] > .part[data-hold] { box-shadow: var(--rule-hold), 0 0 0 1px var(--lit-line); }
+.part[data-hold] .v-part-h { color: var(--st-heldback); }
+
+/* during a replay the stem draws and the part fades in once its step is done */
+.lane:not([data-done]) .stem { background: var(--line); }
+.lane:not([data-done]) > .part > * { opacity: 0.35; }
+.part > * { transition: opacity var(--dur) var(--ease); }
+
+/* step 1 part: segment and group */
+/* the follow up line at the top of part 5, ruled off from the questions under it */
+.part #followup:not([hidden]) { padding-bottom: var(--sp-3); border-bottom: var(--bw) solid var(--row-line); }
+.grp { display: grid; gap: var(--sp-1); }
+.grp .nm { font-weight: var(--w-strong); color: var(--ink); }
+.grp .v-meta { color: var(--ink-2); }
+
+.foot { grid-area: foot; display: flex; justify-content: space-between; gap: var(--sp-5); padding: var(--sp-3) var(--sp-5); border-top: 1px solid var(--line); font-size: var(--t-caption); line-height: var(--lh-caption); color: var(--ink-3); }
+.foot b { color: var(--ink-2); }
+.foot .v-foot-l { display: flex; gap: var(--sp-4); white-space: nowrap; }
+
+/* a laptop: the header gives up its labels, the gaps tighten */
+@media (max-width: 1366px) { .page, .ctx { padding-left: var(--sp-4); padding-right: var(--sp-4); } .spine { --cg: var(--sp-4); } .app { padding: 0 var(--sp-4); gap: var(--sp-3); } }
+/* a tablet: two lanes a row, the questions take the full width */
+@media (max-width: 1099px) {
+  .app { flex-wrap: wrap; padding: var(--sp-2) var(--sp-4); }
+  .sum { grid-template-columns: minmax(0, 1fr); }
+  .head { flex-direction: column; align-items: flex-start; }
+  .head-r { flex-wrap: wrap; }
+  .spine { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "n1 n2" "p1 p2" "w w" "n3 n4" "p3 p4" "n5 n5" "p5 p5"; grid-template-rows: none; }
+  .lane:is([data-n="3"], [data-n="4"], [data-n="5"]) > .node { padding-top: var(--sp-4); }
+  .lane:is([data-n="2"], [data-n="4"]) .v-step::before, .lane:is([data-n="2"], [data-n="4"]) .v-step::after { display: none; }
+}
+@media (max-width: 760px) {
+  .app { gap: var(--sp-2); }
+  .ctx { padding: var(--sp-2) var(--sp-4) 0; }
+  .brand span { display: none; }
+  .v-picker { order: 3; width: 100%; } .v-picker .v-sel { flex: 1; } .v-picker select { width: 100%; max-width: none; }
+  .app .links { display: none; }
+  .v-sum { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .head-r { flex-direction: column; align-items: flex-start; gap: var(--sp-3); }
+  .ag p { text-align: left; }
+  /* a phone: the five steps stack in order, each part directly under its step */
+  .spine { grid-template-columns: minmax(0, 1fr); grid-template-areas: "n1" "p1" "w" "n2" "p2" "n3" "p3" "n4" "p4" "n5" "p5"; }
+  .v-head { font-size: var(--t-headline-sm); line-height: var(--lh-headline-sm); }
+  /* the products fold behind one button that says what is in them, so what not to offer comes up sooner */
+  .wal-body { grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
+  .wal-h .wal-tog { display: inline; }
+  .wallet-part:not([data-open]) #wallet { display: none; }
+  .v-stat .val { font-size: var(--t-body); line-height: var(--lh-body); }
+  .lane:not([data-n="1"]) > .node { padding-top: var(--sp-5); }
+  .node .v-step::before, .node .v-step::after { display: none; }
+  .foot { flex-direction: column; padding: var(--sp-4); }
+}
+</style>
+</head>
+<body>
+<a class="v-skip" href="#stage">Skip to the brief</a>
+<header class="app">
+  <div class="brand"><span class="mk" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 3.5h10M3 8h10M3 12.5h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+    <b>Client brief</b><span>Djamel Zair, application for Junior Data Scientist, CLUE</span></div>
+  <div id="picker"></div>
+  <div id="ds"></div>
+  <div id="scheme"></div>
+  <nav class="links" aria-label="Pages"><a href="../model.html">How the models perform</a><a id="code-l" href="https://github.com/DjamelZair/ClientMeetingBriefAgent-">Code</a></nav>
+</header>
+<div class="ctx" id="context"></div>
+
+<main class="page" id="main">
+  <section class="sum" aria-label="Client summary">
+    <div class="who"><div id="identity"></div><div id="facts"></div></div>
+    <div id="summary"></div>
+  </section>
+
+  <section class="head" id="stage" aria-label="Headline" tabindex="-1">
+    <div id="headline"></div>
+    <div class="head-r"><div id="hbar"></div><div class="ag" id="agent-h"></div></div>
+  </section>
+
+  <ol class="spine" aria-label="The agent's five steps, each with the part of the brief it produced">
+    <li class="lane" data-n="1">
+      <div class="node" id="node-1"></div>
+      <section class="part v-card" aria-labelledby="ph-1"><div id="ph1"></div><div id="group"></div></section>
+      <section class="part v-card wallet-part" aria-labelledby="wal-h"><div class="wal-h" id="wal-head"></div>
+        <div class="wal-body"><div id="timeline"></div><div id="wallet"></div></div>
+      </section>
+    </li>
+    <li class="lane" data-n="2">
+      <div class="node" id="node-2"></div>
+      <section class="part v-card" aria-labelledby="ph-2"><div id="ph2"></div><div id="discuss"></div><div id="ask"></div></section>
+    </li>
+    <li class="lane" data-n="3">
+      <div class="node" id="node-3"></div>
+      <section class="part v-card" aria-labelledby="ph-3"><div id="ph3"></div><div id="care"></div><div id="held"></div><div id="aside"></div></section>
+    </li>
+    <li class="lane" data-n="4">
+      <div class="node" id="node-4"></div>
+      <section class="part v-card" aria-labelledby="ph-4"><div id="ph4"></div><div id="review"></div></section>
+    </li>
+    <li class="lane" data-n="5">
+      <div class="node" id="node-5"></div>
+      <section class="part v-card" aria-labelledby="ph-5"><div id="ph5"></div><div id="followup"></div><div id="questions"></div></section>
+    </li>
+  </ol>
+</main>
+
+<footer class="foot" id="foot"></footer>
+
+<script src="../field.js"></script>
+<script src="variants.js"></script>
+<script>
+/* this page only places components. three small pieces are its own: the agent line, the step 1 group card and the wallet toggle */
+var esc = function(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); };
+
+/* the agent line: one agent, its call count, and replay or skip */
+function agentHead(el, ctx){
+  var S = V.state, n = ctx.v.nCalls;
+  el.innerHTML = '<p>One agent<br>' + n + ' logged ' + (n === 1 ? 'call' : 'calls') + '</p>' +
+    (S.replaying ? '<button type="button" class="v-btn" data-act="skip">Skip</button>'
+      : '<button type="button" class="v-btn" data-act="replay" aria-label="Replay the one agent, ' + n + ' logged ' + (n === 1 ? 'call' : 'calls') + '">' + V.glyph("replay", 14) + 'Replay</button>');
+}
+agentHead.deps = ["client", "replay"];
+/* step 1 produced the segment and the group */
+function groupCard(el, ctx){
+  var v = ctx.v;
+  el.innerHTML = '<div class="grp" data-from="1"><h3 class="v-lane-h">' + V.glyph("group", 14) + 'Segment and group</h3>' +
+    '<p class="nm">' + esc(v.who.name) + '</p><p class="v-meta">' + esc(V.util.cap(v.who.description)) + '.</p></div>';
+}
+/* the bar decides which scores step 2 keeps, so it sits with the headline it changes */
+function scoreBar(el, ctx){ V.components.bar(el, ctx); var l = el.querySelector("#v-bar-l"); if (l) l.textContent = "Only include scores above"; }
+scoreBar.deps = ["client", "model"];
+/* the products the agent did not raise stay one click away, so a full wallet stays short */
+function wallet(el, ctx){
+  V.components.wallet(el, ctx, {split: true});
+  var q = el.querySelector(".v-wcat-quiet"); if (!q) return;
+  var h = q.querySelector(".v-wcat-h"), open = !!V.state.open.wq, n = 0;
+  q.querySelectorAll(".v-wquiet").forEach(function(p){ var t = p.textContent.split(":").slice(1).join(":"); n += t.split(",").length; });
+  q.id = "l2-wq"; q.hidden = !open; h.remove();
+  /* the toggle sits on the not in data line when there is one, so the quiet products cost no row of their own */
+  var line = el.querySelector(".v-wnone");
+  (line || q).insertAdjacentHTML(line ? "beforeend" : "beforebegin", '<button type="button" class="v-link v-wq-tog" data-act="toggle" data-key="wq" aria-expanded="' + open + '" aria-controls="l2-wq">' + esc(h.textContent) + ' (' + n + ')</button>');
+}
+wallet.deps = ["client", "model"];
+/* the heading of the products row says it comes from step 1. on a phone it is also the button that opens the list,
+   and its label counts what is inside, so nothing held back is hidden behind it unseen */
+function walletHead(el, ctx){
+  var c = V.walletCounts(ctx.v), W = V.STATE_WORDS, open = !!V.state.open.wal, parts = [W.held + " " + c.held];
+  if (c.heldback) parts.push(W.heldback + " " + c.heldback);
+  if (c.discuss) parts.push(W.discuss + " " + c.discuss);
+  if (c.progress) parts.push(W.progress + " " + c.progress);
+  el.innerHTML = '<h2 class="v-part-h" id="wal-h">' + V.fromTag(1) + '<span>Products and timeline</span><span class="wal-from">From step 1</span></h2>' +
+    '<button type="button" class="v-link wal-tog" data-act="wal" aria-expanded="' + open + '" aria-controls="wallet">' + (open ? 'Hide products' : 'Show products') + ': ' + esc(parts.join(", ")) + '</button>';
+  el.closest(".wallet-part").toggleAttribute("data-open", open);
+}
+walletHead.deps = ["client", "model"];
+document.addEventListener("click", function(e){
+  if (!e.target.closest('[data-act="wal"]')) return;
+  V.state.open.wal = !V.state.open.wal; walletHead(document.getElementById("wal-head"), {v: V.state.v, m: V.state.m});
+  document.querySelector('[data-act="wal"]').focus();
+});
+
+/* the five brief parts, each named by the question it answers */
+var PARTS = ["Who the client is", "What might help", "What not to offer", "What is due anyway", "Questions to ask"];
+var mounts = {
+  "#identity": ["identity", {mismatch: "inline", sk: 2}], "#facts": ["facts", {sk: 1}], "#summary": ["summary", {sk: 3}],
+  "#headline": ["headline", {kicker: false, sk: 2}], "#hbar": scoreBar, "#agent-h": [agentHead, {sk: 1}],
+  "#group": [groupCard, {sk: 4}], "#wal-head": [walletHead, {sk: 1}], "#timeline": ["timeline", {sk: 2}], "#wallet": [wallet, {sk: 5}],
+  "#discuss": ["discuss", {tags: false, sk: 4}], "#ask": ["ask", {tags: false, sk: 2}],
+  "#care": "care", "#held": ["held", {tags: false, sk: 3}], "#aside": ["aside", {asideWhy: "toggle", tags: false, sk: 2}],
+  "#review": ["review", {tags: false, sk: 3}],
+  "#questions": ["questions", {why: "toggle", tags: false, sk: 6}], "#followup": ["followup", {tags: false, sk: 1}]
+};
+/* steps 1 and 4 drop their returned line: the part right under them says the same words */
+for (var n = 1; n <= 5; n++){
+  mounts["#node-" + n] = ["step", {n: n, readChars: 24, ret: [2, 3, 5], sk: 3}];
+  mounts["#ph" + n] = ["partHead", {n: n, title: PARTS[n - 1], sk: 1}];
+}
+V.boot({chrome: [["#picker", "picker"], ["#ds", "ds"], ["#scheme", "scheme"], ["#context", "context"], ["#foot", "footer"]], mounts: mounts})
+  .then(function(F){ if (F && F.links.code) document.getElementById("code-l").href = F.links.code; });
+
+/* the lane of the selected step stays lit; a lane counts as done when its step is done, or always outside a replay */
+function lanes(){
+  var S = V.state, cur = V.links.current();
+  document.querySelectorAll(".lane").forEach(function(l){
+    var k = +l.getAttribute("data-n");
+    l.toggleAttribute("data-on", k === cur);
+    l.toggleAttribute("data-done", !S.replaying || S.stepState[k - 1] === "done");
+  });
+  /* the stem runs from the marker to the top of the part, whatever height the step name takes */
+  document.querySelectorAll(".node .v-step").forEach(function(st){ if (!st.querySelector(".stem")) st.insertAdjacentHTML("afterbegin", '<span class="stem" aria-hidden="true"></span>'); });
+  var hold = S.m ? V.lane(S.m, "hold").length : 0;
+  document.querySelector('.lane[data-n="3"] > .part').toggleAttribute("data-hold", hold > 0);
+}
+V.on("render", lanes);
+V.on("link", lanes);
+V.on("step", lanes);
+
+/* the timeline is drawn to its box, so it redraws when the box or the face changes */
+var tlw = 0, tl = document.getElementById("timeline");
+function redrawTimeline(force){ var w = tl.clientWidth; if (w && (force || Math.abs(w - tlw) > 2) && V.state.v){ tlw = w; V.components.timeline(tl, {v: V.state.v, m: V.state.m}, {}); V.links.apply(); } }
+new ResizeObserver(function(){ redrawTimeline(false); }).observe(tl);
+V.on("resize", function(){ redrawTimeline(true); });
+</script>
+</body></html>

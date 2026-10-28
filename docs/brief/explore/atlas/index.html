@@ -75,13 +75,13 @@
   <footer class="foot" id="foot"></footer>
 </div>
 
-<!-- a placeholder search. the public data has no names or birth dates, so only the client id can match.
+<!-- the search reads the mock identities in mock.js: client id, client number, name and date of birth.
      the fields have no name attribute and the form never submits, so nothing typed here reaches a url -->
 <dialog class="dlg" id="find" aria-labelledby="find-h" aria-describedby="find-note">
   <form id="find-f" novalidate>
     <div class="dlg-h"><h2 id="find-h">Search client</h2><button type="button" class="v-link dlg-x" id="find-x">Close</button></div>
-    <p class="dlg-note" id="find-note">Search is a placeholder in this prototype. The public data has no names or birth dates.</p>
-    <div class="fld"><label for="f-id">Client ID (klant ID)</label><input id="f-id" type="text" autocomplete="off" spellcheck="false" aria-describedby="f-id-h"><p class="hint" id="f-id-h">Works for the 40 showcase clients, for example 10 or C10.</p></div>
+    <p class="dlg-note" id="find-note">Names, client numbers and birth dates are mock. The public data has none of them.</p>
+    <div class="fld"><label for="f-id">Client ID or client number (klant ID)</label><input id="f-id" type="text" autocomplete="off" spellcheck="false" aria-describedby="f-id-h"><p class="hint" id="f-id-h">For example 10, C10 or a 15 digit client number.</p></div>
     <div class="fld"><label for="f-name">Name</label><input id="f-name" type="text" autocomplete="off" spellcheck="false"></div>
     <div class="fld"><label for="f-dob">Date of birth</label><input id="f-dob" type="date" autocomplete="off"></div>
     <p class="dlg-out" id="find-out" role="status" aria-live="polite"></p>
@@ -90,6 +90,7 @@
 </dialog>
 
 <script src="../../../field.js"></script>
+<script src="mock.js"></script>
 <script src="variants.js"></script>
 <script>
 /* this page only places components, plus the few that are its own: the masthead, the stepper with a figure per step,
@@ -97,14 +98,25 @@
 var esc = function(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); };
 var U = V.util, plural = function(n, w){ return n + " " + w + (n === 1 ? "" : "s"); };
 
-/* the masthead: the client, the segment, the group, and the quiet facts */
+/* the masthead holds only what identifies the client: name (age), the verified tick, client number, date of birth,
+   address and risicoklasse. the name, number, birth date and address come from mock.js; the age and the risk class from
+   data.json. the group the client sits in is part 1's to say, not the identity's */
+var RISK = {low: "Low", medium: "Middle", high: "High"};
+var TICK = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="currentColor"/><path d="M4.6 8.3l2.2 2.2 4.6-4.8" fill="none" stroke="var(--on-prime)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 function ident(el, ctx){
-  var v = ctx.v, b = V.briefOf(v), p = b.who.profile || {};
-  el.innerHTML = '<h1 data-from="1">' + esc(v.ref) + '<span class="seg" title="Bank segment recorded in the data">' + esc(p.segment ? U.cap(p.segment) : "Segment not recorded") + '</span></h1>' +
-    '<p class="grp" data-from="1">In the group <b>' + esc(v.who.name) + '</b></p>' +
-    (b.who.mismatch ? '<p class="mm" data-from="1">' + esc(b.who.mismatch) + '</p>' : '') +
-    '<p class="facts"><span data-from="1">Age<b>' + esc(p.age == null ? "not recorded" : String(Math.round(p.age))) + '</b></span>' +
-    '<span data-from="1">Income recorded<b>' + (p.income == null ? "No" : "Yes") + '</b></span>' +
+  var v = ctx.v, b = V.briefOf(v), p = b.who.profile || {}, id = V.mockOf(v.ref);
+  /* every client is low unless the synthetic review layer puts them higher */
+  var rc = (v.due && v.due.riskClass) || "low";
+  var fact = function(dt, dd, tone){ return '<div><dt>' + dt + '</dt><dd' + (tone ? ' data-tone="' + tone + '"' : '') + '>' + esc(dd) + '</dd></div>'; };
+  el.innerHTML = '<h1 data-from="1">' + esc(id ? id.name : v.ref) +
+      (p.age == null ? '' : ' <span class="age">(' + Math.round(p.age) + ')</span>') +
+      (id ? '<span class="ok" role="img" aria-label="Identity verified" title="Identity verified (mock)">' + TICK + '</span>' : '') +
+      '<span class="seg" title="Bank segment recorded in the data">' + esc(p.segment ? U.cap(p.segment) : "Segment not recorded") + '</span></h1>' +
+    '<dl class="idl">' +
+      (id ? fact("Client number", id.number) + fact("Date of birth", shortDate(id.dob)) + fact("Address", id.address) : '') +
+      fact("Risicoklasse", RISK[rc] || U.cap(rc), rc === "high" ? "hold" : "") + '</dl>' +
+    (id ? '<p class="mock">' + esc(v.ref) + '. Name, number, birth date and address are mock; the risk class is synthetic.</p>' : '') +
+    '<p class="facts"><span data-from="1">Income recorded<b>' + (p.income == null ? "No" : "Yes") + '</b></span>' +
     '<span>Meeting<b>' + esc(v.meeting) + '</b></span>' +
     (v.care ? '<span class="care" data-from="3" title="' + esc(v.care.signals.join(" ")) + '">Care<b>Check first</b></span>' : '') + '</p>';
 }
@@ -180,7 +192,9 @@ function agentHead(el, ctx){
 agentHead.deps = ["client", "replay"];
 function groupCard(el, ctx){
   var v = ctx.v;
-  el.innerHTML = '<div data-from="1"><p class="grp-nm">' + esc(v.who.name) + '</p><p class="grp-d">' + esc(U.cap(v.who.description)) + '.</p></div>';
+  var mm = V.briefOf(v).who.mismatch;
+  el.innerHTML = '<div data-from="1"><p class="grp-nm">' + esc(v.who.name) + '</p><p class="grp-d">' + esc(U.cap(v.who.description)) + '.</p>' +
+    (mm ? '<p class="grp-mm">' + esc(mm) + '</p>' : '') + '</div>';
 }
 function scoreBar(el, ctx){ V.components.bar(el, ctx); var l = el.querySelector("#v-bar-l"); if (l) l.textContent = "Only include scores above"; }
 scoreBar.deps = ["client", "model"];
@@ -283,10 +297,9 @@ function palSet(p, save){
 palSet(document.documentElement.getAttribute("data-pal"), false);
 document.querySelectorAll("[data-palbtn]").forEach(function(b){ b.addEventListener("click", function(){ palSet(b.getAttribute("data-pal"), true); }); });
 
-/* the search dialog. a modal dialog keeps focus inside it and closes on escape. only the client id can match;
-   a name or a date of birth is only checked for being filled in, never read out, stored or logged */
+/* the search dialog. a modal dialog keeps focus inside it and closes on escape. every filled field has to match;
+   the name matches on any part of it, the date of birth exactly. nothing typed is stored or logged */
 var dlg = document.getElementById("find"), dOpen = document.getElementById("find-open"), dOut = document.getElementById("find-out");
-var PH = "Search is a placeholder in this prototype. The public data has no names or birth dates.";
 dOpen.addEventListener("click", function(){ dOut.textContent = ""; dlg.showModal(); document.getElementById("f-id").focus(); });
 document.getElementById("find-x").addEventListener("click", function(){ dlg.close(); });
 dlg.addEventListener("click", function(e){ if (e.target === dlg) dlg.close(); });
@@ -295,13 +308,21 @@ dlg.addEventListener("close", function(){ document.getElementById("find-f").rese
 document.addEventListener("keydown", function(e){ if (dlg.open && e.key === "Escape") e.stopPropagation(); }, true);
 document.getElementById("find-f").addEventListener("submit", function(e){
   e.preventDefault();
-  var raw = document.getElementById("f-id").value.trim(), other = !!(document.getElementById("f-name").value.trim() || document.getElementById("f-dob").value);
+  var raw = document.getElementById("f-id").value.trim(), nm = document.getElementById("f-name").value.trim().toLowerCase(), dob = document.getElementById("f-dob").value;
   var F = V.state.F;
-  if (!raw){ dOut.textContent = other ? "No match. " + PH : "Enter a client ID, for example 10 or C10."; return; }
-  var m = /^(?:c|client)?\s*0*(\d{1,3})$/i.exec(raw), n = m ? +m[1] : -1;
-  var i = F ? F.clients.findIndex(function(c){ return +c.ref.replace(/\D/g, "") === n; }) : -1;
-  if (i < 0){ dOut.textContent = "No showcase client with that ID. The showcase has clients 1 to " + (F ? F.count : 40) + "." + (other ? " " + PH : ""); return; }
-  dlg.close(); V.show(i, true);
+  if (!raw && !nm && !dob){ dOut.textContent = "Enter a client ID, client number, name or date of birth."; return; }
+  if (!F) return;
+  var m = /^(?:c|client)?\s*0*(\d{1,3})$/i.exec(raw), digits = raw.replace(/\D/g, "").replace(/^0+/, "");
+  var hits = F.clients.filter(function(c){
+    var id = V.mockOf(c.ref) || {};
+    if (raw && !(m ? +c.ref.replace(/\D/g, "") === +m[1] : digits && (id.number || "").replace(/^0+/, "") === digits)) return false;
+    if (nm && (id.name || "").toLowerCase().indexOf(nm) < 0) return false;
+    if (dob && id.dob !== dob) return false;
+    return true;
+  });
+  if (!hits.length){ dOut.textContent = "No showcase client matches. The showcase has " + F.count + " clients."; return; }
+  if (hits.length > 1){ dOut.textContent = hits.length + " clients match: " + hits.slice(0, 4).map(function(c){ return V.mockOf(c.ref).name; }).join(", ") + (hits.length > 4 ? " and more" : "") + ". Add a field to narrow it down."; return; }
+  dlg.close(); V.show(hits[0].index, true);
 });
 
 /* the stepper casts its shadow only while it rides at the top, which is once the masthead has left the screen */

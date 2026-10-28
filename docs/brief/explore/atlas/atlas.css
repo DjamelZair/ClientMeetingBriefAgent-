@@ -26,6 +26,7 @@
   --focus: #DB8084;          /* 10, the step in focus: a fill with prime on it, never text on paper */
   --focus-wash: #F6E3E1;     /* behind a part linked to the step in focus */
   --on-prime: #F9F7F3;       /* text on a prime fill */
+  --ok: #2A7549;      /* the verified tick behind a client's name, a mark only, never text */
 }
 /* calm: the calm kit's sage, moss, mist, ivory and sand. sage is darkened for text, rust is the held back colour */
 [data-pal="calm"] {
@@ -46,6 +47,7 @@
   --focus: #C9BDAF;          /* sand */
   --focus-wash: #ECE4DA;
   --on-prime: #FAF7F2;
+  --ok: #2F7A43;
 }
 /* graphite: near black, graphite and slate on light greys. the orange is kept for held back and what not to offer */
 [data-pal="graphite"] {
@@ -66,6 +68,7 @@
   --focus: #9AA5B0;          /* light slate */
   --focus-wash: #E3E6EA;
   --on-prime: #F7F7F8;
+  --ok: #2A7A45;
 }
 /* what every palette derives from its raw values */
 :root, [data-pal] {
@@ -213,6 +216,18 @@ b, strong { font-weight: var(--w-strong); }
 .mast { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--sp-6); align-items: end; padding: var(--sp-4) 0 var(--sp-5); border-top: var(--rule); }
 .ident h1 { font: var(--w-strong) var(--t-h1)/var(--lh-tight) var(--f-display); color: var(--prime); }
 .ident .seg { display: inline-block; margin-left: var(--sp-2); vertical-align: 0.5em; font: var(--w-strong) var(--t-cap)/1 var(--f-sans); letter-spacing: var(--ls-label); font-variant-caps: all-small-caps; font-size: var(--t-sm); color: var(--second-ink); }
+/* the identity: name (age) with the verified tick, then the four facts an advisor checks the client against */
+.ident .age { font-weight: var(--w-mid); color: var(--ink-2); }
+.ident .ok { display: inline-block; width: 0.62em; height: 0.62em; margin-left: 0.3em; vertical-align: 0.02em; color: var(--ok); }
+.ident .ok svg { display: block; width: 100%; height: 100%; }
+/* two by two: number and birth date, then address and risk class, so the short facts line up and the address has room */
+.ident .idl { display: grid; grid-template-columns: repeat(2, max-content); gap: var(--sp-2) var(--sp-6); margin-top: var(--sp-2); font-size: var(--t-sm); }
+@media (max-width: 480px) { .ident .idl { grid-template-columns: 1fr; } }
+.ident .idl dt { color: var(--ink-3); }
+.ident .idl dd { color: var(--ink); font-weight: var(--w-strong); font-variant-numeric: tabular-nums; }
+.ident .idl dd[data-tone="hold"] { color: var(--hold); }
+.ident .mock { margin-top: var(--sp-1); font-size: var(--t-cap); color: var(--ink-3); }
+.grp-mm { margin-top: var(--sp-1); font-size: var(--t-sm); line-height: var(--lh-sm); color: var(--ink-2); max-width: 70ch; }
 .ident .grp { margin-top: var(--sp-1); font-size: var(--t-body); color: var(--ink-2); }
 .ident .grp b { color: var(--prime); font-weight: var(--w-strong); }
 .ident .mm { margin-top: var(--sp-2); font-size: var(--t-sm); line-height: var(--lh-sm); color: var(--ink-2); max-width: 52ch; }

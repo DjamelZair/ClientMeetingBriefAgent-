@@ -256,7 +256,7 @@ C.summary = function(el, ctx){
 /* one quiet line under the header that says what the page is. the data source comes from data.json */
 C.context = function(el){
   var src = (S.F.data.meta || {}).source;
-  el.innerHTML = '<p>Prototype for a job application' + (src ? ', built on the ' + esc(src) : '') + '. Review dates and vulnerability flags are synthetic. The agent prepares the brief; the advisor decides.</p>';
+  el.innerHTML = '<p>Prototype for a job application' + (src ? ', built on the ' + esc(src) : '') + '. Review dates, risk classes and vulnerability flags are synthetic, and names, client numbers, birth dates and addresses are mock. The agent prepares the brief; the advisor decides.</p>';
 };
 C.meeting = function(el, ctx){ el.innerHTML = '<p class="v-meeting">Meeting on <b>' + esc(ctx.v.meeting) + '</b></p>'; };
 
@@ -633,7 +633,7 @@ C.ranked = function(el, ctx){
 };
 C.footer = function(el){
   var F = S.F;
-  el.innerHTML = '<p><b>Djamel Zair, application for Junior Data Scientist, CLUE.</b> Independent prototype for a job application. Not affiliated with or endorsed by Rabobank. Review dates and vulnerability flags are synthetic.</p>' +
+  el.innerHTML = '<p><b>Djamel Zair, application for Junior Data Scientist, CLUE.</b> Independent prototype for a job application. Not affiliated with or endorsed by Rabobank. Review dates, risk classes and vulnerability flags are synthetic; names, client numbers, birth dates and addresses are mock.</p>' +
     '<p class="v-foot-l"><a href="../../../' + F.links.model + '">How the models perform</a> <a href="' + esc(F.links.code) + '">Code</a></p>';
 };
 
@@ -645,11 +645,13 @@ C.skeleton = function(el, ctx, opts){
 };
 
 /* ---------- app chrome ---------- */
+/* the mock identity of a client from mock.js; without that file a client falls back to its ref */
+function mockOf(ref){ return (window.MOCK && window.MOCK[ref]) || {name: ref}; }
 C.picker = function(el){
   var F = S.F;
   el.innerHTML = '<div class="v-picker"><button type="button" class="v-btn" data-act="prev" aria-label="Previous client" title="Previous client">' +
     '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M7.5 2.5L4 6l3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
-    '<label class="v-sr" for="v-pick">Client</label><span class="v-sel"><select id="v-pick">' + F.clients.map(function(c){ return '<option value="' + c.index + '">' + esc(c.ref + ": " + c.tag) + '</option>'; }).join("") + '</select></span>' +
+    '<label class="v-sr" for="v-pick">Client</label><span class="v-sel"><select id="v-pick">' + F.clients.map(function(c){ return '<option value="' + c.index + '">' + esc(mockOf(c.ref).name + ": " + c.tag) + '</option>'; }).join("") + '</select></span>' +
     '<button type="button" class="v-btn" data-act="next" aria-label="Next client" title="Next client"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 2.5L8 6 4.5 9.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
   var sel = el.querySelector("select"); sel.value = String(S.v ? S.v.index : F.start);
   sel.addEventListener("change", function(){ show(+sel.value, true); });
@@ -883,6 +885,7 @@ function mount(sel, fn, o){
 }
 
 var V = {
+  mockOf: function(ref){ return window.MOCK && window.MOCK[ref] || null; },
   briefOf: function(v){ return briefOf(v); }, monYear: monYear, addMonths: addMonths, iso: iso,
   boot: boot, mount: mount, components: C, links: links, scheme: scheme, ds: ds, glyph: glyph, fromTag: fromTag,
   show: show, setAnswer: setAnswer, setBar: setBar, replay: startReplay, skip: endReplay, render: function(why){ renderAll(false, why); },
